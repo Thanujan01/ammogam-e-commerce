@@ -1,0 +1,12 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Simple, safe container helper — uses plain CSS instead of @apply */
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;   /* equivalent to px-4 */
+  padding-right: 1rem;  /* equivalent to px-4 */
+  max-width: 80rem;     /* equivalent to max-w-7xl (1280px = 80rem if base font-size 16px) */
+}
