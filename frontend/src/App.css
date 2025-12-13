@@ -1,3 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import 'tailwindcss';
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -5,38 +15,98 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Add these styles to your global CSS or create a Header.css file */
+
+/* Dropdown menu items */
+.dropdown-item {
+  @apply flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200 rounded-lg text-sm;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Mobile navigation links */
+.mobile-nav-link {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 text-gray-700 font-medium;
+}
+
+/* Sale countdown animation */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Shimmer effect for deals */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Footer-specific styles */
+
+.footer-link {
+  @apply text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center gap-2 py-1.5;
+}
+
+.footer-link:hover {
+  @apply transform translate-x-1;
+}
+
+.footer-legal-link {
+  @apply text-gray-400 hover:text-amber-400 transition-colors duration-300 text-sm;
+}
+
+/* Animation for trust badges */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Gradient border effect */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #b45309, #92400e, #78350f);
+  border-radius: 2px 2px 0 0;
+}
+
+/* Hover effect for social icons */
+.social-icon-hover {
+  @apply transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+}
+
+/* Glow effect for important sections */
+.glow-section {
+  box-shadow: 0 0 20px rgba(180, 83, 9, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-link {
+    @apply text-sm;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .social-icon-hover {
+    @apply w-8 h-8;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
