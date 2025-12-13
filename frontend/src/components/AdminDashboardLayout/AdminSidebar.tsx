@@ -1,17 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Package,
-  FolderTree,
-  ShoppingCart,
-  Users,
-  BarChart3,
-  User,
-  Settings,
-  Camera,
-  X,
-  LogOut,
-} from "lucide-react";
+import {LayoutDashboard,Package,FolderTree,ShoppingCart,Users,BarChart3,User,Settings,Camera,X,LogOut,} from "lucide-react";
 import { cn } from "../../libs/utils";
 
 interface SidebarProps {
