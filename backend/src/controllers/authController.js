@@ -33,5 +33,15 @@ exports.login = async (req, res) => {
 
   const token = signToken({ id: user._id, role: user.role });
 
-  res.json({ token, user });
+  // Don't send password to frontend
+  const userResponse = {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    address: user.address
+  };
+
+  res.json({ token, user: userResponse });
 };
