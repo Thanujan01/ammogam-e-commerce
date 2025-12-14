@@ -1,6 +1,8 @@
-import { NavLink, useLocation } from "react-router-dom";
-import {LayoutDashboard,Package,FolderTree,ShoppingCart,Users,BarChart3,User,Settings,Camera,X,LogOut,} from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import {LayoutDashboard,Package,FolderTree,ShoppingCart,Users,BarChart3,User,Settings,Camera,X,LogOut,Bell,} from "lucide-react";
 import { cn } from "../../libs/utils";
+import { AuthContext } from "../../contexts/AuthContext";
+import { useContext } from "react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,16 +15,19 @@ const navigation = [
   { name: "Categories", href: "/admin/categories", icon: FolderTree },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Notifications", href: "/admin/notifications", icon: Bell },
   { name: "Reports", href: "/admin/reports", icon: BarChart3 },
   { name: "Profile", href: "/admin/profile", icon: User },
 ];
 
 export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
+  const auth = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+    auth?.logout();
+    navigate('/login');
   };
 
   return (
@@ -108,13 +113,13 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
           <div className="p-3 border-t border-gray-200 bg-white/60 space-y-2">
 
             {/* Settings */}
-            <NavLink
+            {/* <NavLink
               to="/settings"
               className="flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
             >
               <Settings className="w-5 h-5" />
               Settings
-            </NavLink>
+            </NavLink> */}
 
             {/* Logout */}
             <button

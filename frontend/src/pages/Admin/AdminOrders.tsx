@@ -29,11 +29,11 @@ export default function AdminOrders() {
 
   const getStatusBadge = (status: Order['status']) => {
     const statusColors = {
-      pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-      processing: 'bg-blue-100 text-blue-700 border-blue-200',
+      // pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      // processing: 'bg-blue-100 text-blue-700 border-blue-200',
       completed: 'bg-green-100 text-green-700 border-green-200',
       delivered: 'bg-purple-100 text-purple-700 border-purple-200',
-      cancelled: 'bg-red-100 text-red-700 border-red-200',
+      // cancelled: 'bg-red-100 text-red-700 border-red-200',
     };
 
     return (
@@ -59,7 +59,7 @@ export default function AdminOrders() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
         <OrderStatsCard
           title="Total Orders"
           value={orderStats.totalOrders}
@@ -68,14 +68,14 @@ export default function AdminOrders() {
           iconBg="bg-orange-100"
           iconColor="text-orange-600"
         />
-        <OrderStatsCard
+        {/* <OrderStatsCard
           title="Pending Orders"
           value={orderStats.pendingOrders}
           icon={Package}
           gradient="from-white to-yellow-50"
           iconBg="bg-yellow-100"
           iconColor="text-yellow-600"
-        />
+        /> */}
         <OrderStatsCard
           title="Completed Orders"
           value={orderStats.completedOrders}
@@ -113,11 +113,11 @@ export default function AdminOrders() {
             className="border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm bg-white min-w-[200px]"
           >
             <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
+            {/* <option value="pending">Pending</option> */}
+            {/* <option value="processing">Processing</option> */}
             <option value="completed">Completed</option>
             <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
+            {/* <option value="cancelled">Cancelled</option> */}
           </select>
           <button
             onClick={() => {
