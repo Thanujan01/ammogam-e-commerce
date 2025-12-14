@@ -22,6 +22,8 @@ import AdminProfile from './pages/Admin/AdminProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtected from './components/AdminProtected';
 import Users from './pages/Admin/Users';
+import AdminNotification from './pages/Admin/AdminNotification';
+import AdminReports from './pages/Admin/AdminReports';
 
 function App(){
   const location = useLocation();
@@ -49,6 +51,8 @@ function App(){
             <Route path="categories" element={<AdminCategories/>} />
             <Route path="orders" element={<AdminOrders/>} /> 
             <Route path='profile' element={<AdminProfile/>}/>
+            <Route path="notifications" element={<AdminNotification/>} /> 
+            <Route path='reports' element={<AdminReports/>}/>
           </Route>
         </Routes>
       </main>

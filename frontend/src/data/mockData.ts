@@ -412,4 +412,110 @@ export const orderStats = {
   totalRevenue: 156789.50,
 };
 
+export interface Notification {
+  id: string;
+  type: 'order' | 'product' | 'user' | 'system';
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  priority: 'low' | 'medium' | 'high';
+}
+
+export const notifications: Notification[] = [
+  {
+    id: '1',
+    type: 'order',
+    title: 'New Order Received',
+    message: 'Order #ORD-001 has been placed by John Smith for $899.97',
+    time: '2024-12-13T10:30:00',
+    read: false,
+    priority: 'high'
+  },
+  {
+    id: '2',
+    type: 'product',
+    title: 'Low Stock Alert',
+    message: 'Night Vision Camera stock is running low (5 units remaining)',
+    time: '2024-12-13T09:15:00',
+    read: false,
+    priority: 'high'
+  },
+  
+  {
+    id: '4',
+    type: 'order',
+    title: 'Order Delivered',
+    message: 'Order #ORD-007 has been successfully delivered to Robert Taylor',
+    time: '2024-12-12T16:20:00',
+    read: true,
+    priority: 'low'
+  },
+  {
+    id: '5',
+    type: 'system',
+    title: 'System Maintenance',
+    message: 'Scheduled maintenance will occur on Dec 15, 2024 at 2:00 AM',
+    time: '2024-12-12T14:00:00',
+    read: false,
+    priority: 'medium'
+  },
+  {
+    id: '6',
+    type: 'product',
+    title: 'Product Added',
+    message: 'New product "WiFi Battery Camera" has been added to the catalog',
+    time: '2024-12-12T11:30:00',
+    read: true,
+    priority: 'low'
+  },
+  {
+    id: '7',
+    type: 'order',
+    title: 'Order Cancelled',
+    message: 'Order #ORD-009 has been cancelled by customer',
+    time: '2024-12-11T17:45:00',
+    read: true,
+    priority: 'medium'
+  },
+  
+];
+
+export const notificationStats = {
+  total: 8,
+  unread: 3,
+  high: 2,
+  medium: 2,
+  low: 4,
+};
+
+// Report Data
+export const reportData = {
+  salesByMonth: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [45, 52, 48, 65, 72, 68, 78, 85, 92, 88, 95, 102],
+  },
+  revenueByMonth: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [12500, 14800, 13200, 18500, 21000, 19800, 23400, 26700, 28900, 27500, 31200, 34800],
+  },
+  topSellingProducts: [
+    { name: 'Pro 4K Dome Camera', sales: 156 },
+    { name: 'Wireless Security Camera', sales: 142 },
+    { name: 'CCTV Camera Kit', sales: 98 },
+    { name: 'Indoor Dome Camera', sales: 110 },
+    { name: 'Smart Doorbell Camera', sales: 95 },
+  ],
+  ordersTrendByMonth: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [38, 42, 45, 52, 58, 55, 62, 68, 72, 70, 75, 80],
+  },
+  yearlyStats: {
+    totalSales: 1025,
+    totalRevenue: 267500,
+    totalProducts: 128,
+    averageOrderValue: 261.46,
+  },
+};
+
 
