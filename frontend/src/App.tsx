@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -12,6 +12,7 @@ import Login from './pages/Login'; // single login page
 import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
 
+import { AdminDashboardLayout } from './components/AdminDashboardLayout/AdminDashboardLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
 // import AdminCategories from './pages/Admin/AdminCategories';
@@ -19,12 +20,16 @@ import AdminProducts from './pages/Admin/AdminProducts';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtected from './components/AdminProtected';
+import Users from './pages/Admin/Users';
 
 function App(){
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 container py-6">
+      {!isAdminRoute && <Header />}
+      <main className={isAdminRoute ? "flex-1" : "flex-1 container py-6"}>
         <Routes>
           <Route path="/" element={<Home/>} />
           <Route path="/products" element={<ProductList/>} />
@@ -36,13 +41,16 @@ function App(){
           <Route path="/dashboard" element={<ProtectedRoute><UserDashboard/></ProtectedRoute>} />
 
           {/* Admin */}
-          <Route path="/admin" element={<AdminProtected><AdminDashboard/></AdminProtected>} />
-          <Route path="/admin/products" element={<AdminProtected><AdminProducts/></AdminProtected>} />
-          {/* <Route path="/admin/categories" element={<AdminProtected><AdminCategories/></AdminProtected>} />
-          <Route path="/admin/orders" element={<AdminProtected><AdminOrders/></AdminProtected>} /> */}
+          <Route path="/admin" element={<AdminProtected><AdminDashboardLayout /></AdminProtected>}>
+            <Route index element={<AdminDashboard/>} />
+            <Route path="products" element={<AdminProducts/>} />
+            <Route path="users" element={<Users/>} />
+            {/* <Route path="categories" element={<AdminCategories/>} />
+            <Route path="orders" element={<AdminOrders/>} /> */}
+          </Route>
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }
