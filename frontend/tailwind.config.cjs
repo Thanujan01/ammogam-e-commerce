@@ -20,6 +20,10 @@ module.exports = {
           DEFAULT: 'hsl(221.2 83.2% 53.3%)',
           foreground: 'hsl(210 40% 98%)',
         },
+        primary1: {
+          DEFAULT: 'hsl(38 92% 50%)',   // 🔥 amber-600
+          foreground: 'hsl(0 0% 100%)',
+        },
         muted: {
           DEFAULT: 'hsl(210 40% 96.1%)',
           foreground: 'hsl(215.4 16.3% 46.9%)',
