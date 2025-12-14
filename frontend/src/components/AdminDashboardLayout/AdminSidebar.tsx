@@ -57,7 +57,7 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
                 <Camera className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">
+                <h1 className="text-lg font-bold  text-primary1">
                   Ammogam
                 </h1>
                 <p className="text-xs text-gray-500">Admin Panel</p>
@@ -87,7 +87,7 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
                     "relative flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-indigo-100 text-indigo-700 shadow-sm border border-indigo-200"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      : "text-primary1 hover:bg-gray-100 hover:text-gray-900"
                   )}
                 >
                   {/* Active Indicator */}
@@ -100,7 +100,7 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
                       "w-5 h-5",
                       isActive
                         ? "text-indigo-600"
-                        : "text-gray-500"
+                        : "text-primary1"
                     )}
                   />
                   {item.name}
