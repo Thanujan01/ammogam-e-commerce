@@ -11,7 +11,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
   register: (payload: any) => Promise<void>;
 };
@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(t);
     setUser(user);
     setAuthToken(t);
+    return user;
   }
 
   async function register(payload: any) {

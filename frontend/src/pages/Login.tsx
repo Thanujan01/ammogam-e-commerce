@@ -18,10 +18,12 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      await auth.login(email, password);
+      const user = await auth.login(email, password);
       // redirect based on role
-      const role = auth.user?.role;
-      if (role === 'admin') nav('/admin');
+      console.log('Logged in user:', user);
+      console.log('Role:', user?.role);
+
+      if (user?.role === 'admin') nav('/admin');
       else nav('/dashboard');
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || err.message || 'Login failed';
