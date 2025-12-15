@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react';
+import { useState } from 'react';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import { Package } from 'lucide-react';
 import { products as mockProducts, categories, type Product } from '../../data/mockData';
@@ -73,15 +73,18 @@ export default function AdminProducts() {
     alert(`${product?.name} deleted.`);
   };
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFormData(prev => ({ ...prev, image: reader.result as string }));
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    }
+  const handleImageChange = () => {
+    
   };
+  //  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setFormData(prev => ({ ...prev, image: reader.result as string }));
+  //     };
+  //     reader.readAsDataURL(e.target.files[0]);
+  //   }
+  // };
 
   const filteredProducts = productList.filter(p => {
     const matchesSearch = 
