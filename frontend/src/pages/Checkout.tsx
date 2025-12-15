@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import  { useContext, useState } from 'react';
 import { CartContext } from '../contexts/CartContext';
 import { api } from '../api/api';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ export default function Checkout(){
     try {
       const items = cart.items.map(it => ({ product: it.product._id, quantity: it.quantity, price: it.product.price }));
       const res = await api.post('/orders', { items, totalAmount: cart.totalAmount, address });
+      console.log('Order placed:', res.data);
       cart.clearCart();
       navigate('/dashboard');
       alert('Order placed');

@@ -1,4 +1,5 @@
-import React, { createContext, useEffect, useState, ReactNode } from 'react';
+import  { createContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { api, setAuthToken } from '../api/api';
 
 type User = {
@@ -6,6 +7,8 @@ type User = {
   name: string;
   email: string;
   role: 'admin' | 'customer';
+  phone?: string;
+  address?: string;
 };
 
 type AuthContextType = {
