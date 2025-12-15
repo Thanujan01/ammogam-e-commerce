@@ -128,14 +128,46 @@ export interface Product {
 export interface Category {
   id: string;
   name: string;
+  description: string;
+  productCount: number;
+  image?: string;
+  createdAt: string;
 }
 
 // Example categories
 export const categories: Category[] = [
-  { id: '1', name: 'CCTV Cameras' },
-  { id: '2', name: 'Dome Cameras' },
-  { id: '3', name: 'Wireless Cameras' },
-  { id: '4', name: 'Accessories' },
+  { 
+    id: '1', 
+    name: 'CCTV Cameras',
+    description: 'Professional surveillance cameras for commercial and residential security',
+    productCount: 4,
+    image: '/placeholder.svg',
+    createdAt: '2024-01-15'
+  },
+  { 
+    id: '2', 
+    name: 'Dome Cameras',
+    description: 'Vandal-resistant dome cameras for indoor and outdoor monitoring',
+    productCount: 3,
+    image: '/placeholder.svg',
+    createdAt: '2024-01-20'
+  },
+  { 
+    id: '3', 
+    name: 'Wireless Cameras',
+    description: 'Easy-to-install wireless security cameras with WiFi connectivity',
+    productCount: 3,
+    image: '/placeholder.svg',
+    createdAt: '2024-02-05'
+  },
+  { 
+    id: '4', 
+    name: 'Accessories',
+    description: 'Essential accessories including cables, mounts, and power adapters',
+    productCount: 2,
+    image: '/placeholder.svg',
+    createdAt: '2024-02-10'
+  },
 ];
 
 // Example products
@@ -262,7 +294,228 @@ export const products: Product[] = [
   },
 ];
 
+export interface Order {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  orderDate: string;
+  amount: number;
+  status: 'pending' | 'processing' | 'completed' | 'delivered' | 'cancelled';
+  items: {
+    id: string;
+    productName: string;
+    category: string;
+    quantity: number;
+    price: number;
+  }[];
+}
 
+export const orders: Order[] = [
+  {
+    id: 'ORD-001',
+    customerName: 'John Smith',
+    customerEmail: 'john.smith@example.com',
+    orderDate: '2024-12-10',
+    amount: 899.97,
+    status: 'delivered',
+    items: [
+      { id: '1', productName: 'Pro 4K Dome Camera', category: 'Dome Cameras', quantity: 2, price: 299.99 },
+      { id: '2', productName: 'Pro HD Monitor', category: 'Accessories', quantity: 1, price: 299.99 }
+    ]
+  },
+  {
+    id: 'ORD-002',
+    customerName: 'Sarah Johnson',
+    customerEmail: 'sarah.j@example.com',
+    orderDate: '2024-12-11',
+    amount: 649.97,
+    status: 'completed',
+    items: [
+      { id: '1', productName: 'Wireless Security Camera', category: 'Wireless Cameras', quantity: 2, price: 199.99 },
+      { id: '2', productName: 'Camera Mount Bracket', category: 'Accessories', quantity: 5, price: 19.99 }
+    ]
+  },
+  {
+    id: 'ORD-003',
+    customerName: 'Michael Chen',
+    customerEmail: 'michael.chen@example.com',
+    orderDate: '2024-12-11',
+    amount: 999.98,
+    status: 'processing',
+    items: [
+      { id: '1', productName: 'CCTV Camera Kit', category: 'CCTV Cameras', quantity: 2, price: 499.99 }
+    ]
+  },
+  {
+    id: 'ORD-004',
+    customerName: 'Emily Brown',
+    customerEmail: 'emily.brown@example.com',
+    orderDate: '2024-12-12',
+    amount: 1349.95,
+    status: 'delivered',
+    items: [
+      { id: '1', productName: 'HD PTZ Camera', category: 'CCTV Cameras', quantity: 3, price: 449.99 }
+    ]
+  },
+  {
+    id: 'ORD-005',
+    customerName: 'David Wilson',
+    customerEmail: 'david.w@example.com',
+    orderDate: '2024-12-12',
+    amount: 539.97,
+    status: 'completed',
+    items: [
+      { id: '1', productName: 'Smart Doorbell Camera', category: 'Wireless Cameras', quantity: 2, price: 179.99 },
+      { id: '2', productName: 'Wireless Security Camera', category: 'Wireless Cameras', quantity: 1, price: 199.99 }
+    ]
+  },
+  {
+    id: 'ORD-006',
+    customerName: 'Lisa Anderson',
+    customerEmail: 'lisa.a@example.com',
+    orderDate: '2024-12-13',
+    amount: 329.99,
+    status: 'pending',
+    items: [
+      { id: '1', productName: 'Night Vision Camera', category: 'CCTV Cameras', quantity: 1, price: 329.99 }
+    ]
+  },
+  {
+    id: 'ORD-007',
+    customerName: 'Robert Taylor',
+    customerEmail: 'robert.t@example.com',
+    orderDate: '2024-12-13',
+    amount: 1169.94,
+    status: 'delivered',
+    items: [
+      { id: '1', productName: 'Vandal-Proof Dome', category: 'Dome Cameras', quantity: 3, price: 389.99 }
+    ]
+  },
+  {
+    id: 'ORD-008',
+    customerName: 'Jennifer Martinez',
+    customerEmail: 'jennifer.m@example.com',
+    orderDate: '2024-12-13',
+    amount: 899.94,
+    status: 'completed',
+    items: [
+      { id: '1', productName: 'Pro 4K Dome Camera', category: 'Dome Cameras', quantity: 3, price: 299.99 }
+    ]
+  },
+];
 
+export const orderStats = {
+  totalOrders: 532,
+  pendingOrders: 45,
+  completedOrders: 398,
+  deliveredOrders: 89,
+  totalRevenue: 156789.50,
+};
+
+export interface Notification {
+  id: string;
+  type: 'order' | 'product' | 'user' | 'system';
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  priority: 'low' | 'medium' | 'high';
+}
+
+export const notifications: Notification[] = [
+  {
+    id: '1',
+    type: 'order',
+    title: 'New Order Received',
+    message: 'Order #ORD-001 has been placed by John Smith for $899.97',
+    time: '2024-12-13T10:30:00',
+    read: false,
+    priority: 'high'
+  },
+  {
+    id: '2',
+    type: 'product',
+    title: 'Low Stock Alert',
+    message: 'Night Vision Camera stock is running low (5 units remaining)',
+    time: '2024-12-13T09:15:00',
+    read: false,
+    priority: 'high'
+  },
+  
+  {
+    id: '4',
+    type: 'order',
+    title: 'Order Delivered',
+    message: 'Order #ORD-007 has been successfully delivered to Robert Taylor',
+    time: '2024-12-12T16:20:00',
+    read: true,
+    priority: 'low'
+  },
+  {
+    id: '5',
+    type: 'system',
+    title: 'System Maintenance',
+    message: 'Scheduled maintenance will occur on Dec 15, 2024 at 2:00 AM',
+    time: '2024-12-12T14:00:00',
+    read: false,
+    priority: 'medium'
+  },
+  {
+    id: '6',
+    type: 'product',
+    title: 'Product Added',
+    message: 'New product "WiFi Battery Camera" has been added to the catalog',
+    time: '2024-12-12T11:30:00',
+    read: true,
+    priority: 'low'
+  },
+  {
+    id: '7',
+    type: 'order',
+    title: 'Order Cancelled',
+    message: 'Order #ORD-009 has been cancelled by customer',
+    time: '2024-12-11T17:45:00',
+    read: true,
+    priority: 'medium'
+  },
+  
+];
+
+export const notificationStats = {
+  total: 8,
+  unread: 3,
+  high: 2,
+  medium: 2,
+  low: 4,
+};
+
+// Report Data
+export const reportData = {
+  salesByMonth: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [45, 52, 48, 65, 72, 68, 78, 85, 92, 88, 95, 102],
+  },
+  revenueByMonth: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [12500, 14800, 13200, 18500, 21000, 19800, 23400, 26700, 28900, 27500, 31200, 34800],
+  },
+  topSellingProducts: [
+    { name: 'Pro 4K Dome Camera', sales: 156 },
+    { name: 'Wireless Security Camera', sales: 142 },
+    { name: 'CCTV Camera Kit', sales: 98 },
+    { name: 'Indoor Dome Camera', sales: 110 },
+    { name: 'Smart Doorbell Camera', sales: 95 },
+  ],
+  ordersTrendByMonth: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [38, 42, 45, 52, 58, 55, 62, 68, 72, 70, 75, 80],
+  },
+  yearlyStats: {
+    totalSales: 1025,
+    totalRevenue: 267500,
+    totalProducts: 128,
+    averageOrderValue: 261.46,
+  },
+};
 
 
