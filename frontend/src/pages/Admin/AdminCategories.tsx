@@ -1,4 +1,5 @@
-import { useState, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import { useState } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiPackage } from 'react-icons/fi';
 import { FolderTree } from 'lucide-react';
 import { categories as mockCategories, products, type Category } from '../../data/mockData';
