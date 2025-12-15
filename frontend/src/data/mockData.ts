@@ -300,7 +300,8 @@ export interface Order {
   customerEmail: string;
   orderDate: string;
   amount: number;
-  status: 'pending' | 'processing' | 'completed' | 'delivered' | 'cancelled';
+  // status: 'pending' | 'processing' | 'completed' | 'delivered' | 'cancelled';
+  status: 'completed' | 'delivered' ;
   items: {
     id: string;
     productName: string;
@@ -341,7 +342,7 @@ export const orders: Order[] = [
     customerEmail: 'michael.chen@example.com',
     orderDate: '2024-12-11',
     amount: 999.98,
-    status: 'processing',
+    status: 'completed',
     items: [
       { id: '1', productName: 'CCTV Camera Kit', category: 'CCTV Cameras', quantity: 2, price: 499.99 }
     ]
@@ -375,7 +376,7 @@ export const orders: Order[] = [
     customerEmail: 'lisa.a@example.com',
     orderDate: '2024-12-13',
     amount: 329.99,
-    status: 'pending',
+    status: 'completed',
     items: [
       { id: '1', productName: 'Night Vision Camera', category: 'CCTV Cameras', quantity: 1, price: 329.99 }
     ]
