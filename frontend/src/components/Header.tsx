@@ -1,15 +1,14 @@
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import { 
   FaShoppingCart, FaUser, FaSignOutAlt, FaBars, FaTimes, 
-  FaSearch, FaStore, FaTag, FaCrown, FaHome, FaShoppingBag,
+  FaSearch, FaTag, FaCrown, FaHome, FaShoppingBag,
   FaCaretDown, FaMobileAlt, FaPercent, FaBoxOpen, FaList,
-  FaTruck, FaToolbox, FaEllipsisH, FaClock, FaChartLine,
-  FaUsers, FaShieldAlt, FaCreditCard, FaStar, FaFire,
-  FaRegHeart, FaBell, FaMapMarkerAlt, FaPhone, FaChevronRight,
-  FaChevronLeft, FaAngleRight, FaShoppingBasket, FaUserCircle
+  FaTruck, FaClock, FaChartLine,
+  FaUsers, FaShieldAlt, FaCreditCard, FaFire,
+  FaRegHeart, FaBell, FaMapMarkerAlt, FaPhone, FaAngleRight
 } from 'react-icons/fa';
 import logoImage from '../assets/logo.jpg'; 
 
@@ -728,7 +727,7 @@ export default function Header() {
       </div>
 
       {/* Add CSS for dropdown items */}
-      <style jsx>{`
+      <style>{`
         .dropdown-item {
           display: flex;
           align-items: center;
