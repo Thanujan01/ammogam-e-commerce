@@ -14,8 +14,8 @@ interface Props {
 }
 
 export default function LowStockAlert({ products }: Props) {
-  const criticalCount = products.filter(p => p.stock < 10).length;
-  const warningCount = products.filter(p => p.stock >= 10 && p.stock < 20).length;
+  // const criticalCount = products.filter(p => p.stock < 10).length;
+  // const warningCount = products.filter(p => p.stock >= 10 && p.stock < 20).length;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full">
