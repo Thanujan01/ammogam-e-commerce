@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FiBell, FiFilter, FiCheck, FiTrash2, FiPackage, FiShoppingCart, FiUsers, FiSettings } from 'react-icons/fi';
-import { Bell, AlertCircle, CheckCircle, Info } from 'lucide-react';
-import { notifications as mockNotifications, notificationStats, type Notification } from '../../data/mockData';
+import { Bell, AlertCircle, Info } from 'lucide-react';
+import { notifications as mockNotifications, type Notification } from '../../data/mockData';
 
 export default function AdminNotification() {
   const [notificationList, setNotificationList] = useState<Notification[]>(mockNotifications);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { AlertTriangle, Package } from 'lucide-react';
 
 interface LowStockItem {
@@ -49,7 +48,7 @@ export default function LowStockAlert({ products }: Props) {
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
         {products.map((product, index) => (
           <div
-            key={product.id}
+            key={index}
             className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
           >
             <div className="flex items-center gap-3 flex-1">
