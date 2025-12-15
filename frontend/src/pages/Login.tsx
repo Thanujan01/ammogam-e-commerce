@@ -38,12 +38,9 @@ export default function Login() {
       <div className="w-full max-w-[450px]">
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-white/20">
-          
-          {/* Card Header with Gradient */}
-          <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 sm:p-10 text-center overflow-hidden">
+          <div className="relative bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white p-8 sm:p-10 text-center overflow-hidden">
             {/* Shimmer Effect Background */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_linear_infinite]"></div>
-            
             {/* Back Button */}
             <button 
               type="button" 
@@ -141,10 +138,10 @@ export default function Login() {
               </div>
 
               {/* Submit Button */}
-              <button 
+               <button 
                 type="submit" 
                 disabled={loading} 
-                className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:transform-none shadow-lg hover:shadow-xl active:translate-y-0 relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                className="w-full py-4 px-6 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white font-semibold rounded-xl hover:from-[#7a3a0f] hover:to-[#904823] transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:transform-none shadow-lg hover:shadow-xl active:translate-y-0 relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-amber-200"
               >
                 {/* Shimmer effect on button */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-500"></div>
