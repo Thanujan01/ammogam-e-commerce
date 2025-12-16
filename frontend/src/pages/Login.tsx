@@ -34,8 +34,8 @@ export default function Login() {
   }
 
   return (
-    <div className=" flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="w-full max-w-md">
+  <div className="min-h-screen w-screen flex items-center justify-center ">
+      <div className="w-full max-w-md  py-10">
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-white/20">
           <div className="relative bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white p-8 sm:p-10 text-center overflow-hidden">
