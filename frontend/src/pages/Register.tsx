@@ -58,8 +58,8 @@ export default function Register() {
   const strength = getPasswordStrength();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 pt-32 md:pt-20">
-      <div className="w-full max-w-[500px]">
+    <div className="min-h-screen w-screen flex items-center justify-center">
+      <div className="w-full max-w-md py-10">
         {/* Register Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-white/20">
           

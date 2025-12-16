@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FiSearch, FiEye, FiX } from 'react-icons/fi';
-import { ShoppingCart, Package, CheckCircle, Truck, DollarSign } from 'lucide-react';
+import { ShoppingCart, CheckCircle, Truck } from 'lucide-react';
 import { orders as mockOrders, orderStats, type Order } from '../../data/mockData';
 import OrderStatsCard from '../../components/AdminOrders/OrderStatsCard';
 

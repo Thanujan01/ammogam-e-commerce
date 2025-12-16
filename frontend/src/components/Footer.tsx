@@ -1,10 +1,9 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube,
-  FaCreditCard, FaShieldAlt, FaTruck, FaHeadset, FaMapMarkerAlt,
+  FaShieldAlt, FaTruck, FaHeadset, FaMapMarkerAlt,
   FaPhone, FaEnvelope, FaClock, FaCcVisa, FaCcMastercard, FaCcPaypal,
-  FaCcAmex, FaApplePay, FaGooglePay, FaShoppingBag, FaTag,
+  FaCcAmex, FaShoppingBag, FaTag,
   FaGift, FaStar, FaAward, FaRecycle
 } from 'react-icons/fa';
 
@@ -16,7 +15,6 @@ export default function Footer() {
     { icon: <FaCcMastercard className="text-2xl text-red-600" />, name: 'Mastercard' },
     { icon: <FaCcAmex className="text-2xl text-blue-800" />, name: 'Amex' },
     { icon: <FaCcPaypal className="text-2xl text-blue-500" />, name: 'PayPal' },
-    
   ];
 
   const trustBadges = [

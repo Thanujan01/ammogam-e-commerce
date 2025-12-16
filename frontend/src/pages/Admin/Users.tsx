@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
 import { Users as UsersIcon, UserCheck, UserX, DollarSign } from 'lucide-react';
-import { users as mockUsers, userStats, type User } from '../../data/mockData';
+import { users as mockUsers, type User } from '../../data/mockData';
 
 export default function Users() {
   const [userList, setUserList] = useState<User[]>(mockUsers);

@@ -1,11 +1,9 @@
-import React, { createContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { IProduct, ICartItem } from '../types';
 
-type IProduct = {
-  _id: string; name: string; price: number; stock?: number; image?: string;
-};
-
-type ICartItem = { product: IProduct; quantity: number; };
+//type IProduct = {_id: string; name: string; price: number; stock?: number; image?: string;};
+//type ICartItem = { product: IProduct; quantity: number; };
 
 type CartContextType = {
   items: ICartItem[];

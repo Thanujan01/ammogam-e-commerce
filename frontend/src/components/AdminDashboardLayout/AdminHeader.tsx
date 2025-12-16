@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Menu, Bell, Search, User, LogOut, Settings } from "lucide-react";
+import { Menu, Bell, User, LogOut } from "lucide-react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 

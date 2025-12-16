@@ -1,4 +1,3 @@
-import React from 'react';
 import { stats, monthlyRevenue, salesByCategory, topProducts, lowStockProducts } from '../../data/mockData';
 import DashBoardCard from '../../components/AdminDash/DashBoarCard';
 import RevenueChart from '../../components/AdminDash/RevenueChart';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -25,7 +24,7 @@ import Users from './pages/Admin/Users';
 import AdminNotification from './pages/Admin/AdminNotification';
 import AdminReports from './pages/Admin/AdminReports';
 
-function App(){
+function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
