@@ -141,7 +141,7 @@ export const categories: Category[] = [
     name: 'CCTV Cameras',
     description: 'Professional surveillance cameras for commercial and residential security',
     productCount: 4,
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&h=300&fit=crop',
     createdAt: '2024-01-15'
   },
   { 
@@ -149,7 +149,7 @@ export const categories: Category[] = [
     name: 'Dome Cameras',
     description: 'Vandal-resistant dome cameras for indoor and outdoor monitoring',
     productCount: 3,
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=400&h=300&fit=crop',
     createdAt: '2024-01-20'
   },
   { 
@@ -157,7 +157,7 @@ export const categories: Category[] = [
     name: 'Wireless Cameras',
     description: 'Easy-to-install wireless security cameras with WiFi connectivity',
     productCount: 3,
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=400&h=300&fit=crop',
     createdAt: '2024-02-05'
   },
   { 
@@ -165,7 +165,7 @@ export const categories: Category[] = [
     name: 'Accessories',
     description: 'Essential accessories including cables, mounts, and power adapters',
     productCount: 2,
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop',
     createdAt: '2024-02-10'
   },
 ];
@@ -179,7 +179,7 @@ export const products: Product[] = [
     price: 299.99,
     stock: 50,
     category: 'Dome Cameras',
-    image: '/placeholder.svg', 
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=500&h=400&fit=crop', 
     sales: 120,
   },
   {
@@ -189,7 +189,7 @@ export const products: Product[] = [
     price: 199.99,
     stock: 15,
     category: 'Wireless Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=500&h=400&fit=crop',
     sales: 80,
   },
   {
@@ -199,7 +199,7 @@ export const products: Product[] = [
     price: 499.99,
     stock: 8,
     category: 'CCTV Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=500&h=400&fit=crop',
     sales: 45,
   },
   {
@@ -209,7 +209,7 @@ export const products: Product[] = [
     price: 29.99,
     stock: 100,
     category: 'Accessories',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&h=400&fit=crop',
     sales: 300,
   },
   {
@@ -219,7 +219,7 @@ export const products: Product[] = [
     price: 449.99,
     stock: 25,
     category: 'CCTV Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1557597774-9d546a79c0b6?w=500&h=400&fit=crop',
     sales: 65,
   },
   {
@@ -229,7 +229,7 @@ export const products: Product[] = [
     price: 159.99,
     stock: 42,
     category: 'Dome Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=500&h=400&fit=crop&sat=-10',
     sales: 110,
   },
   {
@@ -239,7 +239,7 @@ export const products: Product[] = [
     price: 179.99,
     stock: 18,
     category: 'Wireless Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1585241645927-c7a8e5840c42?w=500&h=400&fit=crop',
     sales: 95,
   },
   {
@@ -249,7 +249,7 @@ export const products: Product[] = [
     price: 39.99,
     stock: 150,
     category: 'Accessories',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&h=400&fit=crop',
     sales: 200,
   },
   {
@@ -259,7 +259,7 @@ export const products: Product[] = [
     price: 329.99,
     stock: 5,
     category: 'CCTV Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=500&h=400&fit=crop&brightness=-10',
     sales: 55,
   },
   {
@@ -269,7 +269,7 @@ export const products: Product[] = [
     price: 389.99,
     stock: 12,
     category: 'Dome Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=500&h=400&fit=crop&contrast=10',
     sales: 42,
   },
   {
@@ -279,7 +279,7 @@ export const products: Product[] = [
     price: 149.99,
     stock: 35,
     category: 'Wireless Cameras',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=500&h=400&fit=crop&hue=10',
     sales: 88,
   },
   {
@@ -289,7 +289,7 @@ export const products: Product[] = [
     price: 19.99,
     stock: 200,
     category: 'Accessories',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&h=400&fit=crop',
     sales: 350,
   },
 ];
