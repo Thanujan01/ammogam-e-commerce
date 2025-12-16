@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FiBell, FiFilter, FiCheck, FiTrash2, FiPackage, FiShoppingCart, FiUsers, FiSettings } from 'react-icons/fi';
-import { Bell, AlertCircle, CheckCircle, Info } from 'lucide-react';
-import { notifications as mockNotifications, notificationStats, type Notification } from '../../data/mockData';
+import { Bell } from 'lucide-react';
+import { notifications as mockNotifications, type Notification } from '../../data/mockData';
 
 export default function AdminNotification() {
   const [notificationList, setNotificationList] = useState<Notification[]>(mockNotifications);
@@ -61,26 +61,26 @@ export default function AdminNotification() {
     }
   };
 
-  const getPriorityBadge = (priority: Notification['priority']) => {
-    const colors = {
-      low: 'bg-gray-100 text-gray-700 border-gray-200',
-      medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-      high: 'bg-red-100 text-red-700 border-red-200',
-    };
+  // const getPriorityBadge = (priority: Notification['priority']) => {
+  //   const colors = {
+  //     low: 'bg-gray-100 text-gray-700 border-gray-200',
+  //     medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  //     high: 'bg-red-100 text-red-700 border-red-200',
+  //   };
 
-    const icons = {
-      low: <Info className="w-3 h-3" />,
-      medium: <AlertCircle className="w-3 h-3" />,
-      high: <AlertCircle className="w-3 h-3" />,
-    };
+  //   const icons = {
+  //     low: <Info className="w-3 h-3" />,
+  //     medium: <AlertCircle className="w-3 h-3" />,
+  //     high: <AlertCircle className="w-3 h-3" />,
+  //   };
 
-    return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${colors[priority]}`}>
-        {icons[priority]}
-        {priority.charAt(0).toUpperCase() + priority.slice(1)}
-      </span>
-    );
-  };
+  //   return (
+  //     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${colors[priority]}`}>
+  //       {icons[priority]}
+  //       {priority.charAt(0).toUpperCase() + priority.slice(1)}
+  //     </span>
+  //   );
+  // };
 
   const formatTime = (time: string) => {
     const date = new Date(time);

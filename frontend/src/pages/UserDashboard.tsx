@@ -1,15 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { api } from '../api/api';
-import type { IProduct } from '../types';
 import { 
-  FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight, FaChevronDown,
-  FaMobileAlt, FaTshirt, FaHome, FaSearch, FaUser, FaBars, FaTimes,
-  FaTruck, FaCreditCard, FaUndo, FaTag, FaHeadphones, FaGamepad,
-  FaCamera, FaLaptop, FaBolt, FaFacebook, FaTwitter, FaInstagram,
-  FaPalette, FaRuler, FaGift, FaCheckCircle, FaPlusCircle,
+  FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight,
+  FaMobileAlt, FaTshirt, FaHome, FaTruck, FaCreditCard, FaUndo, FaTag, FaHeadphones, FaGamepad,
+  FaCamera, FaLaptop, FaBolt, FaPalette, FaRuler, FaGift, FaCheckCircle,
   FaFire, FaGem, FaCrown, FaBatteryFull, FaCartPlus, FaTimes as FaClose,
-  FaChevronLeft, FaChevronRight as FaChevronRightIcon, FaCheck, FaTruck as FaShipping,
+  FaChevronRight as FaChevronRightIcon, FaCheck, FaTruck as FaShipping,
   FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope
 } from 'react-icons/fa';
 
@@ -17,19 +14,16 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [showCartNotification, setShowCartNotification] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showProductModal, setShowProductModal] = useState(false);
 
-  const auth = useContext(AuthContext)!;
-  const [orders, setOrders] = useState<any[]>([]);
+  useContext(AuthContext);
 
   useEffect(() => {
-    api.get('/orders/my').then(r => setOrders(r.data)).catch(console.error);
+    api.get('/orders/my').then(r => r.data).catch(console.error);
   }, []);
 
   const addToCart = (product: any) => {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { AlertTriangle, Package } from 'lucide-react';
 
 interface LowStockItem {
@@ -14,8 +13,8 @@ interface Props {
 }
 
 export default function LowStockAlert({ products }: Props) {
-  const criticalCount = products.filter(p => p.stock < 10).length;
-  const warningCount = products.filter(p => p.stock >= 10 && p.stock < 20).length;
+  // const criticalCount = products.filter(p => p.stock < 10).length;
+  // const warningCount = products.filter(p => p.stock >= 10 && p.stock < 20).length;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full">
@@ -49,7 +48,7 @@ export default function LowStockAlert({ products }: Props) {
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
         {products.map((product, index) => (
           <div
-            key={product.id}
+            key={index}
             className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
           >
             <div className="flex items-center gap-3 flex-1">

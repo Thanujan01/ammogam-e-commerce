@@ -28,8 +28,10 @@ export default function StatCard({
           {subtitle && <p className="text-white/70 text-xs mt-2">{subtitle}</p>}
         </div>
         {icon && (
-          <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            {icon}
+          <div className={`w-12 h-12 ${iconBg} rounded-lg flex items-center justify-center backdrop-blur-sm`}>
+            <span className={`${iconColor} text-xl`}>
+              {icon}
+            </span>
           </div>
         )}
       </div>
