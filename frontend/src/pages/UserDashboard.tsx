@@ -358,7 +358,7 @@ export default function UserDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 w-screen">
       {/* Cart Notification */}
       {showCartNotification && recentlyAdded && (
         <div className="fixed top-4 right-4 z-50 animate-fade-in">
