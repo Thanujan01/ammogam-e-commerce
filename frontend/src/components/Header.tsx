@@ -9,20 +9,32 @@ import {
   FaTruck, FaClock, FaChartLine, FaLaptop, FaTshirt,
   FaUsers, FaShieldAlt, FaCreditCard, FaFire,
   FaRegHeart, FaBell, FaMapMarkerAlt, FaPhone, FaAngleRight,
-  FaHeartbeat, FaDumbbell, FaCar, FaGamepad, FaBook,
-  FaChevronRight, FaArrowRight, FaCheck, FaShippingFast
+  FaChevronRight, FaArrowRight, FaCheck, FaShippingFast,
+  FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,
+  FaTools, FaPrint, FaImages
 } from 'react-icons/fa';
 
 // Placeholder images - using Unsplash URLs
 const placeholderImages = {
+  mobile: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  security: 'https://images.unsplash.com/photo-1585368955551-c04c20a96c4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  menfashion: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  womenfashion: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  wallets: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  jewelry: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  pet: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  baby: 'https://images.unsplash.com/photo-1533456061338-88b8f6c217cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  watches: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  srilankan: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  indian: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  climate: 'https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  shoes: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  electrical: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   electronics: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  fashion: 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  home: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  beauty: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  sports: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  auto: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  toys: 'https://images.unsplash.com/photo-1587654780298-8c6d6b2c8b2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  books: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  tshirts: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  kitchen: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  photo: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+  print: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
 };
 
 import logoImage from '../assets/logo.jpg';
@@ -39,7 +51,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>('Electronics');
+  const [activeCategory, setActiveCategory] = useState<string>('Mobile accessories');
   const categoryMenuRef = useRef<HTMLDivElement>(null);
 
   const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
@@ -114,239 +126,558 @@ export default function Header() {
     setShowUserMenu(false);
   };
 
-  // Professional category data with subcategories and featured products
+  // Updated categories with the provided list
   const categories = [
     { 
-      name: 'Electronics', 
-      icon: <FaLaptop className="text-lg" />, 
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100',
+      name: 'Mobile accessories', 
+      icon: <FaMobileAlt className="text-lg" />, 
+      color: 'from-blue-500 to-cyan-600',
+      bgColor: 'bg-gradient-to-br from-blue-50 to-cyan-100',
       borderColor: 'border-blue-200',
       textColor: 'text-blue-700',
-      image: placeholderImages.electronics,
+      image: placeholderImages.mobile,
       mainSubcategories: [
         {
-          title: 'Mobile & Accessories',
-          items: ['Smartphones', 'Tablets', 'Smart Watches', 'Headphones', 'Power Banks', 'Cases & Covers']
+          title: 'Phone Accessories',
+          items: ['Cases & Covers', 'Screen Protectors', 'Chargers', 'Power Banks', 'Headphones', 'Cables']
         },
         {
-          title: 'Computers & Laptops',
-          items: ['Laptops', 'Desktops', 'Monitors', 'Printers', 'Keyboards', 'Mouse']
+          title: 'Smart Devices',
+          items: ['Smart Watches', 'Fitness Bands', 'Bluetooth Earphones', 'Wireless Chargers', 'Selfie Sticks']
         },
         {
-          title: 'Home Entertainment',
-          items: ['Televisions', 'Soundbars', 'Home Theaters', 'Streaming Devices', 'Gaming Consoles']
+          title: 'Audio & Sound',
+          items: ['Earphones', 'Speakers', 'Headphones', 'Microphones', 'Sound Systems']
         }
       ],
       featuredProducts: [
-        { name: 'iPhone 15 Pro', price: '₹1,19,999', discount: '10% OFF', image: '📱' },
-        { name: 'Samsung OLED TV', price: '₹89,999', discount: '15% OFF', image: '📺' },
-        { name: 'Sony Headphones', price: '₹14,999', tag: 'Bestseller', image: '🎧' }
+        { name: 'Wireless Earbuds', price: '₹4,999', discount: '30% OFF', image: '🎧' },
+        { name: 'Fast Charger', price: '₹1,499', tag: 'Bestseller', image: '🔌' },
+        { name: 'Phone Case', price: '₹799', discount: '20% OFF', image: '📱' }
       ],
-      promoText: 'Up to 50% OFF on latest gadgets'
+      promoText: 'Up to 50% OFF on mobile accessories'
     },
     { 
-      name: 'Fashion', 
+      name: 'Security cameras', 
+      icon: <FaCamera className="text-lg" />, 
+      color: 'from-gray-500 to-gray-700',
+      bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100',
+      borderColor: 'border-gray-200',
+      textColor: 'text-gray-700',
+      image: placeholderImages.security,
+      mainSubcategories: [
+        {
+          title: 'Home Security',
+          items: ['WiFi Cameras', 'Outdoor Cameras', 'Doorbell Cameras', 'Baby Monitors', 'Night Vision']
+        },
+        {
+          title: 'Security Systems',
+          items: ['CCTV Systems', 'NVR Kits', 'DVR Systems', 'Security Alarms', 'Motion Sensors']
+        },
+        {
+          title: 'Accessories',
+          items: ['Mounts & Stands', 'Cables', 'Storage Cards', 'Power Supplies', 'Extension Kits']
+        }
+      ],
+      featuredProducts: [
+        { name: 'WiFi Camera', price: '₹6,999', discount: '25% OFF', image: '📹' },
+        { name: 'CCTV Kit', price: '₹12,499', tag: 'Popular', image: '🎥' },
+        { name: 'Doorbell Camera', price: '₹8,999', discount: '15% OFF', image: '🚪' }
+      ],
+      promoText: 'Free installation available'
+    },
+    { 
+      name: 'Men fashion', 
+      icon: <FaTshirt className="text-lg" />, 
+      color: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-gradient-to-br from-indigo-50 to-blue-100',
+      borderColor: 'border-indigo-200',
+      textColor: 'text-indigo-700',
+      image: placeholderImages.menfashion,
+      mainSubcategories: [
+        {
+          title: 'Clothing',
+          items: ['Shirts', 'T-Shirts', 'Jeans', 'Formal Wear', 'Jackets', 'Shorts']
+        },
+        {
+          title: 'Footwear',
+          items: ['Sneakers', 'Formal Shoes', 'Sandals', 'Sports Shoes', 'Boots']
+        },
+        {
+          title: 'Accessories',
+          items: ['Watches', 'Belts', 'Wallets', 'Sunglasses', 'Caps', 'Ties']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Formal Shirt', price: '₹2,499', discount: '40% OFF', image: '👔' },
+        { name: 'Sneakers', price: '₹3,999', tag: 'Trending', image: '👟' },
+        { name: 'Leather Wallet', price: '₹1,299', discount: '25% OFF', image: '👛' }
+      ],
+      promoText: 'New arrivals up to 60% OFF'
+    },
+    { 
+      name: 'Women fashion', 
       icon: <FaTshirt className="text-lg" />, 
       color: 'from-pink-500 to-rose-600',
       bgColor: 'bg-gradient-to-br from-pink-50 to-rose-100',
       borderColor: 'border-pink-200',
       textColor: 'text-pink-700',
-      image: placeholderImages.fashion,
+      image: placeholderImages.womenfashion,
       mainSubcategories: [
         {
-          title: 'Women\'s Fashion',
-          items: ['Ethnic Wear', 'Western Wear', 'Lingerie', 'Handbags', 'Jewelry', 'Footwear']
+          title: 'Clothing',
+          items: ['Dresses', 'Tops', 'Jeans', 'Skirts', 'Traditional Wear', 'Jackets']
         },
         {
-          title: 'Men\'s Fashion',
-          items: ['Shirts & T-Shirts', 'Jeans & Trousers', 'Formal Wear', 'Watches', 'Shoes', 'Accessories']
+          title: 'Footwear',
+          items: ['Heels', 'Flats', 'Sandals', 'Sneakers', 'Boots', 'Wedges']
         },
         {
-          title: 'Kids & Infant',
-          items: ['Baby Clothing', 'Kids Wear', 'School Uniforms', 'Footwear', 'Toys', 'Accessories']
+          title: 'Accessories',
+          items: ['Handbags', 'Jewelry', 'Scarves', 'Sunglasses', 'Watches', 'Belts']
         }
       ],
       featuredProducts: [
-        { name: 'Designer Handbag', price: '₹12,999', discount: '30% OFF', image: '👜' },
-        { name: 'Leather Jacket', price: '₹8,499', tag: 'Trending', image: '🧥' },
-        { name: 'Running Shoes', price: '₹5,999', discount: '25% OFF', image: '👟' }
+        { name: 'Summer Dress', price: '₹3,499', discount: '35% OFF', image: '👗' },
+        { name: 'Designer Handbag', price: '₹5,999', tag: 'Luxury', image: '👜' },
+        { name: 'Heels', price: '₹2,799', discount: '30% OFF', image: '👠' }
       ],
-      promoText: 'New Arrivals 40% OFF'
+      promoText: 'Buy 1 Get 1 Free on selected items'
     },
     { 
-      name: 'Home & Kitchen', 
-      icon: <FaHome className="text-lg" />, 
-      color: 'from-orange-500 to-amber-600',
-      bgColor: 'bg-gradient-to-br from-orange-50 to-amber-100',
-      borderColor: 'border-orange-200',
-      textColor: 'text-orange-700',
-      image: placeholderImages.home,
+      name: 'Wallets', 
+      icon: <FaCreditCard className="text-lg" />, 
+      color: 'from-amber-500 to-orange-600',
+      bgColor: 'bg-gradient-to-br from-amber-50 to-orange-100',
+      borderColor: 'border-amber-200',
+      textColor: 'text-amber-700',
+      image: placeholderImages.wallets,
       mainSubcategories: [
         {
-          title: 'Furniture',
-          items: ['Sofa & Couches', 'Beds', 'Wardrobes', 'Dining Sets', 'Office Furniture', 'Outdoor']
+          title: 'Men Wallets',
+          items: ['Leather Wallets', 'Card Holders', 'Money Clips', 'Bifold Wallets', 'Travel Wallets']
         },
         {
-          title: 'Kitchen & Dining',
-          items: ['Cookware', 'Cutlery', 'Small Appliances', 'Storage', 'Serveware', 'Bakeware']
+          title: 'Women Wallets',
+          items: ['Clutch Wallets', 'Long Wallets', 'Coin Purses', 'Designer Wallets', 'Mini Wallets']
         },
         {
-          title: 'Home Decor',
-          items: ['Lighting', 'Wall Decor', 'Clocks', 'Mirrors', 'Rugs', 'Curtains']
+          title: 'Specialty',
+          items: ['RFID Blocking', 'Travel Wallets', 'Business Card Holders', 'Passport Covers']
         }
       ],
       featuredProducts: [
-        { name: 'Smart Air Fryer', price: '₹9,999', discount: '20% OFF', image: '🍳' },
-        { name: 'King Size Bed', price: '₹34,999', tag: 'Premium', image: '🛏️' },
-        { name: 'Dining Set', price: '₹22,999', discount: '15% OFF', image: '🍽️' }
+        { name: 'Leather Wallet', price: '₹1,899', discount: '20% OFF', image: '👛' },
+        { name: 'RFID Wallet', price: '₹2,499', tag: 'Secure', image: '🛡️' },
+        { name: 'Card Holder', price: '₹999', discount: '15% OFF', image: '💳' }
       ],
-      promoText: 'Home makeover starting ₹999'
+      promoText: 'Premium leather wallets starting ₹799'
     },
     { 
-      name: 'Beauty & Health', 
-      icon: <FaHeartbeat className="text-lg" />, 
+      name: 'Fashion jewelry', 
+      icon: <FaCrown className="text-lg" />, 
       color: 'from-purple-500 to-violet-600',
       bgColor: 'bg-gradient-to-br from-purple-50 to-violet-100',
       borderColor: 'border-purple-200',
       textColor: 'text-purple-700',
-      image: placeholderImages.beauty,
+      image: placeholderImages.jewelry,
       mainSubcategories: [
         {
-          title: 'Skincare',
-          items: ['Face Care', 'Body Care', 'Sunscreen', 'Acne Care', 'Anti-Aging', 'Masks']
+          title: 'Necklaces',
+          items: ['Gold Plated', 'Silver', 'Pearl', 'Designer', 'Choker', 'Pendants']
         },
         {
-          title: 'Makeup',
-          items: ['Foundation', 'Lipstick', 'Eyeshadow', 'Mascara', 'Blush', 'Makeup Kits']
+          title: 'Earrings',
+          items: ['Studs', 'Hoops', 'Danglers', 'Jhumkas', 'Clips', 'Threads']
         },
         {
-          title: 'Health & Wellness',
-          items: ['Vitamins', 'Protein', 'Fitness Gear', 'Medical Devices', 'Personal Care', 'Supplements']
+          title: 'Rings & Bracelets',
+          items: ['Engagement Rings', 'Fashion Rings', 'Bangles', 'Bracelets', 'Anklets']
         }
       ],
       featuredProducts: [
-        { name: 'Vitamin C Serum', price: '₹1,499', discount: '25% OFF', image: '🧴' },
-        { name: 'Fitness Tracker', price: '₹3,999', tag: 'Bestseller', image: '⌚' },
-        { name: 'Makeup Kit', price: '₹2,999', discount: '30% OFF', image: '💄' }
+        { name: 'Gold Necklace', price: '₹3,499', discount: '25% OFF', image: '📿' },
+        { name: 'Diamond Earrings', price: '₹5,999', tag: 'Premium', image: '💎' },
+        { name: 'Silver Bracelet', price: '₹1,899', discount: '20% OFF', image: '💍' }
       ],
-      promoText: 'Buy 1 Get 1 Free on skincare'
+      promoText: 'Exclusive jewelry collections'
     },
     { 
-      name: 'Sports & Fitness', 
-      icon: <FaDumbbell className="text-lg" />, 
+      name: 'Pet friendly products', 
+      icon: <FaPaw className="text-lg" />, 
       color: 'from-green-500 to-emerald-600',
       bgColor: 'bg-gradient-to-br from-green-50 to-emerald-100',
       borderColor: 'border-green-200',
       textColor: 'text-green-700',
-      image: placeholderImages.sports,
+      image: placeholderImages.pet,
       mainSubcategories: [
         {
-          title: 'Fitness Equipment',
-          items: ['Treadmills', 'Dumbbells', 'Yoga Mats', 'Exercise Bikes', 'Home Gyms', 'Weights']
+          title: 'Pet Food',
+          items: ['Dry Food', 'Wet Food', 'Treats', 'Supplements', 'Puppy Food', 'Senior Food']
         },
         {
-          title: 'Sportswear',
-          items: ['Activewear', 'Running Shoes', 'Sport Shoes', 'Accessories', 'Team Jerseys', 'Outdoor']
+          title: 'Accessories',
+          items: ['Collars', 'Leashes', 'Beds', 'Toys', 'Bowls', 'Grooming']
         },
         {
-          title: 'Sports Gear',
-          items: ['Cricket', 'Football', 'Badminton', 'Tennis', 'Basketball', 'Cycling']
+          title: 'Health & Care',
+          items: ['Shampoos', 'Flea Control', 'Vitamins', 'Dental Care', 'First Aid']
         }
       ],
       featuredProducts: [
-        { name: 'Treadmill Pro', price: '₹45,999', discount: '18% OFF', image: '🏃' },
-        { name: 'Yoga Mat Set', price: '₹1,999', tag: 'Popular', image: '🧘' },
-        { name: 'Protein Powder', price: '₹2,499', discount: '20% OFF', image: '🥤' }
+        { name: 'Pet Bed', price: '₹2,999', discount: '30% OFF', image: '🛏️' },
+        { name: 'Dog Food', price: '₹1,499', tag: 'Healthy', image: '🍖' },
+        { name: 'Cat Toy Set', price: '₹899', discount: '25% OFF', image: '🐱' }
       ],
-      promoText: 'Fitness sale up to 60% OFF'
+      promoText: 'Everything your pet needs'
     },
     { 
-      name: 'Automotive', 
-      icon: <FaCar className="text-lg" />, 
+      name: 'Baby fashion & toys', 
+      icon: <FaBaby className="text-lg" />, 
+      color: 'from-pink-400 to-rose-500',
+      bgColor: 'bg-gradient-to-br from-pink-50 to-rose-100',
+      borderColor: 'border-pink-200',
+      textColor: 'text-pink-600',
+      image: placeholderImages.baby,
+      mainSubcategories: [
+        {
+          title: 'Baby Clothing',
+          items: ['Onesies', 'Rompers', 'Sleepwear', 'Sets', 'Winter Wear', 'Party Wear']
+        },
+        {
+          title: 'Toys & Games',
+          items: ['Soft Toys', 'Educational Toys', 'Rattles', 'Teethers', 'Activity Gyms']
+        },
+        {
+          title: 'Nursery',
+          items: ['Diapers', 'Feeding', 'Bathing', 'Strollers', 'Car Seats', 'Safety']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Baby Romper Set', price: '₹1,299', discount: '40% OFF', image: '👶' },
+        { name: 'Educational Toy', price: '₹1,999', tag: 'Learning', image: '🧸' },
+        { name: 'Stroller', price: '₹8,999', discount: '20% OFF', image: '🚼' }
+      ],
+      promoText: 'Quality products for your little ones'
+    },
+    { 
+      name: 'Watches', 
+      icon: <FaClock className="text-lg" />, 
+      color: 'from-slate-600 to-gray-700',
+      bgColor: 'bg-gradient-to-br from-slate-50 to-gray-100',
+      borderColor: 'border-slate-200',
+      textColor: 'text-slate-700',
+      image: placeholderImages.watches,
+      mainSubcategories: [
+        {
+          title: 'Men Watches',
+          items: ['Analog', 'Digital', 'Smart Watches', 'Sports', 'Luxury', 'Casual']
+        },
+        {
+          title: 'Women Watches',
+          items: ['Fashion', 'Diamond', 'Leather', 'Gold', 'Rose Gold', 'Slim']
+        },
+        {
+          title: 'Brands',
+          items: ['Titan', 'Fastrack', 'Casio', 'Fossil', 'Rolex', 'Apple Watch']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Smart Watch', price: '₹9,999', discount: '35% OFF', image: '⌚' },
+        { name: 'Luxury Watch', price: '₹24,999', tag: 'Premium', image: '💎' },
+        { name: 'Sports Watch', price: '₹4,499', discount: '25% OFF', image: '🏃' }
+      ],
+      promoText: 'Timeless elegance for every wrist'
+    },
+    { 
+      name: 'Srilankan products', 
+      icon: <FaGlobeAsia className="text-lg" />, 
       color: 'from-red-500 to-orange-600',
       bgColor: 'bg-gradient-to-br from-red-50 to-orange-100',
       borderColor: 'border-red-200',
       textColor: 'text-red-700',
-      image: placeholderImages.auto,
+      image: placeholderImages.srilankan,
       mainSubcategories: [
         {
-          title: 'Car Accessories',
-          items: ['Audio Systems', 'Seat Covers', 'Dash Cams', 'Lighting', 'Cleaning', 'Storage']
+          title: 'Traditional',
+          items: ['Handlooms', 'Batik', 'Wood Carvings', 'Masks', 'Brassware', 'Ceramics']
         },
         {
-          title: 'Car Care',
-          items: ['Cleaning Kits', 'Polish & Wax', 'Air Fresheners', 'Maintenance', 'Tools', 'Tires']
+          title: 'Food & Spices',
+          items: ['Ceylon Tea', 'Spices', 'Rice', 'Sweets', 'Traditional Snacks']
         },
         {
-          title: 'Two Wheelers',
-          items: ['Helmets', 'Bike Covers', 'Accessories', 'Maintenance', 'Security', 'Storage']
+          title: 'Handicrafts',
+          items: ['Jewelry', 'Bags', 'Home Decor', 'Clothing', 'Accessories']
         }
       ],
       featuredProducts: [
-        { name: 'Car Dash Camera', price: '₹5,999', discount: '30% OFF', image: '📹' },
-        { name: 'Leather Seat Covers', price: '₹8,499', tag: 'Premium', image: '🚗' },
-        { name: 'Car Vacuum', price: '₹2,999', discount: '25% OFF', image: '🧹' }
+        { name: 'Ceylon Tea', price: '₹699', discount: '20% OFF', image: '🍵' },
+        { name: 'Batik Dress', price: '₹3,499', tag: 'Traditional', image: '👗' },
+        { name: 'Wood Carving', price: '₹2,999', discount: '15% OFF', image: '🗿' }
       ],
-      promoText: 'Free installation available'
+      promoText: 'Authentic Sri Lankan products'
     },
     { 
-      name: 'Toys & Games', 
-      icon: <FaGamepad className="text-lg" />, 
-      color: 'from-yellow-500 to-amber-600',
-      bgColor: 'bg-gradient-to-br from-yellow-50 to-amber-100',
-      borderColor: 'border-yellow-200',
-      textColor: 'text-yellow-700',
-      image: placeholderImages.toys,
+      name: 'Indian products', 
+      icon: <FaGlobeAsia className="text-lg" />, 
+      color: 'from-orange-500 to-amber-600',
+      bgColor: 'bg-gradient-to-br from-orange-50 to-amber-100',
+      borderColor: 'border-orange-200',
+      textColor: 'text-orange-700',
+      image: placeholderImages.indian,
       mainSubcategories: [
         {
-          title: 'Kids Toys',
-          items: ['Educational Toys', 'Soft Toys', 'Action Figures', 'Dolls', 'Puzzles', 'Building Blocks']
+          title: 'Textiles',
+          items: ['Silk Sarees', 'Cotton Kurtas', 'Handlooms', 'Dress Materials', 'Embroidered']
         },
         {
-          title: 'Video Games',
-          items: ['Consoles', 'Games', 'Controllers', 'VR Headsets', 'Accessories', 'Gaming Chairs']
+          title: 'Handicrafts',
+          items: ['Pottery', 'Jewelry', 'Paintings', 'Woodwork', 'Metal Crafts']
         },
         {
-          title: 'Board Games',
-          items: ['Family Games', 'Strategy Games', 'Card Games', 'Puzzle Games', 'Party Games', 'Classic']
+          title: 'Food & Spices',
+          items: ['Masalas', 'Pickles', 'Sweets', 'Tea', 'Rice', 'Snacks']
         }
       ],
       featuredProducts: [
-        { name: 'Drone with Camera', price: '₹12,999', discount: '20% OFF', image: '🚁' },
-        { name: 'Gaming Console', price: '₹39,999', tag: 'Hot', image: '🎮' },
-        { name: 'LEGO Set', price: '₹3,499', discount: '15% OFF', image: '🧱' }
+        { name: 'Silk Saree', price: '₹8,999', discount: '30% OFF', image: '👘' },
+        { name: 'Spice Set', price: '₹1,499', tag: 'Authentic', image: '🌶️' },
+        { name: 'Handicraft', price: '₹2,999', discount: '25% OFF', image: '🏺' }
       ],
-      promoText: 'Perfect gifts for Christmas'
+      promoText: 'Rich Indian heritage products'
     },
     { 
-      name: 'Books & Stationery', 
-      icon: <FaBook className="text-lg" />, 
-      color: 'from-indigo-500 to-blue-600',
-      bgColor: 'bg-gradient-to-br from-indigo-50 to-blue-100',
-      borderColor: 'border-indigo-200',
-      textColor: 'text-indigo-700',
-      image: placeholderImages.books,
+      name: 'Climate dress', 
+      icon: <FaCloudSun className="text-lg" />, 
+      color: 'from-sky-500 to-blue-500',
+      bgColor: 'bg-gradient-to-br from-sky-50 to-blue-100',
+      borderColor: 'border-sky-200',
+      textColor: 'text-sky-700',
+      image: placeholderImages.climate,
       mainSubcategories: [
         {
-          title: 'Books',
-          items: ['Fiction', 'Non-Fiction', 'Academic', 'Children\'s', 'Biographies', 'Self-Help']
+          title: 'Summer Wear',
+          items: ['Cotton Dresses', 'Shorts', 'T-Shirts', 'Linen Clothes', 'Sun Hats']
         },
         {
-          title: 'Office Supplies',
-          items: ['Notebooks', 'Pens', 'Desk Organizers', 'Files & Folders', 'Calculators', 'Art Supplies']
+          title: 'Winter Wear',
+          items: ['Sweaters', 'Jackets', 'Thermals', 'Winter Coats', 'Woolens']
         },
         {
-          title: 'Educational',
-          items: ['Textbooks', 'Reference Books', 'Exam Prep', 'Learning Kits', 'Stationery Sets', 'School']
+          title: 'Rainy Season',
+          items: ['Raincoats', 'Umbrellas', 'Waterproof Shoes', 'Quick Dry', 'Windcheaters']
         }
       ],
       featuredProducts: [
-        { name: 'Bestseller Novel', price: '₹499', discount: '10% OFF', image: '📚' },
-        { name: 'Premium Pen Set', price: '₹2,999', tag: 'Luxury', image: '🖊️' },
-        { name: 'Art Supplies Kit', price: '₹1,799', discount: '25% OFF', image: '🎨' }
+        { name: 'Winter Jacket', price: '₹4,999', discount: '40% OFF', image: '🧥' },
+        { name: 'Summer Dress', price: '₹2,499', tag: 'Lightweight', image: '👗' },
+        { name: 'Raincoat', price: '₹1,899', discount: '30% OFF', image: '🌧️' }
       ],
-      promoText: 'Buy 2 Books Get 1 Free'
+      promoText: 'Dress appropriately for every season'
+    },
+    { 
+      name: 'Shoes', 
+      icon: <FaShoppingBag className="text-lg" />, 
+      color: 'from-brown-500 to-amber-700',
+      bgColor: 'bg-gradient-to-br from-amber-50 to-brown-100',
+      borderColor: 'border-amber-200',
+      textColor: 'text-brown-700',
+      image: placeholderImages.shoes,
+      mainSubcategories: [
+        {
+          title: 'Men Shoes',
+          items: ['Formal Shoes', 'Sneakers', 'Sports Shoes', 'Sandals', 'Boots', 'Casual']
+        },
+        {
+          title: 'Women Shoes',
+          items: ['Heels', 'Flats', 'Wedges', 'Sandals', 'Sneakers', 'Boots']
+        },
+        {
+          title: 'Kids Shoes',
+          items: ['School Shoes', 'Sports', 'Sandals', 'Casual', 'Party Shoes']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Running Shoes', price: '₹3,999', discount: '35% OFF', image: '👟' },
+        { name: 'Formal Shoes', price: '₹4,499', tag: 'Premium', image: '👞' },
+        { name: 'High Heels', price: '₹2,999', discount: '30% OFF', image: '👠' }
+      ],
+      promoText: 'Step in style with premium footwear'
+    },
+    { 
+      name: 'Electrical tool & hard ware', 
+      icon: <FaTools className="text-lg" />, 
+      color: 'from-gray-600 to-gray-800',
+      bgColor: 'bg-gradient-to-br from-gray-100 to-gray-200',
+      borderColor: 'border-gray-300',
+      textColor: 'text-gray-800',
+      image: placeholderImages.electrical,
+      mainSubcategories: [
+        {
+          title: 'Power Tools',
+          items: ['Drills', 'Saws', 'Grinders', 'Sanders', 'Welders', 'Compressors']
+        },
+        {
+          title: 'Hand Tools',
+          items: ['Screwdrivers', 'Wrenches', 'Hammers', 'Pliers', 'Measuring Tools']
+        },
+        {
+          title: 'Hardware',
+          items: ['Nails', 'Screws', 'Bolts', 'Hinges', 'Locks', 'Electrical Fittings']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Power Drill', price: '₹5,999', discount: '25% OFF', image: '🔧' },
+        { name: 'Tool Kit', price: '₹3,499', tag: 'Complete Set', image: '🧰' },
+        { name: 'Measuring Tape', price: '₹499', discount: '20% OFF', image: '📏' }
+      ],
+      promoText: 'Professional tools for every job'
+    },
+    { 
+      name: 'Electronics products', 
+      icon: <FaLaptop className="text-lg" />, 
+      color: 'from-blue-600 to-indigo-600',
+      bgColor: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+      borderColor: 'border-blue-200',
+      textColor: 'text-blue-800',
+      image: placeholderImages.electronics,
+      mainSubcategories: [
+        {
+          title: 'Home Appliances',
+          items: ['TVs', 'Refrigerators', 'Washing Machines', 'ACs', 'Microwaves', 'Fans']
+        },
+        {
+          title: 'Computers',
+          items: ['Laptops', 'Desktops', 'Monitors', 'Printers', 'Keyboards', 'Mouse']
+        },
+        {
+          title: 'Audio & Video',
+          items: ['Speakers', 'Headphones', 'Home Theater', 'Soundbars', 'Projectors']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Smart TV', price: '₹34,999', discount: '20% OFF', image: '📺' },
+        { name: 'Laptop', price: '₹54,999', tag: 'Latest', image: '💻' },
+        { name: 'Refrigerator', price: '₹28,999', discount: '15% OFF', image: '🧊' }
+      ],
+      promoText: 'Latest electronics at best prices'
+    },
+    { 
+      name: 'T. Shirts', 
+      icon: <FaTshirt className="text-lg" />, 
+      color: 'from-teal-500 to-green-600',
+      bgColor: 'bg-gradient-to-br from-teal-50 to-green-100',
+      borderColor: 'border-teal-200',
+      textColor: 'text-teal-700',
+      image: placeholderImages.tshirts,
+      mainSubcategories: [
+        {
+          title: 'Men T-Shirts',
+          items: ['Plain T-Shirts', 'Printed T-Shirts', 'Polo T-Shirts', 'Oversized', 'V-Neck']
+        },
+        {
+          title: 'Women T-Shirts',
+          items: ['Crop Tops', 'Oversized', 'Graphic Tees', 'Basic Tees', 'Sleeveless']
+        },
+        {
+          title: 'Kids T-Shirts',
+          items: ['Cartoon Prints', 'School T-Shirts', 'Sports T-Shirts', 'Pack of 3']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Premium T-Shirt', price: '₹999', discount: '40% OFF', image: '👕' },
+        { name: 'Graphic Tee', price: '₹1,299', tag: 'Trendy', image: '🎨' },
+        { name: 'Pack of 3', price: '₹2,499', discount: '35% OFF', image: '👕👕👕' }
+      ],
+      promoText: 'Comfort meets style in every tee'
+    },
+    { 
+      name: 'Home kitchen products', 
+      icon: <FaHome className="text-lg" />, 
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'bg-gradient-to-br from-orange-50 to-red-100',
+      borderColor: 'border-orange-200',
+      textColor: 'text-orange-700',
+      image: placeholderImages.kitchen,
+      mainSubcategories: [
+        {
+          title: 'Cookware',
+          items: ['Pots & Pans', 'Pressure Cookers', 'Non-Stick', 'Utensils', 'Knives']
+        },
+        {
+          title: 'Appliances',
+          items: ['Mixer Grinders', 'Toasters', 'Microwaves', 'Induction Cookers', 'Blenders']
+        },
+        {
+          title: 'Storage',
+          items: ['Containers', 'Jars', 'Bottles', 'Lunch Boxes', 'Organizers']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Non-Stick Pan Set', price: '₹3,999', discount: '30% OFF', image: '🍳' },
+        { name: 'Mixer Grinder', price: '₹4,499', tag: 'Powerful', image: '⚡' },
+        { name: 'Food Container Set', price: '₹1,299', discount: '25% OFF', image: '🥡' }
+      ],
+      promoText: 'Upgrade your kitchen essentials'
+    },
+    { 
+      name: 'Photo editing', 
+      icon: <FaImages className="text-lg" />, 
+      color: 'from-purple-500 to-pink-600',
+      bgColor: 'bg-gradient-to-br from-purple-50 to-pink-100',
+      borderColor: 'border-purple-200',
+      textColor: 'text-purple-700',
+      image: placeholderImages.photo,
+      mainSubcategories: [
+        {
+          title: 'Editing Services',
+          items: ['Portrait Editing', 'Product Photos', 'Real Estate', 'Event Photos', 'Restoration']
+        },
+        {
+          title: 'Software',
+          items: ['Adobe Photoshop', 'Lightroom Presets', 'Mobile Apps', 'Templates', 'Plugins']
+        },
+        {
+          title: 'Tools & Equipment',
+          items: ['Graphics Tablets', 'Monitors', 'Color Calibrators', 'Studio Lighting']
+        }
+      ],
+      featuredProducts: [
+        { name: 'Portrait Editing', price: '₹499/photo', discount: '50% OFF', image: '📸' },
+        { name: 'Photoshop Presets', price: '₹1,999', tag: 'Professional', image: '🎨' },
+        { name: 'Graphics Tablet', price: '₹8,999', discount: '20% OFF', image: '✏️' }
+      ],
+      promoText: 'Professional photo editing services'
+    },
+    { 
+      name: 'Print out services', 
+      icon: <FaPrint className="text-lg" />, 
+      color: 'from-gray-500 to-black',
+      bgColor: 'bg-gradient-to-br from-gray-100 to-gray-200',
+      borderColor: 'border-gray-300',
+      textColor: 'text-gray-800',
+      image: placeholderImages.print,
+      mainSubcategories: [
+        {
+          title: 'Document Printing',
+          items: ['Color Printing', 'Black & White', 'Bulk Printing', 'Thesis Binding', 'Reports']
+        },
+        {
+          title: 'Photo Printing',
+          items: ['Photo Prints', 'Canvas Prints', 'Photo Books', 'Frames', 'Albums']
+        },
+        {
+          title: 'Commercial Printing',
+          items: ['Business Cards', 'Flyers', 'Banners', 'Brochures', 'Stickers']
+        }
+      ],
+      featuredProducts: [
+        { name: '100 Page Printing', price: '₹499', discount: '30% OFF', image: '📄' },
+        { name: 'Photo Canvas', price: '₹1,999', tag: 'Premium', image: '🖼️' },
+        { name: 'Business Cards', price: '₹799', discount: '25% OFF', image: '📇' }
+      ],
+      promoText: 'High quality printing services'
     },
   ];
 
@@ -732,10 +1063,10 @@ export default function Header() {
                 <div className="w-72 bg-gradient-to-b from-gray-50 to-white border-r p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-gray-900">Browse Categories</h3>
-                    <div className="text-xs text-amber-600 font-medium">8 Categories</div>
+                    <div className="text-xs text-amber-600 font-medium">{categories.length} Categories</div>
                   </div>
                   
-                  <div className="space-y-1">
+                  <div className="space-y-1 max-h-[500px] overflow-y-auto pr-2">
                     {categories.map((category) => (
                       <button
                         key={category.name}
@@ -778,7 +1109,7 @@ export default function Header() {
                 </div>
 
                 {/* Right Content - Dynamic Category Details */}
-                <div className="flex-1 p-8 bg-white">
+                <div className="flex-1 p-8 bg-white max-h-[600px] overflow-y-auto">
                   <div className="flex items-start justify-between mb-8">
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900">{activeCategoryData.name}</h2>
