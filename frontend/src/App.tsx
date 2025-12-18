@@ -7,7 +7,7 @@ import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
 import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
-import Login from './pages/Login'; // single login page
+import Login from './pages/Login';
 import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
 
@@ -29,30 +29,55 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {!isAdminRoute && <Header />}
-      <main className={isAdminRoute ? "flex-1" : "flex-1 container py-6"}>
+      <main className={isAdminRoute ? "flex-1" : "flex-1"}>
         <Routes>
-          <Route path="/" element={<Home/>} />
-          <Route path="/products" element={<ProductList/>} />
-          <Route path="/products/:id" element={<ProductDetail/>} />
-          <Route path="/cart" element={<CartPage/>} />
-          <Route path="/checkout" element={<ProtectedRoute><Checkout/></ProtectedRoute>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/register" element={<Register/>} />
-          <Route path="/dashboard" element={<ProtectedRoute><UserDashboard/></ProtectedRoute>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<ProductList />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route 
+            path="/checkout" 
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            } 
+          />
 
-          {/* Admin */}
-          <Route path="/admin" element={<AdminProtected><AdminDashboardLayout /></AdminProtected>}>
-            <Route index element={<AdminDashboard/>} />
-            <Route path="products" element={<AdminProducts/>} />
-            <Route path="users" element={<Users/>} />
-            <Route path="categories" element={<AdminCategories/>} />
-            <Route path="orders" element={<AdminOrders/>} /> 
-            <Route path='profile' element={<AdminProfile/>}/>
-            <Route path="notifications" element={<AdminNotification/>} /> 
-            <Route path='reports' element={<AdminReports/>}/>
+          {/* Admin Routes */}
+          <Route 
+            path="/admin" 
+            element={
+              <AdminProtected>
+                <AdminDashboardLayout />
+              </AdminProtected>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="users" element={<Users />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="profile" element={<AdminProfile />} />
+            <Route path="notifications" element={<AdminNotification />} />
+            <Route path="reports" element={<AdminReports />} />
           </Route>
+          
+          {/* Additional routes for categories */}
+          <Route path="/category/:category" element={<ProductList />} />
+          <Route path="/category/:category/:subcategory" element={<ProductList />} />
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
