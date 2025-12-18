@@ -17,7 +17,7 @@ import {
   FaGlobeAsia, FaCreditCard, FaImages
 } from 'react-icons/fa';
 
-// Subcategory image mapping
+// Subcategory image mapping (keeping for reference but not using in display)
 const subcategoryImages: Record<string, string> = {
   // Mobile accessories subcategories
   'phone-cases': 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -855,11 +855,248 @@ const SubcategoriesSection = ({ categories, selectedCategory, selectedSubcategor
 
   const subcategoriesToShow = category.subcategories;
 
+  const getCategoryColor = (color: string) => {
+    const colors: Record<string, string> = {
+      blue: 'bg-gradient-to-br from-blue-500 to-cyan-500',
+      pink: 'bg-gradient-to-br from-pink-500 to-rose-500',
+      orange: 'bg-gradient-to-br from-orange-500 to-amber-500',
+      purple: 'bg-gradient-to-br from-purple-500 to-violet-500',
+      green: 'bg-gradient-to-br from-green-500 to-emerald-500',
+      gray: 'bg-gradient-to-br from-gray-500 to-slate-500',
+      amber: 'bg-gradient-to-br from-amber-500 to-yellow-500',
+      cyan: 'bg-gradient-to-br from-cyan-500 to-blue-500',
+      yellow: 'bg-gradient-to-br from-yellow-500 to-amber-500',
+      brown: 'bg-gradient-to-br from-amber-700 to-yellow-600',
+      teal: 'bg-gradient-to-br from-teal-500 to-green-600',
+      red: 'bg-gradient-to-br from-red-500 to-orange-600'
+    };
+    return colors[color] || colors.blue;
+  };
+
+  const categoryColor = getCategoryColor(category.color);
+
   return (
-    <div>
-      <h1 className="text-xl font-semibold mb-4">All Products</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map(p => <ProductCard key={p._id} product={p} />)}
+    <div className="mb-10 animate-fadeIn">
+      {/* Category Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {category.name} Subcategories
+          </h2>
+          <p className="text-gray-600">
+            Explore all {category.name} products
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => onSubcategorySelect(null)}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+          >
+            View all subcategories
+          </button>
+        </div>
+      </div>
+
+      {/* Subcategories Grid - Icons Only */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
+        {subcategoriesToShow.slice(0, 24).map((subcat: any) => (
+          <button
+            key={`${subcat.id}-${selectedCategory}`}
+            onClick={() => onSubcategorySelect(subcat.id)}
+            className={`group flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${
+              selectedSubcategory === subcat.id 
+                ? `border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg ring-2 ring-blue-200` 
+                : 'border-gray-200 bg-white hover:border-blue-500 hover:shadow-lg hover:bg-gray-50'
+            }`}
+          >
+            {/* Icon Only - No Background Image */}
+            <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-3 flex items-center justify-center transition-all duration-300 ${
+              selectedSubcategory === subcat.id 
+                ? `${categoryColor} shadow-lg scale-110` 
+                : 'bg-gray-100 group-hover:bg-gray-200'
+            }`}>
+              <div className={`text-xl sm:text-2xl ${
+                selectedSubcategory === subcat.id 
+                  ? 'text-white' 
+                  : 'text-gray-700 group-hover:text-gray-900'
+              }`}>
+                {subcat.icon}
+              </div>
+              
+              {/* Selection indicator */}
+              {selectedSubcategory === subcat.id && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <FaCheck className="text-white text-xs" />
+                </div>
+              )}
+            </div>
+            
+            <span className={`text-xs sm:text-sm font-medium text-center ${
+              selectedSubcategory === subcat.id 
+                ? 'text-blue-700 font-semibold' 
+                : 'text-gray-800 group-hover:text-blue-700'
+            }`}>
+              {subcat.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Professional categories display (always visible)
+const ProfessionalCategories = ({ categories, selectedCategory, onCategorySelect }: any) => {
+  // Pre-defined unique color combinations
+  const uniqueColors = [
+    // Background, Border, Icon (now with better contrast)
+    ['from-blue-50 to-cyan-50', 'border-blue-200', 'from-blue-600 to-cyan-600'],
+    ['from-pink-50 to-rose-50', 'border-pink-200', 'from-pink-600 to-rose-600'],
+    ['from-orange-50 to-amber-50', 'border-orange-200', 'from-orange-600 to-amber-600'],
+    ['from-purple-50 to-violet-50', 'border-purple-200', 'from-purple-600 to-violet-600'],
+    ['from-green-50 to-emerald-50', 'border-green-200', 'from-green-600 to-emerald-600'],
+    ['from-teal-50 to-cyan-50', 'border-teal-200', 'from-teal-600 to-cyan-600'],
+    ['from-yellow-50 to-amber-50', 'border-yellow-200', 'from-yellow-600 to-amber-600'],
+    ['from-red-50 to-orange-50', 'border-red-200', 'from-red-600 to-orange-600'],
+    ['from-indigo-50 to-blue-50', 'border-indigo-200', 'from-indigo-600 to-blue-600'],
+    ['from-lime-50 to-green-50', 'border-lime-200', 'from-lime-600 to-green-600'],
+    ['from-fuchsia-50 to-pink-50', 'border-fuchsia-200', 'from-fuchsia-600 to-pink-600'],
+    ['from-sky-50 to-blue-50', 'border-sky-200', 'from-sky-600 to-blue-600'],
+    ['from-amber-50 to-yellow-50', 'border-amber-200', 'from-amber-600 to-yellow-600'],
+    ['from-rose-50 to-pink-50', 'border-rose-200', 'from-rose-600 to-pink-600'],
+    ['from-emerald-50 to-green-50', 'border-emerald-200', 'from-emerald-600 to-green-600'],
+    ['from-cyan-50 to-blue-50', 'border-cyan-200', 'from-cyan-600 to-blue-600'],
+    ['from-violet-50 to-purple-50', 'border-violet-200', 'from-violet-600 to-purple-600'],
+    ['from-slate-50 to-gray-50', 'border-slate-200', 'from-slate-600 to-gray-600']
+  ];
+
+  const getCategoryColor = (index: number, isSelected: boolean) => {
+    const colorIndex = index % uniqueColors.length;
+    const [bgGradient, borderColor, iconGradient] = uniqueColors[colorIndex];
+    
+    return {
+      bg: isSelected 
+        ? `bg-gradient-to-br ${bgGradient} border-2 ${borderColor.replace('200', '500')} shadow-lg` 
+        : `bg-gradient-to-br ${bgGradient}/80 border hover:${borderColor.replace('200', '300')} hover:shadow-md`,
+      icon: isSelected 
+        ? `bg-gradient-to-br ${iconGradient} shadow-lg scale-110` 
+        : `bg-gradient-to-br ${iconGradient.replace('600', '500')}`
+    };
+  };
+
+  return (
+    <div className="mb-10">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
+      <div className="relative">
+        <div className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide px-1">
+          {categories.map((category: any, index: number) => {
+            const isSelected = selectedCategory === category.id;
+            const colors = getCategoryColor(index, isSelected);
+            
+            return (
+              <button
+                key={category.id}
+                onClick={() => onCategorySelect(category.id)}
+                className={`group flex-shrink-0 w-36 transition-all duration-300 ${isSelected ? 'transform -translate-y-2' : ''}`}
+              >
+                <div className={`flex flex-col items-center justify-center p-4 rounded-xl h-full w-full transition-all duration-300 ${colors.bg} ${isSelected ? 'shadow-xl' : 'hover:shadow-lg'}`}>
+                  {/* Icon Circle */}
+                  <div className={`relative w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${colors.icon}`}>
+                    <div className="text-2xl text-white">
+                      {category.icon}
+                    </div>
+                    
+                    {/* Selection indicator */}
+                    {isSelected && (
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                        <FaCheck className="text-white text-xs" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Category Name */}
+                  <h3 className={`text-sm font-semibold text-center mb-1 line-clamp-2 ${
+                    isSelected 
+                      ? 'text-blue-900' 
+                      : 'text-gray-800 group-hover:text-blue-800'
+                  }`}>
+                    {category.name}
+                  </h3>
+                  
+                  {/* Items Count */}
+                  <div className={`text-xs px-3 py-1 rounded-full ${
+                    isSelected 
+                      ? 'bg-blue-100 text-blue-800 font-medium' 
+                      : 'bg-gray-100 text-gray-700 group-hover:bg-blue-50 group-hover:text-blue-700'
+                  }`}>
+                    {category.items}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+      </div>
+    </div>
+  );
+};
+
+// Active filters display
+const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters }: any) => {
+  if (!selectedCategory && !selectedSubcategory) return null;
+
+  const categoryName = selectedCategory 
+    ? mainCategories.find(cat => cat.id === selectedCategory)?.name 
+    : null;
+  
+  const subcategoryName = selectedSubcategory 
+    ? mainCategories
+        .flatMap(cat => cat.subcategories)
+        .find(sub => sub.id === selectedSubcategory)?.name
+    : null;
+
+  return (
+    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <FaFilter className="text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {selectedCategory && (
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium flex items-center gap-2">
+                <span>Category: {categoryName}</span>
+                <button 
+                  onClick={() => onClearFilters('category')}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {selectedSubcategory && (
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium flex items-center gap-2">
+                <span>Subcategory: {subcategoryName}</span>
+                <button 
+                  onClick={() => onClearFilters('subcategory')}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
+        </div>
+        {(selectedCategory || selectedSubcategory) && (
+          <button 
+            onClick={() => onClearFilters('all')}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Clear all filters
+          </button>
+        )}
       </div>
     </div>
   );
