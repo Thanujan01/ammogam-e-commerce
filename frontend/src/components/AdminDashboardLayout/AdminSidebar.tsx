@@ -51,9 +51,9 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex flex-col h-full">
 
           {/* Logo Section */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white/60">
+          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white/60 ">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md">
+              {/* <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md">
                 <Camera className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -61,7 +61,8 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
                   Ammogam
                 </h1>
                 <p className="text-xs text-gray-500">Admin Panel</p>
-              </div>
+              </div> */}
+              <img src="/src/assets/logo.png" alt="Ammogam Logo" className="w-[70%] h-auto items-center flex mx-auto" />
             </div>
 
             {/* Close Button (Mobile) */}
@@ -74,7 +75,7 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
 
@@ -84,22 +85,22 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
                   to={item.href}
                   onClick={onClose}
                   className={cn(
-                    "relative flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                    "relative flex items-center gap-4 px-4 py-3 rounded-xl text-md font-bold transition-all duration-200",
                     isActive
-                      ? "bg-indigo-100 text-indigo-700 shadow-sm border border-indigo-200"
-                      : "text-primary1 hover:bg-gray-100 hover:text-gray-900"
+                      ? "bg-primary1 text-white shadow-sm border border-indigo-200"
+                      : "text-primary1 hover:bg-secondary hover:text-secondary1"
                   )}
                 >
                   {/* Active Indicator */}
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-indigo-600 rounded-r-xl" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-primary1 rounded-r-xl" />
                   )}
 
                   <item.icon
                     className={cn(
                       "w-5 h-5",
                       isActive
-                        ? "text-indigo-600"
+                        ? "text-white"
                         : "text-primary1"
                     )}
                   />
@@ -124,7 +125,7 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition"
+              className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-md font-medium text-red-600 hover:bg-red-50 transition"
             >
               <LogOut className="w-5 h-5" />
               Logout

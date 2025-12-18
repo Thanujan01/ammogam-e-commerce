@@ -102,11 +102,11 @@ export default function AdminNotification() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-white rounded-xl shadow-lg p-6 text-black">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">Notifications</h1>
-            <p className="text-indigo-100 flex items-center gap-2">
+            <p className="text-gray-400 flex items-center gap-2">
               <Bell className="w-4 h-4" />
               Stay updated with all your important notifications
             </p>
@@ -114,7 +114,7 @@ export default function AdminNotification() {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllAsRead}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-all shadow-md"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary1 text-white rounded-lg font-semibold hover:bg-indigo-50 transition-all shadow-md"
             >
               <FiCheck className="w-4 h-4" />
               Mark All as Read ({unreadCount})
