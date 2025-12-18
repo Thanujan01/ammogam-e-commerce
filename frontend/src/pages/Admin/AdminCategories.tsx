@@ -92,17 +92,17 @@ export default function AdminCategories() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-white rounded-xl shadow-lg p-6 text-black">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">Category Management</h1>
-            <p className="text-green-100 flex items-center gap-2">
+            <p className="text-gray-400 flex items-center gap-2">
               <FolderTree className="w-4 h-4" />
               Organize your products with categories
             </p>
           </div>
           <button
-            className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-green-700 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all"
+            className="flex items-center justify-center gap-2 bg-primary1 hover:bg-gray-50 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all"
             onClick={() => openDialog()}
           >
             <FiPlus className="w-5 h-5" />
@@ -224,14 +224,14 @@ export default function AdminCategories() {
               </div>
 
               {/* Product Count Badge */}
-              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-green-600 text-white text-xs font-semibold shadow-md">
+              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary1 text-white text-xs font-semibold shadow-md">
                 {category.productCount} {category.productCount === 1 ? 'Product' : 'Products'}
               </span>
             </div>
 
             {/* Category Details */}
             <div className="p-5">
-              <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+              <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary1 transition-colors">
                 {category.name}
               </h3>
               <p className="text-sm text-gray-600 line-clamp-2 mb-4 min-h-[40px]">
@@ -277,11 +277,11 @@ export default function AdminCategories() {
       {dialogOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-t-2xl">
+            <div className="sticky top-0 bg-primary1 px-6 py-4 rounded-t-2xl">
               <h2 className="text-xl font-bold text-white">
                 {editingCategory ? 'Edit Category' : 'Add New Category'}
               </h2>
-              <p className="text-green-100 text-sm mt-1">
+              <p className="text-primary1 text-sm mt-1">
                 {editingCategory ? 'Update category details' : 'Fill in details to add a new category'}
               </p>
             </div>
@@ -296,7 +296,7 @@ export default function AdminCategories() {
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., CCTV Cameras"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -307,7 +307,7 @@ export default function AdminCategories() {
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Enter category description..."
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all resize-none"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all resize-none"
                     rows={4}
                   />
                 </div>
@@ -319,7 +319,7 @@ export default function AdminCategories() {
                     type="file"
                     onChange={handleImageChange}
                     accept="image/*"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary1 file:text-white hover:file:bg-primary1"
                   />
                   {formData.image && (
                     <div className="mt-3">
@@ -340,7 +340,7 @@ export default function AdminCategories() {
                   Cancel
                 </button>
                 <button
-                  className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
+                  className="px-6 py-2.5 bg-primary1 hover:from-primary2 hover:to-primary3 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
                   onClick={handleSubmit}
                 >
                   {editingCategory ? 'Update Category' : 'Add Category'}

@@ -102,61 +102,61 @@ export default function Users() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Users */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-white rounded-xl shadow-lg p-6 text-black">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium mb-1">Total Users</p>
+              <p className="text-gray-700 text-sm font-medium mb-1">Total Users</p>
               <p className="text-3xl font-bold">{userList.length}</p>
-              <p className="text-blue-100 text-xs mt-2">All registered users</p>
+              <p className="text-gray-700 text-xs mt-2">All registered users</p>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <UsersIcon className="w-6 h-6" />
+            <div className="w-12 h-12  rounded-lg flex items-center justify-center bg-blue-500">
+              <UsersIcon className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
 
         {/* Active Users */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-white rounded-xl shadow-lg p-6 text-black">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium mb-1">Active Users</p>
+              <p className="text-gray-700 text-sm font-medium mb-1">Active Users</p>
               <p className="text-3xl font-bold">{activeCount}</p>
-              <p className="text-green-100 text-xs mt-2">
+              <p className="text-gray-700 text-xs mt-2">
                 {((activeCount / userList.length) * 100).toFixed(0)}% of total
               </p>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <UserCheck className="w-6 h-6" />
+            <div className="w-12 h-12  rounded-lg flex items-center bg-green-600 justify-center">
+              <UserCheck className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
 
         {/* Inactive Users */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-white rounded-xl shadow-lg p-6 text-black">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm font-medium mb-1">Inactive Users</p>
+              <p className="text-gray-700 text-sm font-medium mb-1">Inactive Users</p>
               <p className="text-3xl font-bold">{inactiveCount}</p>
-              <p className="text-orange-100 text-xs mt-2">
+              <p className="text-gray-700 text-xs mt-2">
                 {((inactiveCount / userList.length) * 100).toFixed(0)}% of total
               </p>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <UserX className="w-6 h-6" />
+            <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+              <UserX className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
 
         {/* Total Revenue */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-white rounded-xl shadow-lg p-6 text-black">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium mb-1">Total Revenue</p>
+              <p className="text-gray-700 text-sm font-medium mb-1">Total Revenue</p>
               <p className="text-3xl font-bold">${totalRevenue.toFixed(2)}</p>
-              <p className="text-purple-100 text-xs mt-2">From all users</p>
+              <p className="text-gray-700 text-xs mt-2">From all users</p>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6" />
+            <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
