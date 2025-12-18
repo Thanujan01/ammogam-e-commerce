@@ -930,20 +930,44 @@ const SubcategoriesSection = ({ categories, selectedCategory, selectedSubcategor
 
 // Professional categories display (always visible)
 const ProfessionalCategories = ({ categories, selectedCategory, onCategorySelect }: any) => {
-  const getCategoryColor = (color: string) => {
+  const getCategoryColor = (color: string, isSelected: boolean) => {
     const colors: Record<string, string> = {
-      blue: 'bg-gradient-to-br from-blue-500 to-cyan-500',
-      pink: 'bg-gradient-to-br from-pink-500 to-rose-500',
-      orange: 'bg-gradient-to-br from-orange-500 to-amber-500',
-      purple: 'bg-gradient-to-br from-purple-500 to-violet-500',
-      green: 'bg-gradient-to-br from-green-500 to-emerald-500',
-      gray: 'bg-gradient-to-br from-gray-500 to-slate-500',
-      amber: 'bg-gradient-to-br from-amber-500 to-yellow-500',
-      cyan: 'bg-gradient-to-br from-cyan-500 to-blue-500',
-      yellow: 'bg-gradient-to-br from-yellow-500 to-amber-500',
-      brown: 'bg-gradient-to-br from-amber-700 to-yellow-600',
-      teal: 'bg-gradient-to-br from-teal-500 to-green-600',
-      red: 'bg-gradient-to-br from-red-500 to-orange-600'
+      blue: isSelected 
+        ? 'bg-gradient-to-br from-blue-600 to-cyan-600 shadow-lg' 
+        : 'bg-gradient-to-br from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500',
+      pink: isSelected 
+        ? 'bg-gradient-to-br from-pink-600 to-rose-600 shadow-lg' 
+        : 'bg-gradient-to-br from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500',
+      orange: isSelected 
+        ? 'bg-gradient-to-br from-orange-600 to-amber-600 shadow-lg' 
+        : 'bg-gradient-to-br from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500',
+      purple: isSelected 
+        ? 'bg-gradient-to-br from-purple-600 to-violet-600 shadow-lg' 
+        : 'bg-gradient-to-br from-purple-400 to-violet-400 hover:from-purple-500 hover:to-violet-500',
+      green: isSelected 
+        ? 'bg-gradient-to-br from-green-600 to-emerald-600 shadow-lg' 
+        : 'bg-gradient-to-br from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500',
+      gray: isSelected 
+        ? 'bg-gradient-to-br from-gray-600 to-slate-600 shadow-lg' 
+        : 'bg-gradient-to-br from-gray-400 to-slate-400 hover:from-gray-500 hover:to-slate-500',
+      amber: isSelected 
+        ? 'bg-gradient-to-br from-amber-600 to-yellow-600 shadow-lg' 
+        : 'bg-gradient-to-br from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500',
+      cyan: isSelected 
+        ? 'bg-gradient-to-br from-cyan-600 to-blue-600 shadow-lg' 
+        : 'bg-gradient-to-br from-cyan-400 to-blue-400 hover:from-cyan-500 hover:to-blue-500',
+      yellow: isSelected 
+        ? 'bg-gradient-to-br from-yellow-600 to-amber-600 shadow-lg' 
+        : 'bg-gradient-to-br from-yellow-400 to-amber-400 hover:from-yellow-500 hover:to-amber-500',
+      brown: isSelected 
+        ? 'bg-gradient-to-br from-amber-800 to-yellow-700 shadow-lg' 
+        : 'bg-gradient-to-br from-amber-600 to-yellow-500 hover:from-amber-700 hover:to-yellow-600',
+      teal: isSelected 
+        ? 'bg-gradient-to-br from-teal-600 to-green-600 shadow-lg' 
+        : 'bg-gradient-to-br from-teal-400 to-green-400 hover:from-teal-500 hover:to-green-500',
+      red: isSelected 
+        ? 'bg-gradient-to-br from-red-600 to-orange-600 shadow-lg' 
+        : 'bg-gradient-to-br from-red-400 to-orange-400 hover:from-red-500 hover:to-orange-500'
     };
     return colors[color] || colors.blue;
   };
@@ -952,40 +976,58 @@ const ProfessionalCategories = ({ categories, selectedCategory, onCategorySelect
     <div className="mb-10">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
       <div className="relative">
-        <div className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide">
-          {categories.map((category: any) => (
-            <button
-              key={category.id}
-              onClick={() => onCategorySelect(category.id)}
-              className={`group flex-shrink-0 w-48 ${selectedCategory === category.id ? 'ring-2 ring-blue-500 rounded-2xl' : ''}`}
-            >
-              <div className="relative overflow-hidden rounded-2xl mb-3">
-                <img 
-                  src={category.image} 
-                  alt={category.name}
-                  className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className={`absolute top-3 left-3 w-10 h-10 ${getCategoryColor(category.color)} rounded-lg flex items-center justify-center text-white shadow-lg`}>
-                  {category.icon}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-white font-bold text-lg mb-1">{category.name}</h3>
-                  <div className="text-white/90 text-sm flex items-center gap-2">
-                    <span>{category.items}</span>
-                    <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Shop Now</span>
+        <div className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide px-1">
+          {categories.map((category: any) => {
+            const isSelected = selectedCategory === category.id;
+            
+            return (
+              <button
+                key={category.id}
+                onClick={() => onCategorySelect(category.id)}
+                className={`group flex-shrink-0 w-32 sm:w-36 md:w-40 lg:w-44 ${isSelected ? 'ring-2 ring-blue-500 rounded-2xl' : ''}`}
+              >
+                <div className="flex flex-col items-center justify-center p-4 sm:p-5 rounded-xl border transition-all duration-300 bg-white hover:bg-gray-50 hover:border-blue-500 hover:shadow-lg">
+                  {/* Icon Circle - Always colored with gradient */}
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-3 sm:mb-4 transition-all duration-300 ${getCategoryColor(category.color, isSelected)}`}>
+                    <div className="text-2xl sm:text-3xl text-white">
+                      {category.icon}
+                    </div>
+                    
+                    {/* Selection indicator */}
+                    {isSelected && (
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <FaCheck className="text-white text-xs" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Category Name */}
+                  <h3 className={`text-xs sm:text-sm font-semibold text-center mb-1 line-clamp-2 ${
+                    isSelected 
+                      ? 'text-blue-700' 
+                      : 'text-gray-800 group-hover:text-blue-700'
+                  }`}>
+                    {category.name}
+                  </h3>
+                  
+                  {/* Items Count */}
+                  <div className={`text-xs ${
+                    isSelected 
+                      ? 'text-blue-600' 
+                      : 'text-gray-600 group-hover:text-blue-600'
+                  }`}>
+                    {category.items}
                   </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
         <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
       </div>
     </div>
   );
 };
-
 // Active filters display
 const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters }: any) => {
   if (!selectedCategory && !selectedSubcategory) return null;
