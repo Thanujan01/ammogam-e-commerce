@@ -8,7 +8,8 @@ export default function DashBoardCard({ stats }: { stats: any }) {
         title="Total Users" 
         value={stats.users.toLocaleString()} 
         icon={<Users className="w-6 h-6" />}
-        gradient="from-blue-500 to-blue-600"
+        // gradient="from-blue-500 to-blue-600"
+        gradient='white'
         iconBg="bg-blue-100"
         iconColor="text-blue-600"
       />
@@ -16,7 +17,8 @@ export default function DashBoardCard({ stats }: { stats: any }) {
         title="Total Orders" 
         value={stats.orders.toLocaleString()} 
         icon={<ShoppingCart className="w-6 h-6" />}
-        gradient="from-green-500 to-green-600"
+        // gradient="from-green-500 to-green-600"
+        gradient='white'
         iconBg="bg-green-100"
         iconColor="text-green-600"
       />
@@ -24,7 +26,8 @@ export default function DashBoardCard({ stats }: { stats: any }) {
         title="Products" 
         value={stats.products.toLocaleString()} 
         icon={<Package className="w-6 h-6" />}
-        gradient="from-purple-500 to-purple-600"
+        // gradient="from-purple-500 to-purple-600"
+        gradient='white'
         iconBg="bg-purple-100"
         iconColor="text-purple-600"
       />
@@ -32,7 +35,8 @@ export default function DashBoardCard({ stats }: { stats: any }) {
         title="Revenue" 
         value={`$${stats.revenue.toLocaleString()}`} 
         icon={<DollarSign className="w-6 h-6" />}
-        gradient="from-orange-500 to-orange-600"
+        // gradient="from-orange-500 to-orange-600"
+        gradient='white'
         iconBg="bg-orange-100"
         iconColor="text-orange-600"
       />

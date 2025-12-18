@@ -63,12 +63,12 @@ export default function AdminProfile() {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="text-center">
-              <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+              <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-primary1 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
                 {profileData.name.charAt(0).toUpperCase()}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-1">{profileData.name}</h2>
               <p className="text-gray-600 mb-2">{profileData.email}</p>
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-100 to-rose-100 text-pink-700 rounded-full text-sm font-semibold border border-pink-200">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-orange-400 text-white rounded-full text-sm font-semibold border border-orange-200">
                 <Shield className="w-4 h-4" />
                 {profileData.role.charAt(0).toUpperCase() + profileData.role.slice(1)}
               </span>
@@ -119,7 +119,7 @@ export default function AdminProfile() {
                   </button>
                   <button
                     onClick={handleSaveProfile}
-                    className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-medium transition-all"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary1 hover:bg-orange-500 text-white rounded-lg font-medium transition-all"
                   >
                     <FiSave className="w-4 h-4" />
                     Save
@@ -185,7 +185,7 @@ export default function AdminProfile() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <FiLock className="w-5 h-5 text-pink-600" />
+                <FiLock className="w-5 h-5 text-primary1" />
                 Change Password
               </h3>
               {!isChangingPassword && (
@@ -207,7 +207,7 @@ export default function AdminProfile() {
                     type="password"
                     value={passwordData.currentPassword}
                     onChange={e => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition-all"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1  outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -216,7 +216,7 @@ export default function AdminProfile() {
                     type="password"
                     value={passwordData.newPassword}
                     onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition-all"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -225,7 +225,7 @@ export default function AdminProfile() {
                     type="password"
                     value={passwordData.confirmPassword}
                     onChange={e => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition-all"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1  outline-none transition-all"
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
@@ -240,7 +240,7 @@ export default function AdminProfile() {
                   </button>
                   <button
                     onClick={handleChangePassword}
-                    className="flex-1 px-4 py-2.5 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-medium transition-all"
+                    className="flex-1 px-4 py-2.5 bg-primary1 hover:bg-orange-400 text-white rounded-lg font-medium transition-all"
                   >
                     Update Password
                   </button>
