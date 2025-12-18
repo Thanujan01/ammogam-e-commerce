@@ -46,11 +46,11 @@ export default function AdminProfile() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl shadow-lg p-6 text-white">
+      <div className=" bg-white rounded-xl shadow-lg p-6 text-">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">My Profile</h1>
-            <p className="text-pink-100 flex items-center gap-2">
+            <p className="tex flex items-center gap-2">
               <User className="w-4 h-4" />
               Manage your personal information and settings
             </p>
@@ -103,7 +103,7 @@ export default function AdminProfile() {
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-medium transition-all"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary1 hover:bg-pink-700 text-white rounded-lg font-edium transition-all"
                 >
                   <FiEdit className="w-4 h-4" />
                   Edit Profile

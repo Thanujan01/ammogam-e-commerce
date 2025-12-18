@@ -34,11 +34,11 @@ export default function ProductDialog({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 rounded-t-2xl">
+        <div className="sticky top-0 bg-primary1 px-6 py-4 rounded-t-2xl">
           <h2 className="text-xl font-bold text-white">
             {isEditing ? 'Edit Product' : 'Add New Product'}
           </h2>
-          <p className="text-purple-100 text-sm mt-1">
+          <p className="text-primary1 text-sm mt-1">
             {isEditing ? 'Update product details' : 'Fill in details to add a new product'}
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function ProductDialog({
                 value={formData.name}
                 onChange={e => onChange('name', e.target.value)}
                 placeholder="Enter product name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
               />
             </div>
             <div>
@@ -60,7 +60,7 @@ export default function ProductDialog({
                 value={formData.description}
                 onChange={e => onChange('description', e.target.value)}
                 placeholder="Enter product description"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all resize-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all resize-none"
                 rows={3}
               />
             </div>
@@ -73,7 +73,7 @@ export default function ProductDialog({
                   value={formData.price}
                   onChange={e => onChange('price', e.target.value)}
                   placeholder="0.00"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
                 />
               </div>
               <div>
@@ -83,7 +83,7 @@ export default function ProductDialog({
                   value={formData.stock}
                   onChange={e => onChange('stock', e.target.value)}
                   placeholder="0"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
                 />
               </div>
             </div>
@@ -92,7 +92,7 @@ export default function ProductDialog({
               <select
                 value={formData.category}
                 onChange={e => onChange('category', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all bg-white"
               >
                 <option value="">Select a category</option>
                 {categories.map(cat => (
@@ -108,7 +108,7 @@ export default function ProductDialog({
                 type="file" 
                 onChange={onImageChange} 
                 accept="image/*"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary1 file:text-white hover:file:bg-primary1" 
               />
               {formData.image && (
                 <div className="mt-3">
@@ -125,7 +125,7 @@ export default function ProductDialog({
               Cancel
             </button>
             <button 
-              className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all" 
+              className="px-6 py-2.5 bg-primary1 hover:from-primary2 hover:to-primary3 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all" 
               onClick={onSubmit}
             >
               {isEditing ? 'Update Product' : 'Add Product'}

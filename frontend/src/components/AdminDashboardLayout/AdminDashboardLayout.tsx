@@ -12,7 +12,7 @@ export function AdminDashboardLayout() {
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-gray-50">
         <AdminHeader
           onMenuClick={() => setSidebarOpen(true)} 
         />
