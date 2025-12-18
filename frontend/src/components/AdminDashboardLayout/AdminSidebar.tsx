@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import {LayoutDashboard,Package,FolderTree,ShoppingCart,Users,BarChart3,User,Camera,X,LogOut,Bell,} from "lucide-react";
+import {LayoutDashboard,Package,FolderTree,ShoppingCart,Users,BarChart3,User,X,LogOut,Bell,} from "lucide-react";
 import { cn } from "../../libs/utils";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext } from "react";
