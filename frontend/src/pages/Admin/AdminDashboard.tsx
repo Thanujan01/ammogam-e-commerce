@@ -7,11 +7,11 @@ import LowStockAlert from '../../components/AdminDash/LowStockAlert';
 
 export default function AdminDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-white rounded-xl shadow-lg p-6 text-black">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, Admin! 👋</h1>
-        <p className="text-blue-100">Here's what's happening with your store today</p>
+        <p className="text-gray-400">Here's what's happening with your store today</p>
       </div>
 
       {/* Stats Cards */}

@@ -46,11 +46,11 @@ export default function AdminOrders() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-white rounded-xl shadow-lg p-6 text-black">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">Order Management</h1>
-            <p className="text-orange-100 flex items-center gap-2">
+            <p className="text-gray-400 flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" />
               Track and manage all customer orders
             </p>
