@@ -727,36 +727,7 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Announcement Bar - Mobile Optimized */}
-      <div className="bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between py-1.5 sm:py-2 text-xs sm:text-sm">
-            <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-0 w-full sm:w-auto justify-center sm:justify-start">
-              <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-                <FaPhone className="text-xs hidden xs:inline" />
-                <span className="truncate">Support: +94 77 123 4567</span>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="text-amber-200">•</span>
-                <FaMapMarkerAlt className="text-xs" />
-                <span>Free Delivery Islandwide</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center sm:justify-end">
-              <div className="flex items-center gap-1.5 bg-black/20 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
-                <FaClock className="text-xs animate-pulse" />
-                <span className="font-bold truncate">Flash Sale: {timeLeft}</span>
-              </div>
-              <div className="hidden lg:flex items-center gap-2">
-                <FaPercent className="text-xs" />
-                <span className="hidden xl:inline">Use Code: <span className="font-bold">AMMO15</span> for 15% OFF</span>
-                <span className="xl:hidden">Code: <span className="font-bold">AMMO15</span></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Main Header */}
       <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white border-b'}`}>
