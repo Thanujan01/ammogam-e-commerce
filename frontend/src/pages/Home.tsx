@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { 
   FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight,
-  FaMobileAlt, FaTshirt, FaHome,
+  FaMobileAlt, FaTshirt, FaHome, FaCamera, FaDog, FaBaby,
+  FaGem, FaGlobeAsia, FaUmbrellaBeach, FaShoePrints, FaTools,
+  FaLaptop, FaTshirt as FaTShirt, FaUtensils, FaPalette, FaPrint,
   FaTruck, FaCreditCard, FaUndo, FaTag, FaHeadphones, FaGamepad,
-  FaCamera, FaLaptop, FaBolt, FaPalette, FaRuler, FaGift, FaCheckCircle,
-  FaFire, FaGem, FaCrown, FaBatteryFull, FaCartPlus, FaTimes as FaClose,
+  FaBolt, FaPalette as FaPaletteIcon, FaRuler, FaGift, FaCheckCircle,
+  FaFire, FaCrown, FaBatteryFull, FaCartPlus, FaTimes as FaClose,
   FaChevronRight as FaChevronRightIcon, FaCheck, FaTruck as FaShipping,
-  FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope
+  FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope, FaWallet
 } from 'react-icons/fa';
 
 export default function Home() {
@@ -67,7 +69,7 @@ export default function Home() {
           badge: 'New',
           badgeIcon: <FaGem className="text-white text-xs" />,
           tags: ['Choice', 'Sale'],
-          category: 'Electronics',
+          category: 'Mobile accessories',
           subCategory: 'Audio',
           image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
           discountPercent: 75,
@@ -128,7 +130,7 @@ export default function Home() {
           badge: 'Sale',
           badgeIcon: <FaFire className="text-white text-xs" />,
           tags: ['Choice'],
-          category: 'Fashion',
+          category: 'Baby fashion & toys',
           subCategory: 'Baby Clothes',
           image: 'https://images.unsplash.com/photo-1491926626787-62db157af940?w=400',
           discountPercent: 74,
@@ -180,7 +182,7 @@ export default function Home() {
           badge: 'Trending',
           badgeIcon: <FaFire className="text-white text-xs" />,
           tags: ['Choice', 'Sale'],
-          category: 'Electronics',
+          category: 'Watches',
           subCategory: 'Wearables',
           image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
           discountPercent: 88,
@@ -233,7 +235,7 @@ export default function Home() {
           badge: 'Premium',
           badgeIcon: <FaCrown className="text-white text-xs" />,
           tags: ['Choice', 'Sale'],
-          category: 'Electronics',
+          category: 'Watches',
           subCategory: 'Wearables',
           image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400',
           discountPercent: 31,
@@ -269,7 +271,7 @@ export default function Home() {
           badge: 'Bestseller',
           badgeIcon: <FaCrown className="text-white text-xs" />,
           tags: ['Choice', 'Sale'],
-          category: 'Electronics',
+          category: 'Watches',
           subCategory: 'Wearables',
           image: 'https://images.unsplash.com/photo-1579586337278-3fec9a8b3c4c?w=400',
           discountPercent: 67,
@@ -304,7 +306,7 @@ export default function Home() {
           badge: 'High Power',
           badgeIcon: <FaBatteryFull className="text-white text-xs" />,
           tags: ['Choice', 'Sale'],
-          category: 'Electronics',
+          category: 'Mobile accessories',
           subCategory: 'Gaming',
           image: 'https://images.unsplash.com/photo-1585079542156-4ce2d6380d6e?w=400',
           discountPercent: 84,
@@ -340,28 +342,187 @@ export default function Home() {
     ? products 
     : products.filter(product => product.category === activeCategory);
 
-  const categories = ['All', 'Electronics', 'Fashion', 'Accessories', 'Home', 'Gaming'];
-
-  const featuredCategories = [
-    { name: 'Electronics', icon: <FaMobileAlt />, color: 'bg-blue-50', textColor: 'text-blue-600' },
-    { name: 'Fashion', icon: <FaTshirt />, color: 'bg-pink-50', textColor: 'text-pink-600' },
-    { name: 'Home & Living', icon: <FaHome />, color: 'bg-green-50', textColor: 'text-green-600' },
-    { name: 'Audio', icon: <FaHeadphones />, color: 'bg-purple-50', textColor: 'text-purple-600' },
-    { name: 'Gaming', icon: <FaGamepad />, color: 'bg-red-50', textColor: 'text-red-600' },
-    { name: 'Photography', icon: <FaCamera />, color: 'bg-yellow-50', textColor: 'text-yellow-600' },
-    { name: 'Laptops', icon: <FaLaptop />, color: 'bg-indigo-50', textColor: 'text-indigo-600' },
-    { name: 'Smart Home', icon: <FaBolt />, color: 'bg-teal-50', textColor: 'text-teal-600' },
+  // Categories from your WhatsApp image with item counts from your design
+  const categories = [
+    'All',
+    'Mobile accessories',
+    'Security cameras', 
+    'Men fashion',
+    'Women fashion',
+    'Wallets',
+    'Fashion jewelry',
+    'Pet friendly products',
+    'Baby fashion & toys',
+    'Watches',
+    'Srilankan products',
+    'Indian products',
+    'Climate dress',
+    'Shoes',
+    'Electrical tool & hard ware',
+    'Electronics products',
+    'T. Shirts',
+    'Home kitchen products',
+    'Photo editing',
+    'Print out services'
   ];
 
-  const features = [
-    { icon: <FaTruck />, title: 'Free Shipping', desc: 'On orders over LKR5,000' },
-    { icon: <FaTag />, title: 'Best Price', desc: 'Guaranteed best price' },
-    { icon: <FaCreditCard />, title: 'Secure Payment', desc: '100% secure payment' },
-    { icon: <FaUndo />, title: 'Easy Returns', desc: '30-day return policy' },
+  // Shop by Categories data matching your image design
+  const shopCategories = [
+    { 
+      name: 'Mobile accessories', 
+      items: '245 Items',
+      icon: <FaMobileAlt />,
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-gradient-to-br from-blue-50 to-cyan-50'
+    },
+    { 
+      name: 'Security cameras', 
+      items: '98 Items',
+      icon: <FaCamera />,
+      color: 'from-purple-500 to-violet-500',
+      bgColor: 'bg-gradient-to-br from-purple-50 to-violet-50'
+    },
+    { 
+      name: 'Men fashion', 
+      items: '567 Items',
+      icon: <FaTShirt />,
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-gradient-to-br from-green-50 to-emerald-50'
+    },
+    { 
+      name: 'Women fashion', 
+      items: '789 Items',
+      icon: <FaTShirt />,
+      color: 'from-pink-500 to-rose-500',
+      bgColor: 'bg-gradient-to-br from-pink-50 to-rose-50'
+    },
+    { 
+      name: 'Wallets', 
+      items: '123 Items',
+      icon: <FaWallet />,
+      color: 'from-amber-500 to-yellow-500',
+      bgColor: 'bg-gradient-to-br from-amber-50 to-yellow-50'
+    },
+    { 
+      name: 'Fashion jewelry', 
+      items: '345 Items',
+      icon: <FaGem />,
+      color: 'from-indigo-500 to-purple-500',
+      bgColor: 'bg-gradient-to-br from-indigo-50 to-purple-50'
+    },
+    { 
+      name: 'Pet friendly products', 
+      items: '156 Items',
+      icon: <FaDog />,
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'bg-gradient-to-br from-orange-50 to-red-50'
+    },
+    { 
+      name: 'Baby fashion & toys', 
+      items: '234 Items',
+      icon: <FaBaby />,
+      color: 'from-teal-500 to-cyan-500',
+      bgColor: 'bg-gradient-to-br from-teal-50 to-cyan-50'
+    },
+    { 
+      name: 'Watches', 
+      items: '189 Items',
+      icon: <FaGem />,
+      color: 'from-gray-700 to-gray-900',
+      bgColor: 'bg-gradient-to-br from-gray-100 to-gray-200'
+    },
+    { 
+      name: 'Srilankan products', 
+      items: '67 Items',
+      icon: <FaGlobeAsia />,
+      color: 'from-red-500 to-orange-500',
+      bgColor: 'bg-gradient-to-br from-red-50 to-orange-50'
+    },
+    { 
+      name: 'Indian products', 
+      items: '89 Items',
+      icon: <FaGlobeAsia />,
+      color: 'from-orange-500 to-amber-500',
+      bgColor: 'bg-gradient-to-br from-orange-50 to-amber-50'
+    },
+    { 
+      name: 'Climate dress', 
+      items: '112 Items',
+      icon: <FaUmbrellaBeach />,
+      color: 'from-cyan-500 to-blue-500',
+      bgColor: 'bg-gradient-to-br from-cyan-50 to-blue-50'
+    },
+    { 
+      name: 'Shoes', 
+      items: '432 Items',
+      icon: <FaShoePrints />,
+      color: 'from-blue-600 to-indigo-600',
+      bgColor: 'bg-gradient-to-br from-blue-50 to-indigo-50'
+    },
+    { 
+      name: 'Electrical tool & hard ware', 
+      items: '76 Items',
+      icon: <FaTools />,
+      color: 'from-gray-600 to-gray-800',
+      bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100'
+    },
+    { 
+      name: 'Electronics products', 
+      items: '321 Items',
+      icon: <FaLaptop />,
+      color: 'from-purple-600 to-pink-600',
+      bgColor: 'bg-gradient-to-br from-purple-50 to-pink-50'
+    },
+    { 
+      name: 'T. Shirts', 
+      items: '654 Items',
+      icon: <FaTShirt />,
+      color: 'from-green-600 to-teal-600',
+      bgColor: 'bg-gradient-to-br from-green-50 to-teal-50'
+    },
+    { 
+      name: 'Home kitchen products', 
+      items: '198 Items',
+      icon: <FaUtensils />,
+      color: 'from-amber-600 to-orange-600',
+      bgColor: 'bg-gradient-to-br from-amber-50 to-orange-50'
+    },
+    { 
+      name: 'Photo editing', 
+      items: '45 Items',
+      icon: <FaPalette />,
+      color: 'from-violet-600 to-purple-600',
+      bgColor: 'bg-gradient-to-br from-violet-50 to-purple-50'
+    },
+    { 
+      name: 'Print out services', 
+      items: '32 Items',
+      icon: <FaPrint />,
+      color: 'from-blue-700 to-cyan-700',
+      bgColor: 'bg-gradient-to-br from-blue-50 to-cyan-50'
+    },
   ];
 
   return (
-    <div className="min-h-screen  w-screen">
+    <div className="min-h-screen w-screen bg-gray-50">
+      <style>{`
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+        
+        /* Smooth scrolling */
+        .scroll-smooth {
+          scroll-behavior: smooth;
+        }
+      `}</style>
+      
       {/* Cart Notification */}
       {showCartNotification && recentlyAdded && (
         <div className={`fixed ${isMobile ? 'top-20 left-4 right-4' : 'top-4 right-4'} z-50 animate-fade-in`}>
@@ -606,7 +767,7 @@ export default function Home() {
             {/* Modal Footer */}
             <div className="border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
-                <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+                <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-hide">
                   <button className="text-gray-700 hover:text-gray-900 font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap">
                     <FaDownload className="text-xs sm:text-sm" />
                     Downloads
@@ -658,34 +819,56 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-        {/* Features Banner - COMPLETELY FIXED FOR PROPER CENTERING */}
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-amber-100">
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-stretch gap-4 sm:gap-6">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className="flex-1 min-w-[200px] max-w-[280px] mx-auto sm:mx-0"
-              >
-                <div className="bg-white rounded-lg p-4 sm:p-5 h-full flex flex-col items-center text-center shadow-sm border border-amber-100 hover:shadow-md transition-shadow">
-                  <div className="bg-amber-100 p-3 rounded-full mb-3 sm:mb-4">
-                    <div className="text-amber-600 text-xl sm:text-2xl">{feature.icon}</div>
+         {/* Shop by Categories - UPDATED FOR HORIZONTAL SCROLLING */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shop by Categories</h2>
+            <button className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base">
+              View all <FaChevronRight className="ml-1" />
+            </button>
+          </div>
+          
+          {/* Horizontal scrolling container with hidden scrollbar */}
+          <div className="relative">
+            <div className="flex space-x-4 overflow-x-auto pb-4 px-1 scrollbar-hide scroll-smooth">
+              {shopCategories.map((category, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveCategory(category.name)}
+                  className={`relative group flex-shrink-0 ${category.bgColor} rounded-2xl p-4 border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300 overflow-hidden w-40`}
+                >
+                  
+                  {/* Icon */}
+                  <div className={`relative z-10 w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
+                    <div className="text-xl text-white">
+                      {category.icon}
+                    </div>
                   </div>
-                  <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-1 sm:mb-2">
-                    {feature.title}
+                  
+                  {/* Category Name */}
+                  <h3 className="text-sm font-semibold text-gray-900 text-center line-clamp-2 mb-1 group-hover:text-amber-800 transition-colors">
+                    {category.name}
                   </h3>
-                  <p className="text-gray-600 text-sm sm:text-sm flex-grow">
-                    {feature.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
+                  
+                  {/* Items Count */}
+                  <div className="text-xs text-gray-600 text-center font-medium">
+                    {category.items}
+                  </div>
+                  
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:to-amber-500/10 transition-all duration-300 rounded-xl"></div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Gradient fade effect on the right for better UX */}
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none"></div>
+            {/*<div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none"></div>*/}
           </div>
         </div>
-
-        {/* Hero Banner - IMPROVED CENTERING */}
+        {/* Hero Banner */}
         <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
           <div className="relative h-64 sm:h-80 md:h-96 bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
-            {/* Center the content both horizontally and vertically */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
                 <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm sm:text-base font-medium mb-3 sm:mb-4">
@@ -705,7 +888,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            {/* Optional decorative background image - Only on large screens */}
             <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block">
               <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
               <img 
@@ -717,28 +899,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Featured Categories */}
-        <div className="mb-8 sm:mb-10">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Shop by Category</h2>
-            <button className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base">
-              View all <FaChevronRight className="ml-1" />
-            </button>
-          </div>
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-            {featuredCategories.map((category, index) => (
-              <div 
-                key={index}
-                className={`${category.color} rounded-lg sm:rounded-xl p-3 sm:p-4 text-center hover:shadow-lg transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-amber-200 hover:scale-105`}
-              >
-                <div className={`text-2xl sm:text-3xl ${category.textColor} mb-2 sm:mb-3 flex justify-center`}>
-                  {category.icon}
-                </div>
-                <div className="font-semibold text-gray-800 text-xs sm:text-sm">{category.name}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+       
 
         {/* Featured Products */}
         <div className="mb-10 sm:mb-12">
@@ -749,8 +910,8 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 sm:pb-3 px-1 justify-center sm:justify-start">
+          {/* Category Filter - Horizontal scrolling with hidden scrollbar */}
+          <div className="flex gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 sm:pb-3 px-1 justify-center sm:justify-start scrollbar-hide">
             {categories.map((category) => (
               <button
                 key={category}
@@ -833,7 +994,7 @@ export default function Home() {
                       <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
                         {product.colorOptions && (
                           <div className="flex items-center gap-0.5">
-                            <FaPalette className="text-xs text-gray-500" />
+                            <FaPaletteIcon className="text-xs text-gray-500" />
                             <span className="text-xs text-gray-600">Color</span>
                           </div>
                         )}
