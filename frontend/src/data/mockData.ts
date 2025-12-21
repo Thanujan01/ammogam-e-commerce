@@ -9,13 +9,13 @@ export const stats = {
 
 export const monthlyRevenue = {
   labels: [
-    'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ],
   data: [1200, 1500, 1800, 2100, 2500, 3000, 2800, 3200, 3600, 4200, 4600, 5200],
 };
 
 export const salesByCategory = {
-  labels: ['CCTV Cameras','Dome Cameras','Wireless','Accessories'],
+  labels: ['CCTV Cameras', 'Dome Cameras', 'Wireless', 'Accessories'],
   data: [4200, 3200, 2500, 1400],
 };
 
@@ -104,7 +104,7 @@ export const users: User[] = [
     phone: '+1 234-567-8905',
     role: 'customer',
   }
-    
+
 ];
 
 export const userStats = {
@@ -123,6 +123,7 @@ export interface Product {
   category: string;
   image: string;
   sales: number;
+  subCategory?: string;
 }
 
 export interface Category {
@@ -131,37 +132,38 @@ export interface Category {
   description: string;
   productCount: number;
   image?: string;
+  subCategories?: { name: string }[];
   createdAt: string;
 }
 
 // Example categories
 export const categories: Category[] = [
-  { 
-    id: '1', 
+  {
+    id: '1',
     name: 'CCTV Cameras',
     description: 'Professional surveillance cameras for commercial and residential security',
     productCount: 4,
     image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&h=300&fit=crop',
     createdAt: '2024-01-15'
   },
-  { 
-    id: '2', 
+  {
+    id: '2',
     name: 'Dome Cameras',
     description: 'Vandal-resistant dome cameras for indoor and outdoor monitoring',
     productCount: 3,
     image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=400&h=300&fit=crop',
     createdAt: '2024-01-20'
   },
-  { 
-    id: '3', 
+  {
+    id: '3',
     name: 'Wireless Cameras',
     description: 'Easy-to-install wireless security cameras with WiFi connectivity',
     productCount: 3,
     image: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=400&h=300&fit=crop',
     createdAt: '2024-02-05'
   },
-  { 
-    id: '4', 
+  {
+    id: '4',
     name: 'Accessories',
     description: 'Essential accessories including cables, mounts, and power adapters',
     productCount: 2,
@@ -179,7 +181,7 @@ export const products: Product[] = [
     price: 299.99,
     stock: 50,
     category: 'Dome Cameras',
-    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=500&h=400&fit=crop', 
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=500&h=400&fit=crop',
     sales: 120,
   },
   {
@@ -301,7 +303,7 @@ export interface Order {
   orderDate: string;
   amount: number;
   // status: 'pending' | 'processing' | 'completed' | 'delivered' | 'cancelled';
-  status: 'completed' | 'delivered' ;
+  status: 'completed' | 'delivered';
   items: {
     id: string;
     productName: string;
@@ -442,7 +444,7 @@ export const notifications: Notification[] = [
     read: false,
     priority: 'high'
   },
-  
+
   {
     id: '4',
     type: 'order',
@@ -479,7 +481,7 @@ export const notifications: Notification[] = [
     read: true,
     priority: 'medium'
   },
-  
+
 ];
 
 export const notificationStats = {

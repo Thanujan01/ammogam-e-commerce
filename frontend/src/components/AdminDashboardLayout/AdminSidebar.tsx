@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import {LayoutDashboard,Package,FolderTree,ShoppingCart,Users,BarChart3,User,X,LogOut,Bell,} from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, BarChart3, User, X, LogOut, Bell, Settings as SettingsIcon, Store } from "lucide-react";
 import { cn } from "../../libs/utils";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext } from "react";
@@ -14,10 +14,12 @@ const navigation = [
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Categories", href: "/admin/categories", icon: FolderTree },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
-  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Customers", href: "/admin/users", icon: Users },
+  { name: "Sellers", href: "/admin/sellers", icon: Store },
   { name: "Notifications", href: "/admin/notifications", icon: Bell },
   { name: "Reports", href: "/admin/reports", icon: BarChart3 },
   { name: "Profile", href: "/admin/profile", icon: User },
+  { name: "Settings", href: "/admin/settings", icon: SettingsIcon },
 ];
 
 export function AdminSidebar({ isOpen, onClose }: SidebarProps) {

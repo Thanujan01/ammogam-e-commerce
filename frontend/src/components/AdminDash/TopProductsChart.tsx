@@ -12,7 +12,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 interface Product {
   name: string;
-  sold: number;
+  sold?: number;
+  unitsSold?: number;
   revenue: number;
 }
 
@@ -26,7 +27,7 @@ export default function TopProductsChart({ products }: Props) {
     datasets: [
       {
         label: 'Units Sold',
-        data: products.map(p => p.sold),
+        data: products.map(p => (p.unitsSold || p.sold || 0)),
         backgroundColor: 'rgba(59, 130, 246, 0.8)',
         borderColor: 'rgba(59, 130, 246, 1)',
         borderWidth: 1,
@@ -35,7 +36,7 @@ export default function TopProductsChart({ products }: Props) {
       },
       {
         label: 'Revenue ($)',
-        data: products.map(p => p.revenue),
+        data: products.map(p => (p.revenue || 0)),
         backgroundColor: 'rgba(16, 185, 129, 0.8)',
         borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 1,
@@ -66,7 +67,7 @@ export default function TopProductsChart({ products }: Props) {
       },
       tooltip: {
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -100,7 +101,7 @@ export default function TopProductsChart({ products }: Props) {
           color: 'rgba(0,0,0,0.05)',
         },
         ticks: {
-          callback: function(value: any) {
+          callback: function (value: any) {
             return value + ' units';
           },
         },
@@ -113,7 +114,7 @@ export default function TopProductsChart({ products }: Props) {
           drawOnChartArea: false,
         },
         ticks: {
-          callback: function(value: any) {
+          callback: function (value: any) {
             return '$' + (value / 1000).toFixed(0) + 'K';
           },
         },
@@ -121,8 +122,8 @@ export default function TopProductsChart({ products }: Props) {
     },
   };
 
-  const totalSold = products.reduce((sum, p) => sum + p.sold, 0);
-  const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0);
+  const totalSold = products.reduce((sum, p) => sum + (p.unitsSold || p.sold || 0), 0);
+  const totalRevenue = products.reduce((sum, p) => sum + (p.revenue || 0), 0);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
