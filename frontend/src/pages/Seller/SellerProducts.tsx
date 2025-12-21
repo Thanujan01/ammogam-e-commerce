@@ -158,9 +158,9 @@ export default function SellerProducts() {
 
             <ProductStats
                 totalProducts={productList.length}
-                lowStockCount={productList.filter(p => p.stock < 10).length}
+                lowStockCount={productList.filter(p => (Number(p.stock) || 0) < 10).length}
                 categoriesCount={new Set(productList.map(p => p.category)).size}
-                totalValue={productList.reduce((sum, p) => sum + (p.price * p.stock), 0)}
+                totalValue={productList.reduce((sum, p) => sum + ((Number(p.price) || 0) * (Number(p.stock) || 0)), 0)}
             />
 
             <ProductFilters

@@ -1,6 +1,8 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const emailService = require("../services/emailService");
+const User = require("../models/User");
 
 exports.createCheckoutSession = async (req, res) => {
   try {
@@ -103,13 +105,22 @@ exports.verifyPayment = async (req, res) => {
         const session = await stripe.checkout.sessions.retrieve(session_id);
 
         if (session.payment_status === 'paid') {
-            const order = await Order.findById(orderId);
-            if (order) {
-                order.paymentStatus = 'paid';
-                order.status = 'processed';
-                await order.save();
-                return res.json({ success: true, message: "Payment verified" });
-            }
+                // Fetch full order to update status and send email
+                const order = await Order.findById(orderId)
+                  .populate('user', 'name email')
+                  .populate('items.product');
+
+                if (order) {
+                    order.paymentStatus = 'paid';
+                    order.status = 'processed';
+                    await order.save();
+                    
+                    // Send Confirmation Email
+                    if (order.user && order.user.email) {
+                        await emailService.sendOrderConfirmation(order, order.user);
+                    }
+                    return res.json({ success: true, message: "Payment verified" });
+                }
         }
         res.status(400).json({ success: false, message: "Payment not verified" });
     } catch (error) {
