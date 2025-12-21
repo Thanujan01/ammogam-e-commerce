@@ -1,21 +1,27 @@
-import { useEffect, useState } from 'react';
-import { 
+import { useEffect, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../api/api';
+import { getImageUrl } from '../utils/imageUrl';
+import {
   FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight,
-  FaMobileAlt, FaTshirt, FaHome, FaCamera, FaDog, FaBaby,
+  FaMobileAlt, FaCamera, FaDog, FaBaby,
   FaGem, FaGlobeAsia, FaUmbrellaBeach, FaShoePrints, FaTools,
-  FaLaptop, FaTshirt as FaTShirt, FaUtensils, FaPalette, FaPrint,
-  FaTruck, FaCreditCard, FaUndo, FaTag, FaHeadphones, FaGamepad,
-  FaBolt, FaPalette as FaPaletteIcon, FaRuler, FaGift, FaCheckCircle,
-  FaFire, FaCrown, FaBatteryFull, FaCartPlus, FaTimes as FaClose,
+  FaLaptop, FaUtensils, FaPalette, FaPrint,
+  FaTag,
+  FaRuler, FaCheckCircle,
+  FaFire, FaCrown, FaCartPlus, FaTimes as FaClose,
   FaChevronRight as FaChevronRightIcon, FaCheck, FaTruck as FaShipping,
-  FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope, FaWallet
+  FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope, FaWallet,
+  FaTshirt as FaTShirt, FaPalette as FaPaletteIcon
 } from 'react-icons/fa';
+import { CartContext } from '../contexts/CartContext';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const cart = useContext(CartContext)!;
   const [showCartNotification, setShowCartNotification] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -27,18 +33,18 @@ export default function Home() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const addToCart = (product: any) => {
-    setCartItems(prev => [...prev, product]);
+    cart.addToCart(product);
     setRecentlyAdded(product);
     setShowCartNotification(true);
-    
+
     setTimeout(() => {
       setShowCartNotification(false);
     }, 3000);
@@ -55,298 +61,69 @@ export default function Home() {
     document.body.style.overflow = 'auto';
   };
 
+
+
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 101,
-          name: 'Air Pro 5 TWS Bluetooth Earphone',
-          currentPrice: 'LKR861.88',
-          originalPrice: 'LKR2,311.08',
-          rating: 4.9,
-          sold: 10000,
-          badge: 'New',
-          badgeIcon: <FaGem className="text-white text-xs" />,
-          tags: ['Choice', 'Sale'],
-          category: 'Mobile accessories',
-          subCategory: 'Audio',
-          image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
-          discountPercent: 75,
-          colorOptions: true,
-          sizeOptions: true,
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/products');
+        const dbProducts = res.data;
+
+        // Map backend data to frontend structure
+        const mappedProducts = dbProducts.map((p: any) => ({
+          id: p._id,
+          name: p.name,
+          currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
+          originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
+          rating: p.rating || 0,
+          sold: p.sold || 0,
+          badge: p.badge,
+          badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
+          tags: p.discount > 0 ? ['Choice', 'Sale'] : ['Choice'],
+          category: p.category ? p.category.name : 'Uncategorized',
+          subCategory: p.subCategory,
+          image: getImageUrl(p.image),
+          discountPercent: p.discount,
+          colorOptions: true, // Mock for now or add to model
+          sizeOptions: true, // Mock for now or add to model
           promotions: [
-            { text: 'Save LKR1,449.20', icon: <FaTag className="text-green-500" /> },
-            { text: 'Bundle deals available', icon: <FaGift className="text-amber-600" /> }
+            { text: p.discount > 0 ? `Save ${p.discount}%` : 'Free Shipping', icon: <FaTag className="text-green-500" /> },
+            // Add more dynamic promotions if needed
           ],
-          brand: 'X5Mini',
-          description: 'High-quality TWS Bluetooth earphones with noise cancellation and long battery life.',
-          features: [
-            'Wireless Bluetooth 5.0',
-            '24-hour battery life',
-            'IPX5 Waterproof',
-            'Noise cancellation',
-            'Touch controls'
+          brand: p.brand,
+          description: p.description,
+          features: [ // Mock or add to model
+            'High quality material',
+            'Durable and long lasting',
+            'Warranty included'
           ],
-          deliveryInfo: 'Free shipping on orders over LKR5,000',
+          deliveryInfo: 'Free shipping on orders over $ 100',
           warranty: '1-year warranty',
           returnPolicy: '30-day return policy',
           certified: true,
-          certificationBadge: 'Certified Original',
-          similarItems: [
-            {
-              id: 201,
-              name: 'Bluetooth Earphone Pro',
-              price: 'LKR699.99',
-              image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400',
-              rating: 4.7,
-              sold: 5000
-            },
-            {
-              id: 202,
-              name: 'Wireless Earbuds Sport',
-              price: 'LKR1,299.99',
-              image: 'https://images.unsplash.com/photo-1585079542156-4ce2d6380d6e?w=400',
-              rating: 4.5,
-              sold: 3000
-            },
-            {
-              id: 203,
-              name: 'Noise Cancelling Headphones',
-              price: 'LKR1,899.99',
-              image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
-              rating: 4.8,
-              sold: 8000
-            }
-          ]
-        },
-        {
-          id: 102,
-          name: '0-4Y Elegant Baby Clothes Set',
-          currentPrice: 'LKR519.21',
-          originalPrice: 'LKR1,976.44',
-          rating: 5.0,
-          sold: 261,
-          badge: 'Sale',
-          badgeIcon: <FaFire className="text-white text-xs" />,
-          tags: ['Choice'],
-          category: 'Baby fashion & toys',
-          subCategory: 'Baby Clothes',
-          image: 'https://images.unsplash.com/photo-1491926626787-62db157af940?w=400',
-          discountPercent: 74,
-          colorOptions: true,
-          sizeOptions: true,
-          promotions: [
-            { text: 'LKR692.27 off on LKR5,199', icon: <FaTag className="text-amber-600" /> },
-            { text: 'New shoppers save LKR1,457', icon: <FaGift className="text-green-500" /> }
-          ],
-          brand: 'Elegant Baby',
-          description: 'Premium quality baby clothes set for ages 0-4 years, made with soft organic cotton.',
-          features: [
-            '100% Organic Cotton',
-            'Hypoallergenic',
-            'Easy to wash',
-            'Soft and comfortable',
-            'Multiple colors available'
-          ],
-          deliveryInfo: 'Free shipping available',
-          warranty: 'No warranty',
-          returnPolicy: '15-day return policy',
-          certified: false,
-          similarItems: [
-            {
-              id: 204,
-              name: 'Baby Romper Set',
-              price: 'LKR459.99',
-              image: 'https://images.unsplash.com/photo-1591369822096-ffd140ec948d?w=400',
-              rating: 4.8,
-              sold: 1200
-            },
-            {
-              id: 205,
-              name: 'Kids Winter Set',
-              price: 'LKR799.99',
-              image: 'https://images.unsplash.com/photo-1519241047957-be31d7379a5d?w=400',
-              rating: 4.6,
-              sold: 800
-            }
-          ]
-        },
-        {
-          id: 103,
-          name: 'Multifunctional Smart Watch',
-          currentPrice: 'LKR342.67',
-          originalPrice: 'LKR2,835.35',
-          rating: 4.1,
-          sold: 2000,
-          badge: 'Trending',
-          badgeIcon: <FaFire className="text-white text-xs" />,
-          tags: ['Choice', 'Sale'],
-          category: 'Watches',
-          subCategory: 'Wearables',
-          image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
-          discountPercent: 88,
-          colorOptions: true,
-          sizeOptions: true,
-          promotions: [
-            { text: 'LKR692.27 off on LKR5,199', icon: <FaTag className="text-amber-600" /> },
-            { text: 'New shoppers save LKR2,450', icon: <FaGift className="text-green-500" /> }
-          ],
-          brand: 'SMB',
-          description: 'Smart watch with multiple functions including heart rate monitoring, GPS, and sleep tracking.',
-          features: [
-            'Heart rate monitor',
-            'GPS tracking',
-            'Sleep analysis',
-            'Water resistant',
-            '7-day battery life'
-          ],
-          deliveryInfo: 'Free shipping on orders over LKR3,000',
-          warranty: '2-year warranty',
-          returnPolicy: '30-day return policy',
-          certified: true,
-          certificationBadge: 'Quality Certified',
-          similarItems: [
-            {
-              id: 206,
-              name: 'Fitness Tracker Pro',
-              price: 'LKR1,299.99',
-              image: 'https://images.unsplash.com/photo-1579586337278-3fec9a8b3c4c?w=400',
-              rating: 4.3,
-              sold: 5000
-            },
-            {
-              id: 207,
-              name: 'Luxury Smart Watch',
-              price: 'LKR4,999.99',
-              image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400',
-              rating: 4.7,
-              sold: 1200
-            }
-          ]
-        },
-        {
-          id: 104,
-          name: '2025 E88 Pro Watch Edition',
-          currentPrice: 'LKR6,242.32',
-          originalPrice: 'LKR9,000.33',
-          rating: 4.3,
-          sold: 5000,
-          badge: 'Premium',
-          badgeIcon: <FaCrown className="text-white text-xs" />,
-          tags: ['Choice', 'Sale'],
-          category: 'Watches',
-          subCategory: 'Wearables',
-          image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400',
-          discountPercent: 31,
-          colorOptions: true,
-          sizeOptions: true,
-          promotions: [
-            { text: 'LKR692.27 off on LKR5,199', icon: <FaTag className="text-amber-600" /> },
-            { text: 'New shoppers save LKR9,320', icon: <FaGift className="text-green-500" /> }
-          ],
-          brand: 'SMB',
-          description: 'Premium smart watch with advanced features and luxury design.',
-          features: [
-            'Luxury design',
-            'Advanced health tracking',
-            'Wireless charging',
-            'Premium materials',
-            'Customizable watch faces'
-          ],
-          deliveryInfo: 'Express shipping available',
-          warranty: '3-year warranty',
-          returnPolicy: '60-day return policy',
-          certified: true,
-          certificationBadge: 'Premium Certified',
-          similarItems: []
-        },
-        {
-          id: 105,
-          name: 'Smartwatch Men Sports Edition',
-          currentPrice: 'LKR1,000.33',
-          originalPrice: 'LKR3,000.33',
-          rating: 3.6,
-          sold: 50000,
-          badge: 'Bestseller',
-          badgeIcon: <FaCrown className="text-white text-xs" />,
-          tags: ['Choice', 'Sale'],
-          category: 'Watches',
-          subCategory: 'Wearables',
-          image: 'https://images.unsplash.com/photo-1579586337278-3fec9a8b3c4c?w=400',
-          discountPercent: 67,
-          colorOptions: true,
-          sizeOptions: true,
-          promotions: [
-            { text: 'Save LKR3,255.02', icon: <FaTag className="text-amber-600" /> }
-          ],
-          brand: 'SMB',
-          description: 'Sports edition smartwatch designed for active lifestyles.',
-          features: [
-            'Sports tracking',
-            'Water resistant (50m)',
-            'Long battery life',
-            'Multiple sports modes',
-            'Durable design'
-          ],
-          deliveryInfo: 'Free standard shipping',
-          warranty: '1-year warranty',
-          returnPolicy: '30-day return policy',
-          certified: true,
-          certificationBadge: 'Sports Certified',
-          similarItems: []
-        },
-        {
-          id: 106,
-          name: 'Bluetooth Game Earpods Pro',
-          currentPrice: 'LKR342.67',
-          originalPrice: 'LKR2,100.98',
-          rating: 4.6,
-          sold: 800,
-          badge: 'High Power',
-          badgeIcon: <FaBatteryFull className="text-white text-xs" />,
-          tags: ['Choice', 'Sale'],
-          category: 'Mobile accessories',
-          subCategory: 'Gaming',
-          image: 'https://images.unsplash.com/photo-1585079542156-4ce2d6380d6e?w=400',
-          discountPercent: 84,
-          colorOptions: true,
-          sizeOptions: false,
-          promotions: [
-            { text: 'LKR692.27 off on LKR5,199', icon: <FaTag className="text-amber-600" /> },
-            { text: 'New shoppers save LKR1,750', icon: <FaGift className="text-green-500" /> }
-          ],
-          brand: 'SMB',
-          description: 'Professional gaming earpods with superior sound quality.',
-          features: [
-            'Surround sound',
-            'Noise cancellation',
-            'Low latency',
-            'Comfortable fit',
-            'Built-in mic'
-          ],
-          deliveryInfo: 'Free shipping on orders over LKR2,000',
-          warranty: '1-year warranty',
-          returnPolicy: '30-day return policy',
-          certified: true,
-          certificationBadge: 'Gaming Certified',
-          similarItems: []
-        }
-      ];
-      setProducts(mockProducts);
-      setLoading(false);
-    }, 1000);
+          similarItems: [] // Need to populate if possible, or leave empty
+        }));
+
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
-  const filteredProducts = activeCategory === 'All' 
-    ? products 
+  const filteredProducts = activeCategory === 'All'
+    ? products
     : products.filter(product => product.category === activeCategory);
 
   // Categories from your WhatsApp image with item counts from your design
   const categories = [
     'All',
     'Mobile accessories',
-    'Security cameras', 
+    'Security cameras',
     'Men fashion',
     'Women fashion',
     'Wallets',
@@ -368,134 +145,134 @@ export default function Home() {
 
   // Shop by Categories data matching your image design
   const shopCategories = [
-    { 
-      name: 'Mobile accessories', 
+    {
+      name: 'Mobile accessories',
       items: '245 Items',
       icon: <FaMobileAlt />,
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-gradient-to-br from-blue-50 to-cyan-50'
     },
-    { 
-      name: 'Security cameras', 
+    {
+      name: 'Security cameras',
       items: '98 Items',
       icon: <FaCamera />,
       color: 'from-purple-500 to-violet-500',
       bgColor: 'bg-gradient-to-br from-purple-50 to-violet-50'
     },
-    { 
-      name: 'Men fashion', 
+    {
+      name: 'Men fashion',
       items: '567 Items',
       icon: <FaTShirt />,
       color: 'from-green-500 to-emerald-500',
       bgColor: 'bg-gradient-to-br from-green-50 to-emerald-50'
     },
-    { 
-      name: 'Women fashion', 
+    {
+      name: 'Women fashion',
       items: '789 Items',
       icon: <FaTShirt />,
       color: 'from-pink-500 to-rose-500',
       bgColor: 'bg-gradient-to-br from-pink-50 to-rose-50'
     },
-    { 
-      name: 'Wallets', 
+    {
+      name: 'Wallets',
       items: '123 Items',
       icon: <FaWallet />,
       color: 'from-amber-500 to-yellow-500',
       bgColor: 'bg-gradient-to-br from-amber-50 to-yellow-50'
     },
-    { 
-      name: 'Fashion jewelry', 
+    {
+      name: 'Fashion jewelry',
       items: '345 Items',
       icon: <FaGem />,
       color: 'from-indigo-500 to-purple-500',
       bgColor: 'bg-gradient-to-br from-indigo-50 to-purple-50'
     },
-    { 
-      name: 'Pet friendly products', 
+    {
+      name: 'Pet friendly products',
       items: '156 Items',
       icon: <FaDog />,
       color: 'from-orange-500 to-red-500',
       bgColor: 'bg-gradient-to-br from-orange-50 to-red-50'
     },
-    { 
-      name: 'Baby fashion & toys', 
+    {
+      name: 'Baby fashion & toys',
       items: '234 Items',
       icon: <FaBaby />,
       color: 'from-teal-500 to-cyan-500',
       bgColor: 'bg-gradient-to-br from-teal-50 to-cyan-50'
     },
-    { 
-      name: 'Watches', 
+    {
+      name: 'Watches',
       items: '189 Items',
       icon: <FaGem />,
       color: 'from-gray-700 to-gray-900',
       bgColor: 'bg-gradient-to-br from-gray-100 to-gray-200'
     },
-    { 
-      name: 'Srilankan products', 
+    {
+      name: 'Srilankan products',
       items: '67 Items',
       icon: <FaGlobeAsia />,
       color: 'from-red-500 to-orange-500',
       bgColor: 'bg-gradient-to-br from-red-50 to-orange-50'
     },
-    { 
-      name: 'Indian products', 
+    {
+      name: 'Indian products',
       items: '89 Items',
       icon: <FaGlobeAsia />,
       color: 'from-orange-500 to-amber-500',
       bgColor: 'bg-gradient-to-br from-orange-50 to-amber-50'
     },
-    { 
-      name: 'Climate dress', 
+    {
+      name: 'Climate dress',
       items: '112 Items',
       icon: <FaUmbrellaBeach />,
       color: 'from-cyan-500 to-blue-500',
       bgColor: 'bg-gradient-to-br from-cyan-50 to-blue-50'
     },
-    { 
-      name: 'Shoes', 
+    {
+      name: 'Shoes',
       items: '432 Items',
       icon: <FaShoePrints />,
       color: 'from-blue-600 to-indigo-600',
       bgColor: 'bg-gradient-to-br from-blue-50 to-indigo-50'
     },
-    { 
-      name: 'Electrical tool & hard ware', 
+    {
+      name: 'Electrical tool & hard ware',
       items: '76 Items',
       icon: <FaTools />,
       color: 'from-gray-600 to-gray-800',
       bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100'
     },
-    { 
-      name: 'Electronics products', 
+    {
+      name: 'Electronics products',
       items: '321 Items',
       icon: <FaLaptop />,
       color: 'from-purple-600 to-pink-600',
       bgColor: 'bg-gradient-to-br from-purple-50 to-pink-50'
     },
-    { 
-      name: 'T. Shirts', 
+    {
+      name: 'T. Shirts',
       items: '654 Items',
       icon: <FaTShirt />,
       color: 'from-green-600 to-teal-600',
       bgColor: 'bg-gradient-to-br from-green-50 to-teal-50'
     },
-    { 
-      name: 'Home kitchen products', 
+    {
+      name: 'Home kitchen products',
       items: '198 Items',
       icon: <FaUtensils />,
       color: 'from-amber-600 to-orange-600',
       bgColor: 'bg-gradient-to-br from-amber-50 to-orange-50'
     },
-    { 
-      name: 'Photo editing', 
+    {
+      name: 'Photo editing',
       items: '45 Items',
       icon: <FaPalette />,
       color: 'from-violet-600 to-purple-600',
       bgColor: 'bg-gradient-to-br from-violet-50 to-purple-50'
     },
-    { 
-      name: 'Print out services', 
+    {
+      name: 'Print out services',
       items: '32 Items',
       icon: <FaPrint />,
       color: 'from-blue-700 to-cyan-700',
@@ -522,7 +299,7 @@ export default function Home() {
           scroll-behavior: smooth;
         }
       `}</style>
-      
+
       {/* Cart Notification */}
       {showCartNotification && recentlyAdded && (
         <div className={`fixed ${isMobile ? 'top-20 left-4 right-4' : 'top-4 right-4'} z-50 animate-fade-in`}>
@@ -562,8 +339,8 @@ export default function Home() {
                   {/* Left Column - Product Image */}
                   <div className="lg:w-1/2">
                     <div className="relative bg-gray-100 rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4">
-                      <img 
-                        src={selectedProduct.image} 
+                      <img
+                        src={selectedProduct.image}
                         alt={selectedProduct.name}
                         className="w-full h-48 sm:h-72 md:h-96 object-cover"
                       />
@@ -588,10 +365,10 @@ export default function Home() {
                         See preview
                       </button>
                     </div>
-                    
+
                     {/* Action Buttons */}
                     <div className="flex gap-2 sm:gap-3">
-                      <button 
+                      <button
                         onClick={() => {
                           addToCart(selectedProduct);
                           closeProductModal();
@@ -656,13 +433,12 @@ export default function Home() {
                       <div className="flex items-center gap-1 sm:gap-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
-                            <FaStar 
+                            <FaStar
                               key={i}
-                              className={`text-sm sm:text-lg ${
-                                i < Math.floor(selectedProduct.rating) 
-                                  ? 'text-yellow-400' 
-                                  : 'text-gray-300'
-                              }`}
+                              className={`text-sm sm:text-lg ${i < Math.floor(selectedProduct.rating)
+                                ? 'text-yellow-400'
+                                : 'text-gray-300'
+                                }`}
                             />
                           ))}
                         </div>
@@ -738,8 +514,8 @@ export default function Home() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
                       {selectedProduct.similarItems.map((item: any) => (
                         <div key={item.id} className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-3 hover:shadow-md transition-shadow">
-                          <img 
-                            src={item.image} 
+                          <img
+                            src={item.image}
                             alt={item.name}
                             className="w-full h-20 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3"
                           />
@@ -781,13 +557,13 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-                  <button 
+                  <button
                     onClick={closeProductModal}
                     className="flex-1 sm:flex-none px-4 sm:px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
                   >
                     Close
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       addToCart(selectedProduct);
                       closeProductModal();
@@ -806,12 +582,12 @@ export default function Home() {
       {/* Floating Cart Icon */}
       <div className={`fixed ${isMobile ? 'bottom-6 right-6' : 'bottom-8 right-8'} z-40`}>
         <div className="relative">
-          <div className="bg-amber-600 text-white p-3 sm:p-4 rounded-full shadow-2xl cursor-pointer hover:bg-amber-700 transition-colors">
+          <div className="bg-amber-600 text-white p-3 sm:p-4 rounded-full shadow-2xl cursor-pointer hover:bg-amber-700 transition-colors" onClick={() => navigate('/cart')}>
             <FaShoppingCart className="text-xl sm:text-2xl" />
           </div>
-          {cartItems.length > 0 && (
+          {cart.items.length > 0 && (
             <span className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
-              {cartItems.length}
+              {cart.items.reduce((s, i) => s + i.quantity, 0)}
             </span>
           )}
         </div>
@@ -819,7 +595,7 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-         {/* Shop by Categories - UPDATED FOR HORIZONTAL SCROLLING */}
+        {/* Shop by Categories - UPDATED FOR HORIZONTAL SCROLLING */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shop by Categories</h2>
@@ -827,7 +603,7 @@ export default function Home() {
               View all <FaChevronRight className="ml-1" />
             </button>
           </div>
-          
+
           {/* Horizontal scrolling container with hidden scrollbar */}
           <div className="relative">
             <div className="flex space-x-4 overflow-x-auto pb-4 px-1 scrollbar-hide scroll-smooth">
@@ -837,30 +613,30 @@ export default function Home() {
                   onClick={() => setActiveCategory(category.name)}
                   className={`relative group flex-shrink-0 ${category.bgColor} rounded-2xl p-4 border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300 overflow-hidden w-40`}
                 >
-                  
+
                   {/* Icon */}
                   <div className={`relative z-10 w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
                     <div className="text-xl text-white">
                       {category.icon}
                     </div>
                   </div>
-                  
+
                   {/* Category Name */}
                   <h3 className="text-sm font-semibold text-gray-900 text-center line-clamp-2 mb-1 group-hover:text-amber-800 transition-colors">
                     {category.name}
                   </h3>
-                  
+
                   {/* Items Count */}
                   <div className="text-xs text-gray-600 text-center font-medium">
                     {category.items}
                   </div>
-                  
+
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:to-amber-500/10 transition-all duration-300 rounded-xl"></div>
                 </button>
               ))}
             </div>
-            
+
             {/* Gradient fade effect on the right for better UX */}
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none"></div>
             {/*<div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none"></div>*/}
@@ -890,7 +666,7 @@ export default function Home() {
             </div>
             <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block">
               <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
-              <img 
+              <img
                 src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
                 alt="Summer Sale"
                 className="w-full h-full object-cover opacity-70"
@@ -899,7 +675,7 @@ export default function Home() {
           </div>
         </div>
 
-       
+
 
         {/* Featured Products */}
         <div className="mb-10 sm:mb-12">
@@ -916,11 +692,10 @@ export default function Home() {
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full whitespace-nowrap transition-all duration-300 text-xs sm:text-sm ${
-                  activeCategory === category
-                    ? 'bg-[#8B4513] text-white shadow-lg'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
-                }`}
+                className={`px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full whitespace-nowrap transition-all duration-300 text-xs sm:text-sm ${activeCategory === category
+                  ? 'bg-[#8B4513] text-white shadow-lg'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
+                  }`}
               >
                 {category}
               </button>
@@ -936,12 +711,12 @@ export default function Home() {
               {/* Products Grid */}
               <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
                 {filteredProducts.map((product) => (
-                  <div 
-                    key={product.id} 
+                  <div
+                    key={product.id}
                     className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
                   >
                     {/* Quick Add Icon */}
-                    <button 
+                    <button
                       onClick={() => addToCart(product)}
                       className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 bg-white/90 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110"
                       title="Add to cart"
@@ -950,16 +725,16 @@ export default function Home() {
                     </button>
 
                     {/* Product Image */}
-                    <div 
+                    <div
                       className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
                       onClick={() => openProductModal(product)}
                     >
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      
+
                       {/* Brand Badge */}
                       {product.badge && (
                         <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2">
@@ -983,7 +758,7 @@ export default function Home() {
                     {/* Product Info */}
                     <div className="p-2 sm:p-3">
                       {/* Product Name */}
-                      <h3 
+                      <h3
                         className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
                         onClick={() => openProductModal(product)}
                       >
@@ -1024,7 +799,7 @@ export default function Home() {
                       <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
-                            <FaStar 
+                            <FaStar
                               key={i}
                               className={`text-xs ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
                             />
@@ -1053,13 +828,13 @@ export default function Home() {
 
                       {/* Bundle Deals Button */}
                       <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                        <button 
+                        <button
                           className="text-amber-700 hover:text-amber-800 font-medium text-xs flex items-center gap-0.5"
                           onClick={() => openProductModal(product)}
                         >
                           Bundle deals <FaChevronRightIcon className="text-xs" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => addToCart(product)}
                           className="bg-amber-600 hover:bg-amber-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors"
                         >
@@ -1076,7 +851,7 @@ export default function Home() {
               <div className="mb-8 sm:mb-12 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl sm:rounded-2xl p-4 sm:p-8 md:p-12 text-white overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-white/10 rounded-full -translate-y-16 sm:-translate-y-32 translate-x-16 sm:translate-x-32"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-48 sm:h-48 bg-white/10 rounded-full -translate-x-12 sm:-translate-x-24 translate-y-12 sm:translate-y-24"></div>
-                
+
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between">
                   <div className="mb-6 md:mb-0 md:max-w-lg text-center md:text-left">
                     <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Flash Sale Ends Soon!</h2>
@@ -1102,7 +877,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="w-48 sm:w-64 md:w-80 mt-6 md:mt-0">
-                    <img 
+                    <img
                       src="https://images.unsplash.com/photo-1606788075767-20b25ec7eac5?w=400"
                       alt="Flash Sale"
                       className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl"
@@ -1122,13 +897,13 @@ export default function Home() {
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
                   {products.slice(0, 6).map((product) => (
                     <div key={product.id} className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-shadow hover:border-amber-200">
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={product.name}
                         className="w-full h-24 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3 cursor-pointer"
                         onClick={() => openProductModal(product)}
                       />
-                      <div 
+                      <div
                         className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 cursor-pointer hover:text-amber-700"
                         onClick={() => openProductModal(product)}
                       >

@@ -1,5 +1,5 @@
 import { FiSearch, FiFilter, FiPackage } from 'react-icons/fi';
-import { type Category } from '../../data/mockData';
+import type { ICategory } from '../../types';
 
 interface ProductFiltersProps {
   searchQuery: string;
@@ -8,7 +8,7 @@ interface ProductFiltersProps {
   setCategoryFilter: (value: string) => void;
   stockFilter: string;
   setStockFilter: (value: string) => void;
-  categories: Category[];
+  categories: ICategory[];
   filteredCount: number;
   totalCount: number;
   onReset: () => void;
@@ -35,7 +35,7 @@ export default function ProductFilters({
             Showing {filteredCount} of {totalCount} products
           </span>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search */}
           <div className="relative">

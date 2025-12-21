@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { FaShippingFast, FaFire } from 'react-icons/fa';
+import { FaFire } from 'react-icons/fa';
 import type { IProduct } from '../types';
 
 export default function ProductCard({ product }: { product: IProduct }) {
   const image = product.images?.[0] || '/placeholder.png';
-  
-  const discountedPrice = product.discount 
+
+  const discountedPrice = product.discount
     ? Math.round(product.price * (100 - product.discount) / 100)
     : product.price;
 
@@ -13,12 +13,12 @@ export default function ProductCard({ product }: { product: IProduct }) {
     <div className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white">
       {/* Product Image */}
       <div className="relative h-48 overflow-hidden">
-        <img 
-          src={image} 
-          alt={product.name} 
+        <img
+          src={image}
+          alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
         />
-        
+
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.discount && (
@@ -26,14 +26,9 @@ export default function ProductCard({ product }: { product: IProduct }) {
               -{product.discount}% OFF
             </div>
           )}
-          {product.shipping && product.shippingCost === 0 && (
-            <div className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-              <FaShippingFast className="text-xs" />
-              Free Shipping
-            </div>
-          )}
+
         </div>
-        
+
         {product.sold && product.sold > 100 && (
           <div className="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
             <FaFire className="text-xs" />
@@ -41,13 +36,13 @@ export default function ProductCard({ product }: { product: IProduct }) {
           </div>
         )}
       </div>
-      
+
       {/* Product Info */}
       <div className="p-4">
         <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 h-12">
           {product.name}
         </h3>
-        
+
         {/* Rating */}
         {product.rating && (
           <div className="flex items-center gap-1 mb-2">
@@ -58,7 +53,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
             <span className="text-sm text-gray-600">({product.rating})</span>
           </div>
         )}
-        
+
         {/* Price */}
         <div className="mb-3">
           <div className="flex items-center gap-2">
@@ -72,7 +67,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
             )}
           </div>
         </div>
-        
+
         {/* Stock & Sold */}
         <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
           <div>
@@ -88,16 +83,16 @@ export default function ProductCard({ product }: { product: IProduct }) {
             )}
           </div>
         </div>
-        
+
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link 
+          <Link
             to={`/products/${product._id}`}
             className="flex-1 text-center py-2 border border-amber-600 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors font-medium text-sm"
           >
             View Details
           </Link>
-          <button 
+          <button
             className="px-4 py-2 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg hover:opacity-90 transition-opacity font-medium text-sm"
           >
             Add to Cart

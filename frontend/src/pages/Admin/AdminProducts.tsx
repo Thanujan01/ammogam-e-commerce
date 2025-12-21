@@ -1,22 +1,72 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import { Package } from 'lucide-react';
-import { products as mockProducts, categories, type Product } from '../../data/mockData';
+import { api } from '../../api/api';
+import type { IProduct, ICategory } from '../../types';
 import ProductStats from '../../components/AdminProducts/ProductStats';
 import ProductFilters from '../../components/AdminProducts/ProductFilters';
 import ProductCard from '../../components/AdminProducts/ProductCard';
 import ProductDialog from '../../components/AdminProducts/ProductDialog';
 
 export default function AdminProducts() {
-  const [productList, setProductList] = useState<Product[]>(mockProducts);
+  const [productList, setProductList] = useState<IProduct[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '', price: '', stock: '', category: '', image: '' });
+  const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    category: '',
+    subCategory: '',
+    mainSubcategory: '',
+    image: '',
+    brand: '',
+    discount: '',
+    badge: ''
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<string>('all');
 
-  const openDialog = (product?: Product) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [productsRes, categoriesRes] = await Promise.all([
+        api.get('/products'),
+        api.get('/categories')
+      ]);
+
+      const normalizedCategories = categoriesRes.data.map((c: any) => ({
+        ...c,
+        id: c._id,
+        createdAt: c.createdAt ? c.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
+      }));
+      setCategories(normalizedCategories);
+
+      const normalizedProducts = productsRes.data.map((p: any) => ({
+        ...p,
+        id: p._id,
+        category: p.category ? p.category.name : 'Uncategorized',
+        categoryId: p.category ? p.category._id : '',
+        image: p.image || '',
+        subCategory: p.subCategory || '',
+        brand: p.brand || '',
+        discount: p.discount || 0,
+        badge: p.badge || '',
+        seller: p.seller || null
+      }));
+      setProductList(normalizedProducts);
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+    }
+  };
+
+  const openDialog = (product?: any) => {
     if (product) {
       setEditingProduct(product);
       setFormData({
@@ -24,82 +74,96 @@ export default function AdminProducts() {
         description: product.description,
         price: product.price.toString(),
         stock: product.stock.toString(),
-        category: product.category,
+        category: product.categoryId || '',
+        mainSubcategory: product.mainSubcategory || '',
+        subCategory: product.subCategory || '',
         image: product.image,
+        brand: product.brand || '',
+        discount: product.discount?.toString() || '',
+        badge: product.badge || ''
       });
     } else {
       setEditingProduct(null);
-      setFormData({ name: '', description: '', price: '', stock: '', category: '', image: '' });
+      setFormData({
+        name: '', description: '', price: '', stock: '', category: '',
+        mainSubcategory: '', subCategory: '', image: '', brand: '', discount: '', badge: ''
+      });
     }
     setDialogOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.price || !formData.category) {
       alert('Please fill all required fields.');
       return;
     }
 
-    if (editingProduct) {
-      setProductList(prev =>
-        prev.map(p =>
-          p.id === editingProduct.id
-            ? { ...p, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock) || 0 }
-            : p
-        )
-      );
-      alert(`${formData.name} updated successfully.`);
-    } else {
-      const newProduct: Product = {
-        id: String(Date.now()),
-        name: formData.name,
-        description: formData.description,
+    try {
+      const payload = {
+        ...formData,
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock) || 0,
-        category: formData.category,
-        image: formData.image || '/placeholder.svg',
-        sales: 0,
+        stock: parseInt(formData.stock) || 0
       };
-      setProductList(prev => [...prev, newProduct]);
-      alert(`${formData.name} added successfully.`);
+
+      if (editingProduct) {
+        await api.put(`/products/${editingProduct.id}`, payload);
+        alert(`${formData.name} updated successfully.`);
+      } else {
+        await api.post('/products', payload);
+        alert(`${formData.name} added successfully.`);
+      }
+      fetchData();
+      setDialogOpen(false);
+    } catch (error) {
+      console.error("Operation failed", error);
+      alert("Operation failed");
     }
-
-    setDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    const product = productList.find(p => p.id === id);
-    setProductList(prev => prev.filter(p => p.id !== id));
-    alert(`${product?.name} deleted.`);
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Delete this product?")) return;
+    try {
+      await api.delete(`/products/${id}`);
+      setProductList(prev => prev.filter(p => p.id !== id));
+      alert(`Product deleted.`);
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
   };
 
-  const handleImageChange = () => {
-    
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+
+      try {
+        const res = await api.post('/uploads/image', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setFormData(prev => ({ ...prev, image: res.data.url }));
+      } catch (error) {
+        console.error("Image upload failed", error);
+        alert("Failed to upload image");
+      }
+    }
   };
-  //  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files && e.target.files[0]) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setFormData(prev => ({ ...prev, image: reader.result as string }));
-  //     };
-  //     reader.readAsDataURL(e.target.files[0]);
-  //   }
-  // };
 
   const filteredProducts = productList.filter(p => {
-    const matchesSearch = 
+    const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+      (p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+
+    // For category filter, we match against the display name (p.category)
     const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
-    
-    const matchesStock = 
+
+    const matchesStock =
       stockFilter === 'all' ||
       (stockFilter === 'low' && p.stock < 20) ||
       (stockFilter === 'medium' && p.stock >= 20 && p.stock < 50) ||
       (stockFilter === 'high' && p.stock >= 50);
-    
+
     return matchesSearch && matchesCategory && matchesStock;
   });
 
@@ -139,7 +203,7 @@ export default function AdminProducts() {
       </div>
 
       {/* Stats Cards */}
-      <ProductStats 
+      <ProductStats
         totalProducts={productList.length}
         lowStockCount={lowStockCount}
         categoriesCount={categories.length}
