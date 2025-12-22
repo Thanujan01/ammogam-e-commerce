@@ -173,8 +173,6 @@ export default function Header() {
   const quickLinks = [
     { name: 'Home', path: '/', icon: <FaHome className="text-lg" /> },
     { name: 'Products', path: '/products', icon: <FaShoppingBag className="text-lg" /> },
-    { name: 'Categories', path: '/categories', icon: <FaList className="text-lg" /> },
-    { name: 'Hot Deals', path: '/deals', icon: <FaFire className="text-lg text-red-500" /> },
     { name: 'Flash Sale', path: '/flash-sale', icon: <FaTag className="text-lg text-orange-500" /> },
     { name: 'Wishlist', path: '/wishlist', icon: <FaHeart className="text-lg text-red-500" /> },
   ];
