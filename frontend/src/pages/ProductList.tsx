@@ -13,7 +13,7 @@ import {
   FaGlobeAsia, FaCloudSun, FaTools, FaPrint,
   FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet,
   FaStar, FaCartPlus, FaGem, FaFilter, FaHeart,
-  FaCreditCard, FaClock, FaEye, FaChevronRight,
+  FaCreditCard, FaClock, FaChevronRight,
   FaBox, FaLayerGroup
 } from 'react-icons/fa';
 
@@ -44,7 +44,7 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
 };
 
 // Product Card Component
-const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isFav, categories, showCategoryBadge = false }: any) => {
+const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isFav, showCategoryBadge = false }: any) => {
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
       {/* Category Badge */}
@@ -634,9 +634,7 @@ export default function ProductList() {
   };
 
   // Handle Show Less for Related Products
-  const handleShowLessRelated = () => {
-    setShowAllRelated(false);
-  };
+  
 
   // Handle View All click for All Products - Shows all products from database
   const handleViewAllProducts = () => {
@@ -651,9 +649,6 @@ export default function ProductList() {
   };
 
   // Handle Show Less for All Products
-  const handleShowLessProducts = () => {
-    setShowAllProducts(false);
-  };
 
   const addToCart = (product: any) => { 
     cart.addToCart(product); 

@@ -6,7 +6,7 @@ import { WishlistContext } from '../contexts/WishlistContext';
 import { 
    FaShoppingCart, FaUser, FaSignOutAlt, FaBars, FaTimes, 
    FaSearch, FaTag, FaCrown, FaHome, FaShoppingBag,
-   FaCaretDown, FaMobileAlt, FaBoxOpen, FaList,
+   FaCaretDown, FaMobileAlt, FaBoxOpen, 
    FaTruck, FaClock, FaChartLine, FaLaptop, FaTshirt,
    FaUsers, FaShieldAlt, FaCreditCard, FaFire,
     FaRegHeart, FaHeart, FaBell, FaAngleRight,
