@@ -61,7 +61,10 @@ export default function Home() {
     document.body.style.overflow = 'auto';
   };
 
-
+  // Handle View All button click - Navigate to products page
+  const handleViewAllProducts = () => {
+    navigate('/products');
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -85,15 +88,14 @@ export default function Home() {
           subCategory: p.subCategory,
           image: getImageUrl(p.image),
           discountPercent: p.discount,
-          colorOptions: true, // Mock for now or add to model
-          sizeOptions: true, // Mock for now or add to model
+          colorOptions: true,
+          sizeOptions: true,
           promotions: [
             { text: p.discount > 0 ? `Save ${p.discount}%` : 'Free Shipping', icon: <FaTag className="text-green-500" /> },
-            // Add more dynamic promotions if needed
           ],
           brand: p.brand,
           description: p.description,
-          features: [ // Mock or add to model
+          features: [
             'High quality material',
             'Durable and long lasting',
             'Warranty included'
@@ -102,7 +104,7 @@ export default function Home() {
           warranty: '1-year warranty',
           returnPolicy: '30-day return policy',
           certified: true,
-          similarItems: [] // Need to populate if possible, or leave empty
+          similarItems: []
         }));
 
         setProducts(mappedProducts);
@@ -115,9 +117,13 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = activeCategory === 'All'
-    ? products
-    : products.filter(product => product.category === activeCategory);
+  // Get first 12 products for featured section
+  const featuredProducts = products.slice(0, 12);
+
+  // Filter featured products by category when category is selected
+  const filteredFeaturedProducts = activeCategory === 'All'
+    ? featuredProducts
+    : featuredProducts.filter(product => product.category === activeCategory);
 
   // Categories from your WhatsApp image with item counts from your design
   const categories = [
@@ -599,8 +605,11 @@ export default function Home() {
         <div className="mb-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shop by Categories</h2>
-            <button className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base">
-              View all <FaChevronRight className="ml-1" />
+            <button 
+              onClick={handleViewAllProducts}
+              className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
+            >
+              See all <FaChevronRight className="ml-1" />
             </button>
           </div>
 
@@ -610,7 +619,10 @@ export default function Home() {
               {shopCategories.map((category, index) => (
                 <button
                   key={index}
-                  onClick={() => setActiveCategory(category.name)}
+                  onClick={() => {
+                    // Navigate to products page with category filter
+                    navigate(`/products?category=${encodeURIComponent(category.name)}`);
+                  }}
                   className={`relative group flex-shrink-0 ${category.bgColor} rounded-2xl p-4 border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300 overflow-hidden w-40`}
                 >
 
@@ -642,6 +654,7 @@ export default function Home() {
             {/*<div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none"></div>*/}
           </div>
         </div>
+
         {/* Hero Banner */}
         <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
           <div className="relative h-64 sm:h-80 md:h-96 bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
@@ -659,7 +672,10 @@ export default function Home() {
                 <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
                   Discover amazing deals on electronics, fashion, and more
                 </p>
-                <button className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg">
+                <button 
+                  onClick={handleViewAllProducts}
+                  className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
+                >
                   Shop Now
                 </button>
               </div>
@@ -675,13 +691,19 @@ export default function Home() {
           </div>
         </div>
 
-
-
         {/* Featured Products */}
         <div className="mb-10 sm:mb-12">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
-            <button className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base">
+            <div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
+              <p className="text-gray-600 text-sm mt-1">
+                Showing {filteredFeaturedProducts.length} of {products.length}+ premium products
+              </p>
+            </div>
+            <button 
+              onClick={handleViewAllProducts}
+              className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
+            >
               View all <FaChevronRight className="ml-1" />
             </button>
           </div>
@@ -708,9 +730,9 @@ export default function Home() {
             </div>
           ) : (
             <>
-              {/* Products Grid */}
+              {/* Products Grid - Only shows first 12 products */}
               <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
-                {filteredProducts.map((product) => (
+                {filteredFeaturedProducts.map((product) => (
                   <div
                     key={product.id}
                     className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
@@ -847,6 +869,24 @@ export default function Home() {
                 ))}
               </div>
 
+              {/* View All Products CTA */}
+              <div className="text-center mb-8 sm:mb-12">
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl sm:rounded-2xl p-6 sm:p-8">
+                  <div className="max-w-2xl mx-auto">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+                      Want to see more products?
+                    </h3>
+                    
+                    <button 
+                      onClick={handleViewAllProducts}
+                      className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base mx-auto"
+                    >
+                      See all products <FaChevronRight className="ml-1 sm:ml-2" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Promotional Banner */}
               <div className="mb-8 sm:mb-12 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl sm:rounded-2xl p-4 sm:p-8 md:p-12 text-white overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-white/10 rounded-full -translate-y-16 sm:-translate-y-32 translate-x-16 sm:translate-x-32"></div>
@@ -871,7 +911,10 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="flex justify-center md:justify-start">
-                      <button className="bg-white text-amber-600 px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base">
+                      <button 
+                        onClick={handleViewAllProducts}
+                        className="bg-white text-amber-600 px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
+                      >
                         Shop Flash Sale
                       </button>
                     </div>
@@ -889,13 +932,19 @@ export default function Home() {
               {/* Recently Viewed */}
               <div className="mb-8 sm:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
-                  <button className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
+                    <p className="text-gray-600 text-sm mt-1">Based on your browsing history</p>
+                  </div>
+                  <button 
+                    onClick={handleViewAllProducts}
+                    className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
+                  >
                     See all <FaChevronRight className="ml-1" />
                   </button>
                 </div>
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-                  {products.slice(0, 6).map((product) => (
+                  {featuredProducts.slice(0, 6).map((product) => (
                     <div key={product.id} className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-shadow hover:border-amber-200">
                       <img
                         src={product.image}
