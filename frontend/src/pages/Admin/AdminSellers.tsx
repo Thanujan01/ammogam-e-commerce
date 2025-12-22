@@ -89,7 +89,7 @@ export default function AdminSellers() {
         <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                <div className="bg-white rounded-xl shadow-lg p-6  border-blue-500">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-gray-500 text-sm font-medium">Total Sellers</p>
@@ -101,7 +101,7 @@ export default function AdminSellers() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+                <div className="bg-white rounded-xl shadow-lg p-6 border-yellow-500">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-gray-500 text-sm font-medium">Pending Requests</p>
@@ -113,7 +113,7 @@ export default function AdminSellers() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                <div className="bg-white rounded-xl shadow-lg p-6  border-green-500">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-gray-500 text-sm font-medium">Approved Sellers</p>

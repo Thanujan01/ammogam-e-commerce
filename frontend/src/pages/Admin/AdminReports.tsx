@@ -367,24 +367,24 @@ export default function AdminReports() {
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl shadow-sm border border-indigo-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-indigo-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Performance Summary ({viewMode === 'yearly' ? selectedYear : selectedMonth})
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="bg-white rounded-lg  shadow-md p-4 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Total Sales (Orders)</p>
             <p className="text-2xl font-bold text-gray-900">{(stats?.totalOrders || 0).toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="bg-white rounded-lg  shadow-md p-4 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Total Revenue</p>
             <p className="text-2xl font-bold text-green-600">${(stats?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="bg-white rounded-lg  shadow-md p-4 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Total Products</p>
             <p className="text-2xl font-bold text-gray-900">{(stats?.totalProducts || 0).toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="bg-white rounded-lg  shadow-md p-4 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Avg Order Value</p>
             <p className="text-2xl font-bold text-gray-900">${(stats?.averageOrderValue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>

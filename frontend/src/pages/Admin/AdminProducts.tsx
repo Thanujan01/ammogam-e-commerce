@@ -183,7 +183,7 @@ export default function AdminProducts() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-white  p-6 ">
+      <div className="bg-white rounded-xl  p-6 ">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">Product Management</h1>

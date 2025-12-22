@@ -21,8 +21,8 @@ export default function ReportCard({
   onDownload,
 }: ReportCardProps) {
   return (
-    <div className={`bg-gradient-to-br ${gradient} rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all`}>
-      <div className="flex items-start justify-between mb-4">
+    <div className={`bg-gradient-to-br ${gradient} rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all`}>
+      <div className="flex items-start justify-between mb-2">
         <div className={`w-14 h-14 ${iconBg} rounded-xl flex items-center justify-center`}>
           <Icon className={`w-7 h-7 ${iconColor}`} />
         </div>
@@ -35,7 +35,7 @@ export default function ReportCard({
         </button>
       </div>
       <h3 className="text-sm font-semibold text-gray-600 mb-2">{title}</h3>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
