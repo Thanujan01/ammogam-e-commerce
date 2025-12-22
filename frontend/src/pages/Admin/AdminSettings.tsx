@@ -61,36 +61,36 @@ export default function AdminSettings() {
                 <form onSubmit={handleSave} className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-black text-gray-400 uppercase tracking-widest">Base Shipping Fee ($)</label>
+                            <label className="text-sm font-semibold text-gray-600">Base Shipping Fee ($)</label>
                             <input
                                 type="number"
                                 value={settings.shippingFee}
                                 onChange={e => setSettings({ ...settings, shippingFee: Number(e.target.value) })}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none font-bold"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
                                 placeholder="350"
                             />
                             <p className="text-xs text-gray-400">Standard delivery charge applied to all orders below the threshold.</p>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-black text-gray-400 uppercase tracking-widest">Fee Per Additional Item ($)</label>
+                            <label className="text-sm font-semibold text-gray-600">Fee Per Additional Item ($)</label>
                             <input
                                 type="number"
                                 value={settings.feePerAdditionalItem || 0}
                                 onChange={e => setSettings({ ...settings, feePerAdditionalItem: Number(e.target.value) })}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none font-bold"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
                                 placeholder="0"
                             />
                             <p className="text-xs text-gray-400">Added for each unique item beyond the first. Set to 0 for flat fee.</p>
                         </div>
 
                         <div className="space-y-2 col-span-1 md:col-span-2">
-                            <label className="text-sm font-black text-gray-400 uppercase tracking-widest">Free Shipping Threshold ($)</label>
+                            <label className="text-sm font-semibold text-gray-600">Free Shipping Threshold ($)</label>
                             <input
                                 type="number"
                                 value={settings.freeShippingThreshold}
                                 onChange={e => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none font-bold"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
                                 placeholder="5000"
                             />
                             <p className="text-xs text-gray-400">Order amount required to qualify for free delivery.</p>
@@ -108,7 +108,7 @@ export default function AdminSettings() {
                         <button
                             type="submit"
                             disabled={saving}
-                            className="bg-slate-900 text-white px-8 py-3 rounded-xl font-black flex items-center gap-2 hover:bg-black transition-all shadow-xl shadow-slate-900/20 active:scale-95 disabled:opacity-50"
+                            className="bg-primary1 text-white px-8 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-orange-500 transition-all shadow-xl shadow-slate-900/20 active:scale-95 disabled:opacity-50"
                         >
                             {saving ? 'Saving...' : (
                                 <>
@@ -123,7 +123,7 @@ export default function AdminSettings() {
 
             {/* Preview Section */}
             <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6">
-                <h3 className="text-sm font-black text-orange-800 uppercase tracking-widest mb-4">Customer Experience Preview</h3>
+                <h3 className="text-sm font-semibold text-orange-800 mb-4">Customer Experience Preview</h3>
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-orange-100 flex items-center gap-4">
                     <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
                         <FaTruck />

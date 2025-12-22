@@ -191,14 +191,22 @@ export default function AdminCategories() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white p-6 ">
+      <div className="bg-white rounded-xl p-6 ">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div>
+          <div className='space-y-2'>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">Category Management</h1>
             <p className="text-gray-400 flex items-center gap-2">
               <FolderTree className="w-4 h-4" />
               Manage product hierarchy and visual themes
             </p>
+            <span className="text-sm font-semibold  ">
+              <span className="bg-primary1 text-white px-2 py-1 rounded">
+                {categoryList.length}
+              </span>
+              <span className="text-gray-400 ml-2">
+                Total Categories
+              </span>
+            </span>
           </div>
           <button
             className="flex items-center justify-center gap-2 bg-primary1 hover:bg-gray-50 text-white px-6 py-3 rounded-lg font-semibold shadow-xl transition-all"
@@ -211,12 +219,12 @@ export default function AdminCategories() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           <p className="text-sm text-gray-500 mb-1">Total Categories</p>
           <p className="text-2xl font-bold text-gray-900">{categoryList.length}</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Search */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

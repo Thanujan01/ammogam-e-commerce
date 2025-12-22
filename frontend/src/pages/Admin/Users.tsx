@@ -382,11 +382,11 @@ export default function Users() {
       {dialogOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-2xl">
+            <div className="sticky top-0 bg-primary1  px-6 py-4 rounded-t-2xl">
               <h2 className="text-xl font-bold text-white">
                 {editingUser ? 'Edit User' : 'Add New User'}
               </h2>
-              <p className="text-blue-100 text-sm mt-1">
+              <p className="text-white text-sm mt-1">
                 {editingUser ? 'Update user information' : 'Fill in user details'}
               </p>
             </div>
@@ -452,7 +452,7 @@ export default function Users() {
                   Cancel
                 </button>
                 <button
-                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
+                  className="px-6 py-2.5 bg-primary1 hover:bg-orange-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
                   onClick={handleSubmit}
                 >
                   {editingUser ? 'Update User' : 'Add User'}

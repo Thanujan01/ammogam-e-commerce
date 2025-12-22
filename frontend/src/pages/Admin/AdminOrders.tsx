@@ -222,7 +222,7 @@ export default function AdminOrders() {
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2 tracking-tight">Order Management</h1>
             <p className="text-gray-400 flex items-center gap-2 text-sm font-medium">
-              <ShoppingCart className="w-4 h-4 text-orange-500" />
+              <ShoppingCart className="w-4 h-4 " />
               Manage customer orders, track payments and update statuses
             </p>
           </div>
@@ -234,7 +234,7 @@ export default function AdminOrders() {
           title="Total Orders"
           value={orderStats.total}
           icon={ShoppingCart as any}
-          gradient="from-white to-gray-50"
+          gradient="from-white to-white"
           iconBg="bg-orange-100"
           iconColor="text-orange-600"
         />
@@ -242,7 +242,7 @@ export default function AdminOrders() {
           title="Pending"
           value={orderStats.pending}
           icon={FiClock as any}
-          gradient="from-white to-amber-50"
+          gradient="from-white to-white"
           iconBg="bg-amber-100"
           iconColor="text-amber-600"
         />
@@ -250,7 +250,7 @@ export default function AdminOrders() {
           title="Delivered"
           value={orderStats.delivered}
           icon={FiCheckCircle as any}
-          gradient="from-white to-emerald-50"
+          gradient="from-white to-white"
           iconBg="bg-emerald-100"
           iconColor="text-emerald-600"
         />
@@ -258,7 +258,7 @@ export default function AdminOrders() {
           title="Total Revenue"
           value={`$ ${orderStats.revenue.toLocaleString()}`}
           icon={FiTruck as any}
-          gradient="from-white to-blue-50"
+          gradient="from-white to-white"
           iconBg="bg-blue-100"
           iconColor="text-blue-600"
         />
@@ -296,13 +296,13 @@ export default function AdminOrders() {
           <table className="w-full">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Order ID</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Total</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500">Order ID</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500">Customer</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500">Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500">Total</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500">Payment</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -310,7 +310,7 @@ export default function AdminOrders() {
                 <tr>
                   <td colSpan={7} className="py-20 text-center">
                     <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Loading orders...</p>
+                    <p className="text-gray-400 text-sm">Loading orders...</p>
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
@@ -336,22 +336,22 @@ export default function AdminOrders() {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-black text-gray-900">$ {(order.storeTotal || order.totalAmount).toLocaleString()}</span>
+                    <span className="font-bold text-gray-900">$ {(order.storeTotal || order.totalAmount).toLocaleString()}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-xs font-semibold capitalize ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                       {order.paymentStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${getStatusBadge(order.status)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize border ${getStatusBadge(order.status)}`}>
                       {order.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <button
                       onClick={() => { setSelectedOrder(order); setViewDialogOpen(true); }}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary1 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
                     >
                       <FiEye className="w-3.5 h-3.5" />
                       View Details
@@ -366,15 +366,15 @@ export default function AdminOrders() {
 
       {viewDialogOpen && selectedOrder && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col border border-white">
-            <div className="bg-slate-900 px-8 py-6 flex items-center justify-between text-white">
+          <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col border border-white">
+            <div className="bg-primary1 px-8 py-6 flex items-center justify-between text-white">
               <div>
-                <h2 className="text-xl font-black tracking-tight">Order # {selectedOrder._id.toUpperCase()}</h2>
+                <h2 className="text-xl font-bold">Order # {selectedOrder._id.toUpperCase()}</h2>
                 <div className="flex gap-4 mt-2">
-                  <span className="text-xs font-bold text-slate-400 capitalize flex items-center gap-2">
+                  <span className="text-xs font-semibold text-white capitalize flex items-center gap-2">
                     <FiClock /> {new Date(selectedOrder.createdAt).toLocaleString()}
                   </span>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <span className="text-xs font-semibold text-white capitalize flex items-center gap-2">
                     <FiTruck /> {selectedOrder.paymentMethod}
                   </span>
                 </div>
@@ -388,24 +388,24 @@ export default function AdminOrders() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Customer Details</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 mb-4">Customer Details</h4>
                     <div className="space-y-4">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center font-bold text-slate-900 border border-slate-100">
                           {selectedOrder.user?.name?.charAt(0) || 'G'}
                         </div>
                         <div>
-                          <div className="font-black text-gray-900">{selectedOrder.user?.name || 'Guest User'}</div>
+                          <div className="font-bold text-gray-900">{selectedOrder.user?.name || 'Guest User'}</div>
                           <div className="text-xs text-gray-500">{selectedOrder.user?.email || 'No email provided'}</div>
                         </div>
                       </div>
                       <div className="pt-4 border-t border-slate-200">
-                        <div className="text-[10px] font-black text-slate-400 uppercase mb-2">Delivery Address</div>
+                        <div className="text-xs font-semibold text-gray-500 mb-2">Delivery Address</div>
                         <div className="text-sm text-slate-600 font-medium leading-relaxed">
                           {selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city}<br />
                           {selectedOrder.shippingAddress.postalCode && <span>Zip: {selectedOrder.shippingAddress.postalCode}</span>}
                         </div>
-                        <div className="mt-2 text-sm font-black text-slate-900">
+                        <div className="mt-2 text-sm font-bold text-slate-900">
                           +94 {selectedOrder.shippingAddress.phone}
                         </div>
                       </div>
@@ -413,23 +413,23 @@ export default function AdminOrders() {
                   </div>
 
                   <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Order Logic</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 mb-4">Order Logic</h4>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-500">Current Status</span>
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusBadge(selectedOrder.status)}`}>
+                        <span className="text-xs font-semibold text-slate-500">Current Status</span>
+                        <span className={`px-4 py-1.5 rounded-full text-xs font-semibold capitalize border ${getStatusBadge(selectedOrder.status)}`}>
                           {selectedOrder.status}
                         </span>
                       </div>
                       <div className="pt-4 space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase">Change Status</label>
+                        <label className="text-xs font-semibold text-gray-500">Change Status</label>
                         <div className="flex flex-wrap gap-2">
                           {['pending', 'processed', 'shipped', 'delivered', 'cancelled'].map(s => (
                             <button
                               key={s}
                               disabled={updateLoading}
                               onClick={() => handleUpdateStatus(selectedOrder._id, s)}
-                              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${selectedOrder.status === s ? 'bg-orange-600 text-white shadow-lg' : 'bg-white border border-slate-200 text-slate-500 hover:border-orange-500 hover:text-orange-600'}`}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${selectedOrder.status === s ? 'bg-orange-600 text-white shadow-lg' : 'bg-white border border-slate-200 text-slate-500 hover:border-orange-500 hover:text-orange-600'}`}
                             >
                               {s}
                             </button>
@@ -442,7 +442,7 @@ export default function AdminOrders() {
 
                 <div className="space-y-6">
                   <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Cart Items</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 mb-6">Cart Items</h4>
                     <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                       {selectedOrder.items.map((item: any) => (
                         <div key={item._id} className="flex items-center gap-4 group">
@@ -451,20 +451,20 @@ export default function AdminOrders() {
                           </div>
                           <div className="flex-1">
                             <div className="font-bold text-slate-900 text-sm">{item.product?.name}</div>
-                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.quantity} × $ {item.price.toLocaleString()}</div>
+                            <div className="text-xs text-slate-400">{item.quantity} × $ {item.price.toLocaleString()}</div>
                           </div>
-                          <div className="text-right font-black text-slate-900 text-sm">
+                          <div className="text-right font-bold text-slate-900 text-sm">
                             $ {(item.price * item.quantity).toLocaleString()}
                           </div>
                         </div>
                       ))}
                     </div>
                     <div className="mt-6 pt-6 border-t border-dashed border-slate-200 space-y-3">
-                      <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                      <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
                         <span>Store Subtotal</span>
                         <span>$ {(selectedOrder.storeTotal || selectedOrder.totalAmount).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center text-lg font-black text-slate-900">
+                      <div className="flex justify-between items-center text-lg font-bold text-slate-900">
                         <span>Store Total</span>
                         <span className="text-orange-600">$ {(selectedOrder.storeTotal || selectedOrder.totalAmount).toLocaleString()}</span>
                       </div>
@@ -475,12 +475,12 @@ export default function AdminOrders() {
             </div>
 
             <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
-              <button onClick={() => setViewDialogOpen(false)} className="px-8 py-3 bg-white border border-slate-200 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-100 transition-all">
+              <button onClick={() => setViewDialogOpen(false)} className="px-8 py-3 bg-white border border-slate-200 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all">
                 Close Window
               </button>
               <button
                 onClick={() => downloadInvoice(selectedOrder)}
-                className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-black transition-all shadow-xl shadow-slate-900/20 active:scale-95 flex items-center gap-2"
+                className="px-8 py-3 bg-primary1 text-white rounded-2xl font-semibold text-sm hover:bg-orange-500 transition-all shadow-xl shadow-slate-900/20 active:scale-95 flex items-center gap-2"
               >
                 <FiDownload />
                 Download Invoice
