@@ -55,15 +55,6 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
           {/* Logo Section */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white/60 ">
             <div className="flex items-center gap-3">
-              {/* <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md">
-                <Camera className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold  text-primary1">
-                  Ammogam
-                </h1>
-                <p className="text-xs text-gray-500">Admin Panel</p>
-              </div> */}
               <img src="/src/assets/logo.png" alt="Ammogam Logo" className="w-[70%] h-auto items-center flex mx-auto" />
             </div>
 
@@ -114,16 +105,6 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
 
           {/* Footer */}
           <div className="p-3 border-t border-gray-200 bg-white/60 space-y-2">
-
-            {/* Settings */}
-            {/* <NavLink
-              to="/settings"
-              className="flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
-            >
-              <Settings className="w-5 h-5" />
-              Settings
-            </NavLink> */}
-
             {/* Logout */}
             <button
               onClick={handleLogout}

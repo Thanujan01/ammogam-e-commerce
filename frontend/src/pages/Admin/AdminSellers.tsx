@@ -260,7 +260,7 @@ export default function AdminSellers() {
             {modalOpen && selectedSeller && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white flex justify-between items-center">
+                        <div className="bg-primary1 to-indigo-700 p-6 text-white flex justify-between items-center">
                             <h3 className="text-xl font-bold">Seller Application Details</h3>
                             <button
                                 onClick={() => setModalOpen(false)}

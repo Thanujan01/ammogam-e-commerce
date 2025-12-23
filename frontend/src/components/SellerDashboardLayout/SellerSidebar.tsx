@@ -67,8 +67,8 @@ export function SellerSidebar({ isOpen, onClose }: SidebarProps) {
                                     className={cn(
                                         "flex items-center gap-4 px-4 py-3 rounded-xl text-md font-bold transition-all duration-200",
                                         isActive
-                                            ? "bg-emerald-600 text-white shadow-md border border-emerald-500"
-                                            : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-600"
+                                            ? "bg-primary1 text-white shadow-md border border-orange-500"
+                                            : "text-gray-600 hover:bg-gray-100 hover:text-black"
                                     )}
                                 >
                                     <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-gray-400")} />
