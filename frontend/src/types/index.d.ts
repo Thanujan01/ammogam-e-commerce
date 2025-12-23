@@ -1,4 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+export interface ColorVariation {
+  _id: string;
+  color: string;
+  colorName: string;
+  colorCode: string;
+  images: string[];
+  stock: number;
+  price?: number;
+  sku?: string;
+}
+
 export interface IUser {
   _id: string;
   name: string;
@@ -6,7 +18,10 @@ export interface IUser {
   role: 'admin' | 'customer' | 'seller';
   address?: string;
   phone?: string;
+  businessName?: string;
+  avatar?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IProduct {
@@ -28,18 +43,34 @@ export interface IProduct {
   sales?: number;
   badge?: string;
   brand?: string;
+  variations?: ColorVariation[];
+  hasVariations?: boolean;
+  defaultColor?: string;
+  specifications?: Array<{ key: string; value: string }>;
+  tags?: string[];
+  isActive?: boolean;
   seller?: {
     _id: string;
     name: string;
     businessName?: string;
+    rating?: number;
   };
   createdAt?: string;
   updatedAt?: string;
+  // Additional fields for enhanced UI
+  freeShipping?: boolean;
+  warranty?: string;
+  returnPolicy?: string;
+  certified?: boolean;
 }
 
 export interface ICartItem {
   product: IProduct;
   quantity: number;
+  selectedColor?: string;
+  selectedColorCode?: string;
+  variationId?: string;
+  selectedImage?: string;
 }
 
 export interface ICategory {
@@ -68,4 +99,35 @@ export interface ICategory {
   description?: string;
   productCount?: number;
   createdAt?: string;
+}
+
+export interface IOrder {
+  _id: string;
+  userId: string;
+  items: Array<{
+    product: IProduct;
+    quantity: number;
+    price: number;
+    color?: string;
+    variationId?: string;
+  }>;
+  totalAmount: number;
+  shippingAddress: {
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+    phone: string;
+  };
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paymentMethod: 'credit_card' | 'paypal' | 'cash_on_delivery';
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IWishlistItem {
+  product: IProduct;
+  addedAt: string;
 }
