@@ -2,26 +2,59 @@ import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
+import { CartContext } from '../contexts/CartContext';
+import { AuthContext } from '../contexts/AuthContext';
+import { WishlistContext } from '../contexts/WishlistContext';
 import {
   FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight,
   FaMobileAlt, FaCamera, FaDog, FaBaby,
-  FaGem, FaGlobeAsia, FaUmbrellaBeach, FaShoePrints, FaTools,
-  FaLaptop, FaUtensils, FaPalette, FaPrint,
+  FaGem, FaGlobeAsia,   FaTools,
+  FaLaptop, FaPrint,
   FaTag,
   FaRuler, FaCheckCircle,
   FaFire, FaCrown, FaCartPlus, FaTimes as FaClose,
   FaChevronRight as FaChevronRightIcon, FaCheck, FaTruck as FaShipping,
   FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope, FaWallet,
-  FaTshirt as FaTShirt, FaPalette as FaPaletteIcon
+  FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
+  FaImages, FaCreditCard, FaClock, FaCloudSun, 
+  FaPaw, FaBaby as FaBabyIcon, FaShoppingBag
 } from 'react-icons/fa';
-import { CartContext } from '../contexts/CartContext';
+
+const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
+  const icons: any = {
+    FaMobileAlt: FaMobileAlt,
+    FaCamera: FaCamera,
+    FaTshirt: FaTShirt,
+    FaCrown: FaCrown,
+    FaCreditCard: FaCreditCard,
+    FaPaw: FaPaw,
+    FaBaby: FaBaby,
+    FaClock: FaClock,
+    FaGlobeAsia: FaGlobeAsia,
+    FaCloudSun: FaCloudSun,
+    FaTools: FaTools,
+    FaLaptop: FaLaptop,
+    FaHome: FaHome,
+    FaImages: FaImages,
+    FaPrint: FaPrint,
+    FaDog: FaDog,
+    FaBabyIcon: FaBabyIcon,
+    FaWallet: FaWallet,
+    FaShoppingBag: FaShoppingBag
+  };
+  const IconComponent = icons[name] || FaShoppingBag;
+  return <IconComponent className={className} />;
+};
 
 export default function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const cart = useContext(CartContext)!;
+  const { user } = useContext(AuthContext)!;
+  const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
   const [showCartNotification, setShowCartNotification] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -39,6 +72,76 @@ export default function Home() {
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          api.get('/products'),
+          api.get('/categories')
+        ]);
+
+        // Process categories
+        const dbCategories = categoriesRes.data;
+        const mergedCategories = dbCategories.map((dbCat: any) => ({
+          ...dbCat,
+          id: dbCat._id,
+          name: dbCat.name,
+          icon: <CategoryIcon name={dbCat.icon} />,
+          iconName: dbCat.icon,
+          image: dbCat.image || '',
+          items: `${dbCat.subCategories?.length || 0} Items`,
+          mainSubcategories: dbCat.mainSubcategories || [],
+          color: dbCat.color || 'blue'
+        }));
+        setCategories(mergedCategories);
+
+        // Process products
+        const dbProducts = productsRes.data.map((p: any) => ({
+          ...p,
+          id: p._id,
+          name: p.name,
+          currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
+          originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
+          rating: p.rating || 0,
+          sold: p.sold || 0,
+          badge: p.badge,
+          badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
+          tags: p.discount > 0 ? ['Choice', 'Sale'] : ['Choice'],
+          category: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
+          categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
+          subCategory: p.subCategory || '',
+          image: getImageUrl(p.image),
+          discountPercent: p.discount,
+          colorOptions: true,
+          sizeOptions: true,
+          promotions: [
+            { text: p.discount > 0 ? `Save ${p.discount}%` : 'Free Shipping', icon: <FaTag className="text-green-500" /> },
+          ],
+          brand: p.brand,
+          description: p.description,
+          features: [
+            'High quality material',
+            'Durable and long lasting',
+            'Warranty included'
+          ],
+          deliveryInfo: 'Free shipping on orders over $ 100',
+          warranty: '1-year warranty',
+          returnPolicy: '30-day return policy',
+          certified: true,
+          similarItems: []
+        }));
+
+        setProducts(dbProducts);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user]);
 
   const addToCart = (product: any) => {
     cart.addToCart(product);
@@ -61,61 +164,91 @@ export default function Home() {
     document.body.style.overflow = 'auto';
   };
 
+  const handleToggleWishlist = async (productId: string) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    await contextToggle(productId);
+  };
+
   // Handle View All button click - Navigate to products page
   const handleViewAllProducts = () => {
     navigate('/products');
   };
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get('/products');
-        const dbProducts = res.data;
+  // Handle category click to navigate to products page
+  const handleCategorySelect = (categoryId: string) => {
+    navigate(`/products?category=${categoryId}`);
+  };
 
-        // Map backend data to frontend structure
-        const mappedProducts = dbProducts.map((p: any) => ({
-          id: p._id,
-          name: p.name,
-          currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
-          originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
-          rating: p.rating || 0,
-          sold: p.sold || 0,
-          badge: p.badge,
-          badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
-          tags: p.discount > 0 ? ['Choice', 'Sale'] : ['Choice'],
-          category: p.category ? p.category.name : 'Uncategorized',
-          subCategory: p.subCategory,
-          image: getImageUrl(p.image),
-          discountPercent: p.discount,
-          colorOptions: true,
-          sizeOptions: true,
-          promotions: [
-            { text: p.discount > 0 ? `Save ${p.discount}%` : 'Free Shipping', icon: <FaTag className="text-green-500" /> },
-          ],
-          brand: p.brand,
-          description: p.description,
-          features: [
-            'High quality material',
-            'Durable and long lasting',
-            'Warranty included'
-          ],
-          deliveryInfo: 'Free shipping on orders over $ 100',
-          warranty: '1-year warranty',
-          returnPolicy: '30-day return policy',
-          certified: true,
-          similarItems: []
-        }));
+  // Professional categories display component from ProductList.tsx
+  const ProfessionalCategories = () => {
+    const uniqueColors = [
+      ['from-blue-50 to-cyan-50', 'border-blue-200', 'from-blue-600 to-cyan-600'],
+      ['from-pink-50 to-rose-50', 'border-pink-200', 'from-pink-600 to-rose-600'],
+      ['from-orange-50 to-amber-50', 'border-orange-200', 'from-orange-600 to-amber-600'],
+      ['from-purple-50 to-violet-50', 'border-purple-200', 'from-purple-600 to-violet-600'],
+      ['from-green-50 to-emerald-50', 'border-green-200', 'from-green-600 to-emerald-600'],
+    ];
 
-        setProducts(mappedProducts);
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-      } finally {
-        setLoading(false);
-      }
+    const getCategoryColor = (index: number, isSelected: boolean) => {
+      const colorIndex = index % uniqueColors.length;
+      const [bgGradient, borderColor, iconGradient] = uniqueColors[colorIndex];
+
+      return {
+        bg: isSelected
+          ? `bg-gradient-to-br ${bgGradient} border-2 ${borderColor.replace('200', '500')} shadow-lg`
+          : `bg-gradient-to-br ${bgGradient}/80 border hover:${borderColor.replace('200', '300')} hover:shadow-md`,
+        icon: isSelected
+          ? `bg-gradient-to-br ${iconGradient} shadow-lg scale-110`
+          : `bg-gradient-to-br ${iconGradient.replace('600', '500')}`
+      };
     };
-    fetchProducts();
-  }, []);
+
+    return (
+      <div className="mb-10">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Shop by Category</h2>
+          <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            {categories.length} Categories
+          </span>
+        </div>
+        <div className="relative">
+          <div className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide px-1">
+            {categories.map((category: any, index: number) => {
+              const colors = getCategoryColor(index, false);
+
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategorySelect(category.id)}
+                  className="group flex-shrink-0 w-40 transition-all duration-300 hover:transform hover:-translate-y-2"
+                >
+                  <div className={`flex flex-col items-center justify-center p-5 rounded-xl h-full w-full transition-all duration-300 ${colors.bg} hover:shadow-xl`}>
+                    <div className={`relative w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${colors.icon}`}>
+                      <div className="text-2xl text-white">
+                        {category.icon}
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <FaChevronRight className="text-white text-xs" />
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-bold text-center mb-2 line-clamp-2 text-gray-800 group-hover:text-blue-900">
+                      {category.name}
+                    </h3>
+                    <div className="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-800">
+                      {category.items}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Get first 12 products for featured section
   const featuredProducts = products.slice(0, 12);
@@ -126,7 +259,7 @@ export default function Home() {
     : featuredProducts.filter(product => product.category === activeCategory);
 
   // Categories from your WhatsApp image with item counts from your design
-  const categories = [
+  const categoryFilters = [
     'All',
     'Mobile accessories',
     'Security cameras',
@@ -149,143 +282,6 @@ export default function Home() {
     'Print out services'
   ];
 
-  // Shop by Categories data matching your image design
-  const shopCategories = [
-    {
-      name: 'Mobile accessories',
-      items: '245 Items',
-      icon: <FaMobileAlt />,
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-gradient-to-br from-blue-50 to-cyan-50'
-    },
-    {
-      name: 'Security cameras',
-      items: '98 Items',
-      icon: <FaCamera />,
-      color: 'from-purple-500 to-violet-500',
-      bgColor: 'bg-gradient-to-br from-purple-50 to-violet-50'
-    },
-    {
-      name: 'Men fashion',
-      items: '567 Items',
-      icon: <FaTShirt />,
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-gradient-to-br from-green-50 to-emerald-50'
-    },
-    {
-      name: 'Women fashion',
-      items: '789 Items',
-      icon: <FaTShirt />,
-      color: 'from-pink-500 to-rose-500',
-      bgColor: 'bg-gradient-to-br from-pink-50 to-rose-50'
-    },
-    {
-      name: 'Wallets',
-      items: '123 Items',
-      icon: <FaWallet />,
-      color: 'from-amber-500 to-yellow-500',
-      bgColor: 'bg-gradient-to-br from-amber-50 to-yellow-50'
-    },
-    {
-      name: 'Fashion jewelry',
-      items: '345 Items',
-      icon: <FaGem />,
-      color: 'from-indigo-500 to-purple-500',
-      bgColor: 'bg-gradient-to-br from-indigo-50 to-purple-50'
-    },
-    {
-      name: 'Pet friendly products',
-      items: '156 Items',
-      icon: <FaDog />,
-      color: 'from-orange-500 to-red-500',
-      bgColor: 'bg-gradient-to-br from-orange-50 to-red-50'
-    },
-    {
-      name: 'Baby fashion & toys',
-      items: '234 Items',
-      icon: <FaBaby />,
-      color: 'from-teal-500 to-cyan-500',
-      bgColor: 'bg-gradient-to-br from-teal-50 to-cyan-50'
-    },
-    {
-      name: 'Watches',
-      items: '189 Items',
-      icon: <FaGem />,
-      color: 'from-gray-700 to-gray-900',
-      bgColor: 'bg-gradient-to-br from-gray-100 to-gray-200'
-    },
-    {
-      name: 'Srilankan products',
-      items: '67 Items',
-      icon: <FaGlobeAsia />,
-      color: 'from-red-500 to-orange-500',
-      bgColor: 'bg-gradient-to-br from-red-50 to-orange-50'
-    },
-    {
-      name: 'Indian products',
-      items: '89 Items',
-      icon: <FaGlobeAsia />,
-      color: 'from-orange-500 to-amber-500',
-      bgColor: 'bg-gradient-to-br from-orange-50 to-amber-50'
-    },
-    {
-      name: 'Climate dress',
-      items: '112 Items',
-      icon: <FaUmbrellaBeach />,
-      color: 'from-cyan-500 to-blue-500',
-      bgColor: 'bg-gradient-to-br from-cyan-50 to-blue-50'
-    },
-    {
-      name: 'Shoes',
-      items: '432 Items',
-      icon: <FaShoePrints />,
-      color: 'from-blue-600 to-indigo-600',
-      bgColor: 'bg-gradient-to-br from-blue-50 to-indigo-50'
-    },
-    {
-      name: 'Electrical tool & hard ware',
-      items: '76 Items',
-      icon: <FaTools />,
-      color: 'from-gray-600 to-gray-800',
-      bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100'
-    },
-    {
-      name: 'Electronics products',
-      items: '321 Items',
-      icon: <FaLaptop />,
-      color: 'from-purple-600 to-pink-600',
-      bgColor: 'bg-gradient-to-br from-purple-50 to-pink-50'
-    },
-    {
-      name: 'T. Shirts',
-      items: '654 Items',
-      icon: <FaTShirt />,
-      color: 'from-green-600 to-teal-600',
-      bgColor: 'bg-gradient-to-br from-green-50 to-teal-50'
-    },
-    {
-      name: 'Home kitchen products',
-      items: '198 Items',
-      icon: <FaUtensils />,
-      color: 'from-amber-600 to-orange-600',
-      bgColor: 'bg-gradient-to-br from-amber-50 to-orange-50'
-    },
-    {
-      name: 'Photo editing',
-      items: '45 Items',
-      icon: <FaPalette />,
-      color: 'from-violet-600 to-purple-600',
-      bgColor: 'bg-gradient-to-br from-violet-50 to-purple-50'
-    },
-    {
-      name: 'Print out services',
-      items: '32 Items',
-      icon: <FaPrint />,
-      color: 'from-blue-700 to-cyan-700',
-      bgColor: 'bg-gradient-to-br from-blue-50 to-cyan-50'
-    },
-  ];
-
   return (
     <div className="min-h-screen w-screen bg-gray-50">
       <style>{`
@@ -303,6 +299,15 @@ export default function Home() {
         /* Smooth scrolling */
         .scroll-smooth {
           scroll-behavior: smooth;
+        }
+
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
         }
       `}</style>
 
@@ -384,8 +389,11 @@ export default function Home() {
                         <FaShoppingCart />
                         Add to Cart
                       </button>
-                      <button className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <FaHeart className="text-gray-600 text-sm sm:text-base" />
+                      <button 
+                        onClick={() => handleToggleWishlist(selectedProduct.id)}
+                        className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        <FaHeart className={`text-gray-600 text-sm sm:text-base ${isInWishlist(selectedProduct.id) ? 'text-red-500' : ''}`} />
                       </button>
                       <button className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
                         <FaShareAlt className="text-gray-600 text-sm sm:text-base" />
@@ -601,59 +609,11 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-        {/* Shop by Categories - UPDATED FOR HORIZONTAL SCROLLING */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shop by Categories</h2>
-            <button 
-              onClick={handleViewAllProducts}
-              className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
-            >
-              See all <FaChevronRight className="ml-1" />
-            </button>
-          </div>
+        {/* Header Section */}
+       
 
-          {/* Horizontal scrolling container with hidden scrollbar */}
-          <div className="relative">
-            <div className="flex space-x-4 overflow-x-auto pb-4 px-1 scrollbar-hide scroll-smooth">
-              {shopCategories.map((category, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    // Navigate to products page with category filter
-                    navigate(`/products?category=${encodeURIComponent(category.name)}`);
-                  }}
-                  className={`relative group flex-shrink-0 ${category.bgColor} rounded-2xl p-4 border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300 overflow-hidden w-40`}
-                >
-
-                  {/* Icon */}
-                  <div className={`relative z-10 w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
-                    <div className="text-xl text-white">
-                      {category.icon}
-                    </div>
-                  </div>
-
-                  {/* Category Name */}
-                  <h3 className="text-sm font-semibold text-gray-900 text-center line-clamp-2 mb-1 group-hover:text-amber-800 transition-colors">
-                    {category.name}
-                  </h3>
-
-                  {/* Items Count */}
-                  <div className="text-xs text-gray-600 text-center font-medium">
-                    {category.items}
-                  </div>
-
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:to-amber-500/10 transition-all duration-300 rounded-xl"></div>
-                </button>
-              ))}
-            </div>
-
-            {/* Gradient fade effect on the right for better UX */}
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none"></div>
-            {/*<div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none"></div>*/}
-          </div>
-        </div>
+        {/* Professional Categories Section - SAME AS PRODUCTLIST */}
+        <ProfessionalCategories />
 
         {/* Hero Banner */}
         <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
@@ -710,7 +670,7 @@ export default function Home() {
 
           {/* Category Filter - Horizontal scrolling with hidden scrollbar */}
           <div className="flex gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 sm:pb-3 px-1 justify-center sm:justify-start scrollbar-hide">
-            {categories.map((category) => (
+            {categoryFilters.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
@@ -775,6 +735,15 @@ export default function Home() {
                           </div>
                         </div>
                       )}
+
+                      {/* Wishlist Button */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleToggleWishlist(product.id); }}
+                        className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110"
+                        title="Add to wishlist"
+                      >
+                        <FaHeart className={`text-sm sm:text-base ${isInWishlist(product.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`} />
+                      </button>
                     </div>
 
                     {/* Product Info */}
