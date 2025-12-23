@@ -54,15 +54,7 @@ export default function SellerNotifications() {
         }
     };
 
-    //   const handleDelete = async (id: string) => {
-    //       // Backend doesn't strictly have delete endpoint in list provided, but assuming we can add if needed.
-    //       // For now, let's just omit or if user wants delete, we need backend support.
-    //       // The prompt didn't strictly ask for delete, just "get message". 
-    //       // But AdminNotification has delete. Let's assume we might need it, but I won't implement API call if route doesn't exist.
-    //       // Route list shows only GET / and PUT read. No DELETE.
-    //       // So I will comment out Delete or handle locally only? No, real apps need API.
-    //       // I'll skip Delete button for now to avoid errors, or just show it but maybe it does nothing.
-    //   };
+   
 
     const filteredNotifications = notificationList.filter(notif => {
         const matchesRead =
@@ -119,10 +111,10 @@ export default function SellerNotifications() {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                        <h1 className="text-2xl font-bold text-gray-900  flex items-center gap-3">
                             <Bell className="text-orange-600" />
                             Notifications
                         </h1>
@@ -131,7 +123,7 @@ export default function SellerNotifications() {
                     {unreadCount > 0 && (
                         <button
                             onClick={handleMarkAllAsRead}
-                            className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 text-sm"
+                            className="px-6 py-3 bg-primary1 text-white rounded-xl font-bold hover:bg-orange-500 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 text-sm"
                         >
                             <FiCheck className="w-4 h-4" />
                             Mark All as Read

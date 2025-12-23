@@ -101,22 +101,22 @@ export default function SellerOrders() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                             <ShoppingBag className="text-orange-600" />
                             Order Management
                         </h1>
-                        <p className="text-gray-500 font-medium mt-2">Manage orders for your products and update fulfillment status</p>
+                        <p className="text-gray-500 mt-2">Manage orders for your products and update fulfillment status</p>
                     </div>
-                    <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-2xl border border-gray-100">
-                        <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-orange-600 font-black">
+                    <div className="flex items-center gap-3 bg-primary1 p-2 rounded-2xl border border-gray-100">
+                        <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-orange-600 font-bold">
                             {stats.total}
                         </div>
                         <div className="pr-4">
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Orders</p>
-                            <p className="text-sm font-bold text-gray-900">Assigned View</p>
+                            <p className="text-xs font-semibold text-white">Total Orders</p>
+                            <p className="text-sm text-white">Assigned View</p>
                         </div>
                     </div>
                 </div>
@@ -124,58 +124,58 @@ export default function SellerOrders() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
-                            <FiClock className="text-lg" />
-                        </div>
-                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">To Process</h3>
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">To Process</h3>
+                        <p className="text-3xl font-bold text-gray-900">{stats.pending}</p>
                     </div>
-                    <p className="text-3xl font-black text-gray-900">{stats.pending}</p>
+                    <div className="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                        <FiClock className="text-2xl" />
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                            <FiTruck className="text-lg" />
-                        </div>
-                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Shipped</h3>
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Shipped</h3>
+                        <p className="text-3xl font-bold text-gray-900">{stats.shipped}</p>
                     </div>
-                    <p className="text-3xl font-black text-gray-900">{stats.shipped}</p>
+                    <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                        <FiTruck className="text-2xl" />
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
-                            <FiCheckCircle className="text-lg" />
-                        </div>
-                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Success Rate</h3>
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Success Rate</h3>
+                        <p className="text-3xl font-bold text-gray-900">98%</p>
                     </div>
-                    <p className="text-3xl font-black text-gray-900">98%</p>
+                    <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                        <FiCheckCircle className="text-2xl" />
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
-                            <span className="font-bold">$</span>
-                        </div>
-                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">My Revenue</h3>
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">My Revenue</h3>
+                        <p className="text-3xl font-bold text-gray-900">$ {stats.revenue.toLocaleString()}</p>
                     </div>
-                    <p className="text-3xl font-black text-gray-900">$ {stats.revenue.toLocaleString()}</p>
+                    <div className="w-16 h-16 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                        <span className="text-2xl font-bold">$</span>
+                    </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 flex flex-col md:flex-row gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                     <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Search by Order ID or Customer Name..."
-                        className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none text-sm font-medium"
+                        className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none text-sm"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                     />
                 </div>
                 <select
-                    className="px-6 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none text-sm font-bold text-gray-700 min-w-[200px]"
+                    className="px-6 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none text-sm font-semibold text-gray-700 min-w-[200px]"
                     value={statusFilter}
                     onChange={e => setStatusFilter(e.target.value)}
                 >
@@ -195,17 +195,17 @@ export default function SellerOrders() {
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50/50 border-b border-gray-100">
                             <tr>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Order ID</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Products</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Income</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Item Status</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                                <th className="px-8 py-5 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
+                                <th className="px-8 py-5 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
+                                <th className="px-8 py-5 text-left text-xs font-semibold text-gray-600 uppercase">Products</th>
+                                <th className="px-8 py-5 text-left text-xs font-semibold text-gray-600 uppercase">Income</th>
+                                <th className="px-8 py-5 text-left text-xs font-semibold text-gray-600 uppercase">Item Status</th>
+                                <th className="px-8 py-5 text-center text-xs font-semibold text-gray-600 uppercase">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -213,7 +213,7 @@ export default function SellerOrders() {
                                 <tr>
                                     <td colSpan={6} className="py-20 text-center">
                                         <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Fetching your orders...</p>
+                                        <p className="text-gray-500 text-sm">Fetching your orders...</p>
                                     </td>
                                 </tr>
                             ) : filteredOrders.length === 0 ? (
@@ -222,18 +222,18 @@ export default function SellerOrders() {
                                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-200">
                                             <FiAlertCircle className="text-4xl" />
                                         </div>
-                                        <h3 className="text-gray-900 font-black">No orders found</h3>
+                                        <h3 className="text-gray-900 font-bold">No orders found</h3>
                                         <p className="text-gray-500 text-sm mt-1">When customers buy your products, they will appear here.</p>
                                     </td>
                                 </tr>
                             ) : filteredOrders.map(order => (
                                 <tr key={order._id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-8 py-6">
-                                        <span className="font-black text-gray-900 text-sm">#{order._id.slice(-8).toUpperCase()}</span>
-                                        <div className="text-[10px] text-gray-400 font-bold uppercase mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
+                                        <span className="font-semibold text-gray-900 text-sm">#{order._id.slice(-8).toUpperCase()}</span>
+                                        <div className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <p className="font-bold text-gray-900 text-sm">{order.user?.name || 'Customer'}</p>
+                                        <p className="font-semibold text-gray-900 text-sm">{order.user?.name || 'Customer'}</p>
                                         <p className="text-xs text-gray-500">{order.user?.email}</p>
                                     </td>
                                     <td className="px-8 py-6">
@@ -244,10 +244,10 @@ export default function SellerOrders() {
                                                 </div>
                                             ))}
                                         </div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase mt-2">{order.items.length} items for you</p>
+                                        <p className="text-xs font-semibold text-gray-500 mt-2">{order.items.length} items</p>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <span className="font-black text-emerald-600 text-sm">
+                                        <span className="font-semibold text-emerald-600 text-sm">
                                             $ {order.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}
                                         </span>
                                     </td>
@@ -255,17 +255,17 @@ export default function SellerOrders() {
                                         {/* Status of the first item as a summary or show multi-status badge */}
                                         <div className="flex flex-col gap-1">
                                             {order.items.slice(0, 1).map((it: any, i: number) => (
-                                                <span key={i} className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${getStatusBadge(it.status)}`}>
+                                                <span key={i} className={`px-3 py-1 rounded-full text-xs font-semibold capitalize border w-fit ${getStatusBadge(it.status)}`}>
                                                     {it.status}
                                                 </span>
                                             ))}
-                                            {order.items.length > 1 && <span className="text-[10px] font-bold text-gray-400 italic">+{order.items.length - 1} more items</span>}
+                                            {order.items.length > 1 && <span className="text-xs text-gray-500">+{order.items.length - 1} more</span>}
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-center">
                                         <button
                                             onClick={() => { setSelectedOrder(order); setViewDialogOpen(true); }}
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-black hover:bg-black transition-all shadow-md active:scale-95"
+                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-semibold hover:bg-black transition-all shadow-md active:scale-95"
                                         >
                                             <FiEye />
                                             Details
@@ -284,16 +284,16 @@ export default function SellerOrders() {
                     <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col border border-white">
                         <div className="bg-gray-900 px-8 py-6 flex items-center justify-between text-white">
                             <div>
-                                <h2 className="text-xl font-black tracking-tight flex items-center gap-3">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
                                     Order Details
-                                    <span className="text-gray-500 font-medium">#{selectedOrder._id.slice(-8).toUpperCase()}</span>
+                                    <span className="text-gray-500">#{selectedOrder._id.slice(-8).toUpperCase()}</span>
                                 </h2>
                                 <div className="flex items-center gap-4 mt-2">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400 tracking-wide uppercase">
+                                    <div className="flex items-center gap-2 text-xs text-gray-400">
                                         <FiClock className="text-orange-500" />
                                         {new Date(selectedOrder.createdAt).toLocaleString()}
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400 tracking-wide uppercase border-l border-gray-800 pl-4">
+                                    <div className="flex items-center gap-2 text-xs text-gray-400 border-l border-gray-800 pl-4">
                                         <FiTruck className="text-blue-500" />
                                         {selectedOrder.items.length} Products
                                     </div>
@@ -312,7 +312,7 @@ export default function SellerOrders() {
                                 {/* Left Side: Order Items and Information */}
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Fulfillment Items</h4>
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-6">Fulfillment Items</h4>
                                         <div className="space-y-6">
                                             {selectedOrder.items.map((item: any) => (
                                                 <div key={item._id} className="space-y-4 p-4 rounded-[1.5rem] border border-gray-50 bg-gray-50/50">
@@ -321,28 +321,28 @@ export default function SellerOrders() {
                                                             <img src={getImageUrl(item.product?.image)} className="w-full h-full object-contain" />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <h5 className="font-black text-gray-900 text-sm truncate">{item.product?.name}</h5>
-                                                            <p className="text-xs text-gray-500 font-bold tracking-tight">
+                                                            <h5 className="font-semibold text-gray-900 text-sm truncate">{item.product?.name}</h5>
+                                                            <p className="text-xs text-gray-500">
                                                                 Qty: {item.quantity} × $ {item.price.toLocaleString()}
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <div className="font-black text-gray-900 text-sm">$ {(item.price * item.quantity).toLocaleString()}</div>
-                                                            <div className={`text-[10px] font-black uppercase tracking-widest mt-1 ${getStatusBadge(item.status).split(' ')[1]}`}>
+                                                            <div className="font-semibold text-gray-900 text-sm">$ {(item.price * item.quantity).toLocaleString()}</div>
+                                                            <div className={`text-xs font-semibold capitalize mt-1 ${getStatusBadge(item.status).split(' ')[1]}`}>
                                                                 {item.status}
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div className="pt-4 border-t border-gray-200">
-                                                        <p className="text-[10px] font-black text-gray-400 uppercase mb-3">Update This Item's Status</p>
+                                                        <p className="text-xs font-semibold text-gray-600 mb-3">Update This Item's Status</p>
                                                         <div className="flex flex-wrap gap-2">
                                                             {['pending', 'processed', 'shipped', 'delivered', 'cancelled'].map(s => (
                                                                 <button
                                                                     key={s}
                                                                     disabled={updateLoading}
                                                                     onClick={() => handleUpdateItemStatus(selectedOrder._id, item.product?._id, s)}
-                                                                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${item.status === s ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-white border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600'}`}
+                                                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${item.status === s ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-white border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600'}`}
                                                                 >
                                                                     {s}
                                                                 </button>
@@ -358,26 +358,26 @@ export default function SellerOrders() {
                                 {/* Right Side: Customer and Summary */}
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
-                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Delivery Details</h4>
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-6">Delivery Details</h4>
                                         <div className="flex items-start gap-4 mb-6">
                                             <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 shadow-inner">
                                                 <FiTruck className="text-xl" />
                                             </div>
                                             <div>
-                                                <p className="font-black text-gray-900 text-base">{selectedOrder.shippingAddress.name}</p>
+                                                <p className="font-semibold text-gray-900 text-base">{selectedOrder.shippingAddress.name}</p>
                                                 <p className="text-sm text-gray-500 mt-1 leading-relaxed">
                                                     {selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city}<br />
                                                     Postal Code: {selectedOrder.shippingAddress.postalCode || 'N/A'}<br />
-                                                    Phone: <span className="text-gray-900 font-bold">+94 {selectedOrder.shippingAddress.phone}</span>
+                                                    Phone: <span className="text-gray-900 font-semibold">+94 {selectedOrder.shippingAddress.phone}</span>
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="bg-gray-900 rounded-[2rem] p-6 text-white relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                                            <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Earnings Summary</h5>
+                                            <h5 className="text-sm font-semibold text-gray-500 mb-4">Earnings Summary</h5>
                                             <div className="space-y-4">
-                                                <div className="flex justify-between items-center text-xs font-bold">
+                                                <div className="flex justify-between items-center text-xs">
                                                     <span className="text-gray-400">Items Subtotal</span>
                                                     <span>$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</span>
                                                 </div>
@@ -399,8 +399,8 @@ export default function SellerOrders() {
                                                 <FiAlertCircle className="text-xl" />
                                             </div>
                                             <div className="text-amber-900">
-                                                <p className="font-black text-sm uppercase tracking-tight">Seller Responsibilities</p>
-                                                <p className="text-xs font-medium leading-relaxed mt-1 opacity-80">
+                                                <p className="font-semibold text-sm">Seller Responsibilities</p>
+                                                <p className="text-xs leading-relaxed mt-1 opacity-80">
                                                     Please ensure items are packed securely and shipped within 48 hours of order confirmation. Update the status regularly to keep the customer informed.
                                                 </p>
                                             </div>
@@ -413,13 +413,13 @@ export default function SellerOrders() {
                         <div className="px-8 py-6 bg-white border-t border-gray-100 flex items-center justify-end gap-4">
                             <button
                                 onClick={() => setViewDialogOpen(false)}
-                                className="px-10 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-2xl font-black text-sm transition-all shadow-sm active:scale-95"
+                                className="px-10 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-2xl font-semibold text-sm transition-all shadow-sm active:scale-95"
                             >
                                 Close Details
                             </button>
                             <button
                                 onClick={() => handlePrintLabel(selectedOrder)}
-                                className="px-10 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-gray-900/20 active:scale-95 flex items-center gap-2"
+                                className="px-10 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl font-semibold text-sm transition-all shadow-xl shadow-gray-900/20 active:scale-95 flex items-center gap-2"
                             >
                                 <FiCheckCircle className="text-green-500" />
                                 Print Shipping Label

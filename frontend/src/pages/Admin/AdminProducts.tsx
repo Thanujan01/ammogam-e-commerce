@@ -193,7 +193,7 @@ export default function AdminProducts() {
             </p>
           </div>
           <button
-            className="flex items-center justify-center gap-2 bg-primary1 hover:bg-gray-50 text-white px-6 py-3 rounded-lg font-semibold shadow-xl hover:shadow-lg transition-all"
+            className="flex items-center justify-center gap-2 bg-primary1 hover:bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold shadow-xl hover:shadow-lg transition-all"
             onClick={() => openDialog()}
           >
             <FiPlus className="w-5 h-5" />

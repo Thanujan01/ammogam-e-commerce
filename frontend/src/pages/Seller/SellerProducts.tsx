@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiPlus } from 'react-icons/fi';
+import { Package } from 'lucide-react';
 import { api } from '../../api/api';
 import type { IProduct, ICategory } from '../../types';
 import ProductStats from '../../components/AdminProducts/ProductStats';
@@ -142,18 +143,24 @@ export default function SellerProducts() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">My Products</h1>
-                    <p className="text-gray-500">Manage and list your products for sale</p>
+            {/* Header */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                            <Package className="text-primary1" />
+                            My Products
+                        </h1>
+                        <p className="text-gray-500 mt-2">Manage and list your products for sale</p>
+                    </div>
+                    <button
+                        onClick={() => openDialog()}
+                        className="flex items-center justify-center gap-2 bg-primary1 hover:bg-orange-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all active:scale-95"
+                    >
+                        <FiPlus className="w-5 h-5" />
+                        Add New Product
+                    </button>
                 </div>
-                <button
-                    onClick={() => openDialog()}
-                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all"
-                >
-                    <FiPlus className="w-5 h-5" />
-                    Add New Product
-                </button>
             </div>
 
             <ProductStats

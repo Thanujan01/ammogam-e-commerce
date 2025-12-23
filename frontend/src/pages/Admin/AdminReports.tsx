@@ -39,6 +39,15 @@ export default function AdminReports() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
 
+  // Sync month with year when switching to monthly view
+  useEffect(() => {
+    if (viewMode === 'monthly') {
+      // Update month to use the selected year (keep the current month number)
+      const currentMonth = selectedMonth.split('-')[1] || '01';
+      setSelectedMonth(`${selectedYear}-${currentMonth}`);
+    }
+  }, [viewMode, selectedYear]);
+
   useEffect(() => {
     fetchReports();
     // Real-time updates every 30 seconds
