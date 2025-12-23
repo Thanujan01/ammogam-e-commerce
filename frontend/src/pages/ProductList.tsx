@@ -470,18 +470,24 @@ const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters, 
 
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('category'));
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(searchParams.get('subcategory'));
+  
+  // Get parameters from URL
+  const categoryParam = searchParams.get('category');
+  const subcategoryParam = searchParams.get('subcategory');
+  
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(subcategoryParam);
+  
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [showAllRelated, setShowAllRelated] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
-  const navigate = useNavigate();
   const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
 
   useEffect(() => {
@@ -495,6 +501,7 @@ export default function ProductList() {
 
         const dbCategories = categoriesRes.data;
         const mergedCategories = dbCategories.map((dbCat: any) => ({
+          ...dbCat,
           id: dbCat._id,
           name: dbCat.name,
           icon: <CategoryIcon name={dbCat.icon} />,
@@ -518,7 +525,9 @@ export default function ProductList() {
           categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
           image: getImageUrl(p.image),
           rating: p.rating || 4.5,
-          sold: p.sold || 0
+          sold: p.sold || 0,
+          // Make sure subCategory field exists
+          subCategory: p.subCategory || ''
         }));
         setAllProducts(dbProducts);
       } catch (error) {
@@ -529,6 +538,16 @@ export default function ProductList() {
     };
     fetchData();
   }, [user]);
+
+  // Update state when URL parameters change
+  useEffect(() => {
+    if (categoryParam !== selectedCategory) {
+      setSelectedCategory(categoryParam);
+    }
+    if (subcategoryParam !== selectedSubcategory) {
+      setSelectedSubcategory(subcategoryParam);
+    }
+  }, [categoryParam, subcategoryParam]);
 
   useEffect(() => {
     if (allProducts.length === 0 || categories.length === 0) return;
@@ -542,21 +561,21 @@ export default function ProductList() {
         if (selectedSubcategory) {
           // When subcategory is selected: Show products from that subcategory
           productsToShow = allProducts.filter(p => 
-            p.categoryName === targetCat.name && 
+            p.categoryId === selectedCategory && 
             p.subCategory === selectedSubcategory
           );
           
           // Related Products: Show products from SAME category but DIFFERENT subcategories
           relatedToShow = allProducts.filter(p => 
-            p.categoryName === targetCat.name && 
+            p.categoryId === selectedCategory && 
             p.subCategory !== selectedSubcategory
           );
         } else {
           // When only category is selected (no subcategory): Show ALL products from that category
-          productsToShow = allProducts.filter(p => p.categoryName === targetCat.name);
+          productsToShow = allProducts.filter(p => p.categoryId === selectedCategory);
           
           // Related Products: Show products from OTHER categories
-          relatedToShow = allProducts.filter(p => p.categoryName !== targetCat.name);
+          relatedToShow = allProducts.filter(p => p.categoryId !== selectedCategory);
         }
       }
     } else {
@@ -573,58 +592,66 @@ export default function ProductList() {
   }, [selectedCategory, selectedSubcategory, allProducts, categories]);
 
   const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
-    setSelectedSubcategory(null);
-    setShowAllRelated(false);
-    setShowAllProducts(false);
+    const params = new URLSearchParams(searchParams);
     
-    // Update URL params
-    const params = new URLSearchParams();
     if (categoryId && selectedCategory !== categoryId) {
       params.set('category', categoryId);
+      params.delete('subcategory');
+      setSelectedCategory(categoryId);
+      setSelectedSubcategory(null);
+    } else {
+      params.delete('category');
+      params.delete('subcategory');
+      setSelectedCategory(null);
+      setSelectedSubcategory(null);
     }
+    
+    setShowAllRelated(false);
+    setShowAllProducts(false);
     setSearchParams(params);
   };
 
   const handleSubcategorySelect = (subcategoryId: string) => {
-    setSelectedSubcategory(selectedSubcategory === subcategoryId ? null : subcategoryId);
-    setShowAllRelated(false);
-    setShowAllProducts(false);
+    const params = new URLSearchParams(searchParams);
     
-    // Update URL params
-    const params = new URLSearchParams();
     if (selectedCategory) {
       params.set('category', selectedCategory);
     }
+    
     if (subcategoryId && selectedSubcategory !== subcategoryId) {
       params.set('subcategory', subcategoryId);
+      setSelectedSubcategory(subcategoryId);
+    } else {
+      params.delete('subcategory');
+      setSelectedSubcategory(null);
     }
+    
+    setShowAllRelated(false);
+    setShowAllProducts(false);
     setSearchParams(params);
   };
 
   const handleClearFilters = (type: 'category' | 'subcategory' | 'all') => {
+    const params = new URLSearchParams();
+    
     if (type === 'all' || type === 'category') {
       setSelectedCategory(null);
       setSelectedSubcategory(null);
-      setShowAllRelated(false);
-      setShowAllProducts(false);
-      // Clear URL params
-      setSearchParams({});
-    } else {
+    } else if (type === 'subcategory') {
       setSelectedSubcategory(null);
-      // Update URL params
-      const params = new URLSearchParams();
       if (selectedCategory) {
         params.set('category', selectedCategory);
       }
-      setSearchParams(params);
     }
+    
+    setShowAllRelated(false);
+    setShowAllProducts(false);
+    setSearchParams(params);
   };
 
   // Handle View All click for Related Products - Shows all related products
   const handleViewAllRelated = () => {
     setShowAllRelated(true);
-    // Scroll to related products section for better UX
     setTimeout(() => {
       const relatedSection = document.querySelector('.related-products-section');
       if (relatedSection) {
@@ -633,13 +660,9 @@ export default function ProductList() {
     }, 100);
   };
 
-  // Handle Show Less for Related Products
-  
-
   // Handle View All click for All Products - Shows all products from database
   const handleViewAllProducts = () => {
     setShowAllProducts(true);
-    // Scroll to all products section for better UX
     setTimeout(() => {
       const allProductsSection = document.querySelector('.all-products-section');
       if (allProductsSection) {
@@ -648,11 +671,8 @@ export default function ProductList() {
     }, 100);
   };
 
-  // Handle Show Less for All Products
-
   const addToCart = (product: any) => { 
     cart.addToCart(product); 
-    // Show notification instead of alert
     const notification = document.createElement('div');
     notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in flex items-center gap-2';
     notification.innerHTML = `
