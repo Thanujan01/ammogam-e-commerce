@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaTimesCircle, FaArrowLeft, FaRedo, FaExclamationTriangle, FaCreditCard } from 'react-icons/fa';
+import { FaTimesCircle, FaArrowLeft, FaRedo, FaExclamationTriangle } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
 export default function PaymentFailed() {

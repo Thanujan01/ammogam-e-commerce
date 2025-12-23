@@ -1,20 +1,19 @@
 import { useEffect, useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { WishlistContext } from '../contexts/WishlistContext';
 import {
-  FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight,
+  FaStar, FaShoppingCart, FaHeart, FaChevronRight,
   FaMobileAlt, FaCamera, FaDog, FaBaby,
   FaGem, FaGlobeAsia, FaTools,
   FaLaptop, FaPrint,
   FaTag,
   FaRuler, FaCheckCircle,
-  FaFire, FaCrown, FaCartPlus, FaTimes as FaClose,
-  FaChevronRight as FaChevronRightIcon, FaCheck, FaTruck as FaShipping,
-  FaShieldAlt, FaRedo, FaShareAlt, FaDownload, FaEnvelope, FaWallet,
+  FaFire, FaCrown, FaCartPlus,
+  FaChevronRight as FaChevronRightIcon, FaWallet,
   FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
   FaImages, FaCreditCard, FaClock, FaCloudSun, 
   FaPaw, FaBaby as FaBabyIcon, FaShoppingBag
@@ -331,9 +330,6 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-        {/* Header Section */}
-       
-
         {/* Professional Categories Section - SAME AS PRODUCTLIST */}
         <ProfessionalCategories />
 
@@ -400,7 +396,7 @@ export default function Home() {
                   ? 'bg-[#8B4513] text-white shadow-lg'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
                   }`}
-              >
+                >
                 {category}
               </button>
             ))}
