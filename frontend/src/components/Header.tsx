@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
@@ -43,7 +43,6 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
   return <IconComponent className={className} />;
 };
 
-
 import logoImage from '../assets/logo.jpg';
 
 export default function Header() {
@@ -51,6 +50,7 @@ export default function Header() {
   const cart = useContext(CartContext)!;
   const { wishlistCount } = useContext(WishlistContext)!;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
@@ -59,7 +59,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>('Mobile accessories');
+  const [activeCategory, setActiveCategory] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
 
@@ -159,16 +159,64 @@ export default function Header() {
     const fetchCategories = async () => {
       try {
         const { data } = await api.get('/categories');
-        setCategories(data);
-        if (data.length > 0) {
-          setActiveCategory(data[0].name);
+        const transformedCategories = data.map((cat: any) => ({
+          ...cat,
+          id: cat._id,
+          name: cat.name,
+          slug: cat.name.toLowerCase().replace(/ /g, '-'),
+          icon: cat.icon,
+          iconName: cat.icon,
+          image: cat.image || '',
+          items: `${cat.subCategories?.length || 0} Items`,
+          mainSubcategories: cat.mainSubcategories || [],
+          color: cat.color || 'blue',
+          bgColor: `bg-gradient-to-br ${cat.color}`,
+          textColor: 'text-white'
+        }));
+        setCategories(transformedCategories);
+        
+        // Set active category based on URL params or first category
+        const categoryParam = searchParams.get('category');
+        if (categoryParam) {
+          const category = transformedCategories.find((cat: any) => cat.id === categoryParam);
+          if (category) {
+            setActiveCategory(category.name);
+          }
+        } else if (transformedCategories.length > 0) {
+          setActiveCategory(transformedCategories[0].name);
         }
       } catch (error) {
         console.error("Failed to fetch categories", error);
       }
     };
     fetchCategories();
-  }, []);
+  }, [searchParams]);
+
+  // ========== ROUTING FUNCTIONS ==========
+
+  // 1. Main Category Click - Goes to products page with category parameter
+  const handleMainCategoryClick = (category: any) => {
+    // Navigate to products page with category ID parameter
+    navigate(`/products?category=${category.id}`);
+    setShowCategoryMenu(false);
+    setIsMenuOpen(false);
+  };
+
+  // 2. Subcategory Click - Goes to products page with BOTH category and subcategory parameters
+  const handleSubcategoryClick = (category: any, subcategory: string) => {
+    // Navigate to products page with both category ID and subcategory as parameters
+    navigate(`/products?category=${category.id}&subcategory=${encodeURIComponent(subcategory)}`);
+    setShowCategoryMenu(false);
+    setIsMenuOpen(false);
+  };
+
+  // 3. View All Category - Goes to products page with category parameter
+  const handleViewAllCategory = (category: any) => {
+    // Same as main category click - goes to products page
+    navigate(`/products?category=${category.id}`);
+    setShowCategoryMenu(false);
+    setIsMenuOpen(false);
+  };
 
   const quickLinks = [
     { name: 'Home', path: '/', icon: <FaHome className="text-lg" /> },
@@ -215,8 +263,6 @@ export default function Header() {
 
   return (
     <>
-
-
       {/* Main Header */}
       <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white border-b'}`}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4">
@@ -556,13 +602,10 @@ export default function Header() {
                   <div className="space-y-1 max-h-[500px] overflow-y-auto pr-2">
                     {categories.map((category) => (
                       <button
-                        key={category.name}
+                        key={category.id}
                         className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all duration-300 group ${activeCategory === category.name ? 'bg-white shadow-lg border border-gray-200' : 'hover:bg-white hover:shadow-md'}`}
                         onMouseEnter={() => setActiveCategory(category.name)}
-                        onClick={() => {
-                          navigate(`/category/${category.name.toLowerCase().replace(/ /g, '-')}`);
-                          setShowCategoryMenu(false);
-                        }}
+                        onClick={() => handleMainCategoryClick(category)}
                       >
                         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-white shadow-sm`}>
                           <CategoryIcon name={category.icon} />
@@ -605,16 +648,15 @@ export default function Header() {
                     <div className="flex items-center gap-3">
                       <div className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-medium rounded-full flex items-center gap-2">
                         <FaCheck className="text-xs" />
-                        {activeCategoryData?.promoText}
+                        Up to 50% OFF on {activeCategoryData?.name.toLowerCase()}
                       </div>
-                      <Link
-                        to={`/category/${activeCategoryData?.name.toLowerCase().replace(/ /g, '-')}`}
+                      <button
+                        onClick={() => handleViewAllCategory(activeCategoryData)}
                         className="px-5 py-2.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg hover:opacity-90 font-medium text-sm flex items-center gap-2 shadow-lg"
-                        onClick={() => setShowCategoryMenu(false)}
                       >
                         View All
                         <FaArrowRight className="text-xs" />
-                      </Link>
+                      </button>
                     </div>
                   </div>
 
@@ -630,17 +672,16 @@ export default function Header() {
                             <ul className="space-y-2.5">
                               {subcategory.items.map((item: string, idx: number) => (
                                 <li key={idx}>
-                                  <Link
-                                    to={`/category/${activeCategoryData?.name.toLowerCase().replace(/ /g, '-')}/${item.toLowerCase().replace(/ /g, '-')}`}
-                                    className="text-sm text-gray-700 hover:text-amber-700 hover:font-medium flex items-center justify-between group"
-                                    onClick={() => setShowCategoryMenu(false)}
+                                  <button
+                                    onClick={() => handleSubcategoryClick(activeCategoryData, item)}
+                                    className="w-full text-left text-sm text-gray-700 hover:text-amber-700 hover:font-medium flex items-center justify-between group"
                                   >
                                     <span className="flex items-center gap-2">
                                       <span className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-amber-500"></span>
                                       {item}
                                     </span>
                                     <FaChevronRight className="text-[10px] text-gray-400 group-hover:text-amber-500" />
-                                  </Link>
+                                  </button>
                                 </li>
                               ))}
                             </ul>
@@ -648,42 +689,28 @@ export default function Header() {
                         ))}
                       </div>
 
-                      {/* Featured Products Grid */}
+                      {/* Quick Links Section */}
                       <div className="mt-8 pt-6 border-t border-gray-200">
-                        <h4 className="font-bold text-gray-900 text-lg mb-4">Featured Products</h4>
-                        <div className="grid grid-cols-3 gap-4">
-                          {activeCategoryData?.featuredProducts.map((product: any, index: number) => (
-                            <Link
-                              key={index}
-                              to={`/product/${product.name.toLowerCase().replace(/ /g, '-')}`}
-                              className="group p-4 border border-gray-200 rounded-xl hover:border-amber-300 hover:shadow-lg transition-all duration-300"
-                              onClick={() => setShowCategoryMenu(false)}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className={`w-14 h-14 rounded-lg flex items-center justify-center text-2xl bg-gradient-to-br ${activeCategoryData?.color || 'from-gray-100 to-gray-200'}`}>
-                                  <CategoryIcon name={product.image} />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-medium text-gray-800 group-hover:text-amber-700 line-clamp-1">
-                                    {product.name}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="font-bold text-gray-900">{product.price}</span>
-                                    {product.discount && (
-                                      <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-medium">
-                                        {product.discount}
-                                      </span>
-                                    )}
-                                    {product.tag && (
-                                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-600 rounded-full font-medium">
-                                        {product.tag}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </Link>
-                          ))}
+                        <h4 className="font-bold text-gray-900 text-lg mb-4">More Available</h4>
+                        <div className="flex gap-4">
+                          <button
+                            onClick={() => handleMainCategoryClick(activeCategoryData)}
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            All Products
+                          </button>
+                          <button
+                            onClick={() => handleMainCategoryClick(activeCategoryData)}
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            Best Sellers
+                          </button>
+                          <button
+                            onClick={() => handleMainCategoryClick(activeCategoryData)}
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            New Arrivals
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -691,47 +718,46 @@ export default function Header() {
                     {/* Category Image and Promotions */}
                     <div className="col-span-4 space-y-6">
                       {/* Main Category Image */}
-                      <div className="relative overflow-hidden rounded-2xl group">
-                        <img
-                          src={activeCategoryData?.image}
-                          alt={activeCategoryData?.name}
-                          className="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <div className="text-white font-bold text-lg">Top Brands</div>
-                          <div className="text-white/90 text-sm">Premium quality guaranteed</div>
+                      {activeCategoryData?.image && (
+                        <div className="relative overflow-hidden rounded-2xl group">
+                          <img
+                            src={activeCategoryData.image}
+                            alt={activeCategoryData.name}
+                            className="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                          <div className="absolute bottom-4 left-4 right-4">
+                            <div className="text-white font-bold text-lg">Top Brands</div>
+                            <div className="text-white/90 text-sm">Premium quality guaranteed</div>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Quick Links */}
                       <div className="p-4 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl">
                         <h5 className="font-bold text-gray-900 mb-3">Quick Links</h5>
                         <div className="space-y-2">
-                          <Link
-                            to={`/category/${activeCategoryData?.name.toLowerCase().replace(/ /g, '-')}/best-sellers`}
-                            className="flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
-                            onClick={() => setShowCategoryMenu(false)}
+                          <button
+                            onClick={() => handleMainCategoryClick(activeCategoryData)}
+                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
+                          >
+                            <span className="text-sm text-gray-700 group-hover:text-amber-700">All Products</span>
+                            <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
+                          </button>
+                          <button
+                            onClick={() => handleMainCategoryClick(activeCategoryData)}
+                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
                           >
                             <span className="text-sm text-gray-700 group-hover:text-amber-700">Best Sellers</span>
                             <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
-                          </Link>
-                          <Link
-                            to={`/category/${activeCategoryData?.name.toLowerCase().replace(/ /g, '-')}/new-arrivals`}
-                            className="flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
-                            onClick={() => setShowCategoryMenu(false)}
+                          </button>
+                          <button
+                            onClick={() => handleMainCategoryClick(activeCategoryData)}
+                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
                           >
                             <span className="text-sm text-gray-700 group-hover:text-amber-700">New Arrivals</span>
                             <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
-                          </Link>
-                          <Link
-                            to={`/category/${activeCategoryData?.name.toLowerCase().replace(/ /g, '-')}/deals`}
-                            className="flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
-                            onClick={() => setShowCategoryMenu(false)}
-                          >
-                            <span className="text-sm text-gray-700 group-hover:text-amber-700">Top Deals</span>
-                            <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
-                          </Link>
+                          </button>
                         </div>
                       </div>
 
@@ -904,17 +930,19 @@ export default function Header() {
                 <div className="text-xs font-bold text-gray-500 uppercase mb-3 px-3">Shop Categories</div>
                 <div className="grid grid-cols-2 gap-2">
                   {categories.map((category: any) => (
-                    <Link
-                      key={category.name}
-                      to={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        handleMainCategoryClick(category);
+                        setIsMenuOpen(false);
+                      }}
                       className="p-3 border rounded-lg hover:bg-amber-50 transition-colors text-center group"
-                      onClick={() => setIsMenuOpen(false)}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${category.bgColor} ${category.textColor} mx-auto mb-2 group-hover:scale-110 transition-transform`}>
                         <CategoryIcon name={category.icon} />
                       </div>
                       <div className="text-xs font-medium">{category.name}</div>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               </div>
