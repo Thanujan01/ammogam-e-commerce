@@ -6,7 +6,8 @@ import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTrash, FaPlus, FaMinus, FaArrowLeft,
   FaShoppingCart, FaShieldAlt, FaTruck,
-  FaCheckCircle
+  FaCheckCircle, FaCreditCard, FaBox,
+  FaLock, FaTag, FaUser
 } from 'react-icons/fa';
 
 export default function CartPage() {
@@ -18,127 +19,156 @@ export default function CartPage() {
   const itemCount = cart.items.reduce((s: number, i: any) => s + i.quantity, 0);
   const shipping = subtotal > cart.freeShippingThreshold ? 0 : cart.shippingFee + (Math.max(0, itemCount - 1) * cart.feePerAdditionalItem);
   const total = subtotal + shipping;
+  const shippingProgress = Math.min((subtotal / cart.freeShippingThreshold) * 100, 100);
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20">
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-              <FaShoppingCart className="text-amber-600" />
-              Your Shopping Cart
-            </h1>
-            <p className="text-gray-600 mt-1">
-              {cart.items.length === 0
-                ? 'Your cart is currently empty'
-                : `You have ${cart.items.length} unique items in your cart`}
-            </p>
-          </div>
-          <Link
-            to="/products"
-            className="flex items-center gap-2 text-amber-600 font-bold hover:text-amber-700 transition-colors group"
-          >
-            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            Continue Shopping
-          </Link>
-        </div>
-
-        {cart.items.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-12 text-center max-w-2xl mx-auto animate-fadeIn">
-            <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-500">
-              <FaShoppingCart className="text-4xl" />
+    <div className="min-h-screen bg-gradient-to-b from-amber-50/50 to-white">
+      {/* Professional Header */}
+      <div className="bg-white border-b border-orange-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg shadow-md">
+                <FaShoppingCart className="text-white text-xl" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
+                <p className="text-sm text-gray-500">
+                  {cart.items.length === 0 
+                    ? 'Your cart is currently empty' 
+                    : `${itemCount} items in your cart`}
+                </p>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty!</h2>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Looks like you haven't added anything to your cart yet. Browse our selection of premium items and find something you'll love.
-            </p>
-            <button
-              onClick={() => navigate('/products')}
-              className="bg-amber-600 text-white px-8 py-4 rounded-2xl font-black text-lg hover:bg-amber-700 transition-all shadow-lg shadow-amber-600/30 active:scale-95"
-            >
-              Start Shopping Now
-            </button>
+            <div className="flex items-center gap-4">
+              <Link
+                to="/products"
+                className="px-6 py-2.5 border border-orange-200 text-orange-700 rounded-lg font-medium hover:bg-orange-50 transition-colors flex items-center gap-2 shadow-sm"
+              >
+                <FaArrowLeft className="text-sm" />
+                Continue Shopping
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        {cart.items.length === 0 ? (
+          // Empty Cart State
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg border border-orange-100 p-12 text-center">
+              <div className="w-24 h-24 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-orange-200">
+                <FaShoppingCart className="text-4xl text-orange-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Browse our premium selection and add items to your cart to get started with your order.
+              </p>
+              <button
+                onClick={() => navigate('/products')}
+                className="px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-orange-200 transition-all flex items-center gap-3 mx-auto shadow-md"
+              >
+                <FaShoppingCart />
+                Start Shopping
+              </button>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Items List */}
-            <div className="lg:w-2/3 space-y-4">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="hidden md:grid grid-cols-12 gap-4 p-6 bg-gray-50 border-b border-gray-100 text-xs font-black text-gray-500 uppercase tracking-widest">
-                  <div className="col-span-6">Product Details</div>
-                  <div className="col-span-2 text-center">Price</div>
-                  <div className="col-span-2 text-center">Quantity</div>
-                  <div className="col-span-2 text-right">Total</div>
+            {/* Left Column - Cart Items */}
+            <div className="lg:w-2/3 space-y-8">
+              {/* Cart Items Card */}
+              <div className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden">
+                {/* Table Header */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-orange-100">
+                  <div className="col-span-6">
+                    <span className="text-sm font-medium text-orange-800 uppercase tracking-wider">Product</span>
+                  </div>
+                  <div className="col-span-2 text-center">
+                    <span className="text-sm font-medium text-orange-800 uppercase tracking-wider">Price</span>
+                  </div>
+                  <div className="col-span-2 text-center">
+                    <span className="text-sm font-medium text-orange-800 uppercase tracking-wider">Quantity</span>
+                  </div>
+                  <div className="col-span-2 text-right">
+                    <span className="text-sm font-medium text-orange-800 uppercase tracking-wider">Total</span>
+                  </div>
                 </div>
 
-                <div className="divide-y divide-gray-100">
+                {/* Cart Items List */}
+                <div className="divide-y divide-orange-50">
                   {cart.items.map((it: any) => (
-                    <div key={it.product._id} className="p-4 md:p-6 hover:bg-gray-50/50 transition-colors animate-fadeIn">
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div key={it.product._id} className="p-6 hover:bg-amber-50/30 transition-colors">
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                         {/* Product Info */}
-                        <div className="col-span-1 md:col-span-6 flex items-center gap-4">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-xl border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center p-2 group cursor-pointer" onClick={() => navigate(`/products/${it.product._id}`)}>
+                        <div className="col-span-6 flex items-center gap-6">
+                          <div 
+                            onClick={() => navigate(`/products/${it.product._id}`)}
+                            className="w-24 h-24 bg-amber-50 rounded-xl border border-orange-200 overflow-hidden flex items-center justify-center p-3 cursor-pointer hover:shadow-md transition-shadow"
+                          >
                             <img
                               src={getImageUrl(it.product.image)}
                               alt={it.product.name}
-                              className="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                              className="w-full h-full object-contain hover:scale-105 transition-transform"
                             />
                           </div>
-                          <div className="min-w-0">
-                            <h3
-                              className="font-bold text-gray-900 truncate hover:text-amber-700 cursor-pointer transition-colors"
+                          <div className="flex-1 min-w-0">
+                            <h3 
                               onClick={() => navigate(`/products/${it.product._id}`)}
+                              className="font-bold text-gray-900 mb-2 hover:text-orange-600 cursor-pointer transition-colors"
                             >
                               {it.product.name}
                             </h3>
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-1">{it.product.description}</p>
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">{it.product.description}</p>
                             <button
                               onClick={() => cart.removeFromCart(it.product._id)}
-                              className="mt-2 text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1.5 transition-colors"
+                              className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-2 transition-colors"
                             >
-                              <FaTrash />
-                              Remove
+                              <FaTrash className="text-xs" />
+                              Remove Item
                             </button>
                           </div>
                         </div>
 
                         {/* Price (Desktop) */}
-                        <div className="hidden md:block col-span-2 text-center font-bold text-gray-700">
-                          $ {(it.product.price || 0).toLocaleString()}
+                        <div className="hidden md:block col-span-2 text-center">
+                          <div className="text-lg font-bold text-gray-900">
+                            ${(it.product.price || 0).toLocaleString()}
+                          </div>
+                          <div className="text-sm text-orange-600">per unit</div>
                         </div>
 
-                        {/* Quantity controls */}
-                        <div className="col-span-1 md:col-span-2 flex justify-center">
-                          <div className="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
-                            <button
-                              onClick={() => cart.updateQty(it.product._id, Math.max(1, it.quantity - 1))}
-                              className="p-1.5 w-8 h-8 flex items-center justify-center rounded-md hover:bg-white text-gray-600 transition-all active:scale-95"
-                            >
-                              <FaMinus className="text-xs" />
-                            </button>
-                            <span className="w-8 text-center font-bold text-sm tracking-tighter">{it.quantity}</span>
-                            <button
-                              onClick={() => cart.updateQty(it.product._id, it.quantity + 1)}
-                              className="p-1.5 w-8 h-8 flex items-center justify-center rounded-md hover:bg-white text-gray-600 transition-all active:scale-95"
-                            >
-                              <FaPlus className="text-xs" />
-                            </button>
+                        {/* Quantity Controls */}
+                        <div className="col-span-2">
+                          <div className="flex items-center justify-center">
+                            <div className="flex items-center border border-orange-300 rounded-lg">
+                              <button
+                                onClick={() => cart.updateQty(it.product._id, Math.max(1, it.quantity - 1))}
+                                className="w-10 h-10 flex items-center justify-center text-orange-700 hover:bg-orange-50 rounded-l-lg transition-colors"
+                              >
+                                <FaMinus className="text-sm" />
+                              </button>
+                              <div className="w-12 h-10 flex items-center justify-center border-x border-orange-300 bg-white font-medium text-orange-900">
+                                {it.quantity}
+                              </div>
+                              <button
+                                onClick={() => cart.updateQty(it.product._id, it.quantity + 1)}
+                                className="w-10 h-10 flex items-center justify-center text-orange-700 hover:bg-orange-50 rounded-r-lg transition-colors"
+                              >
+                                <FaPlus className="text-sm" />
+                              </button>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Total per item */}
-                        <div className="col-span-1 md:col-span-2 text-right">
-                          <div className="md:hidden flex justify-between items-center mb-2 px-2 border-b border-gray-100 pb-2">
-                            <span className="text-sm text-gray-500 font-bold uppercase tracking-wider">Pricing Breakdown</span>
+                        {/* Item Total */}
+                        <div className="col-span-2 text-right">
+                          <div className="text-xl font-bold text-gray-900 mb-1">
+                            ${((it.product.price || 0) * it.quantity).toLocaleString()}
                           </div>
-                          <div className="flex flex-col text-right">
-                            <span className="text-xs text-gray-500 mb-1">
-                              $ {(it.product.price || 0).toLocaleString()} × {it.quantity} {it.quantity === 1 ? 'unit' : 'units'}
-                            </span>
-                            <span className="text-xl font-black text-amber-900">
-                              $ {((it.product.price || 0) * it.quantity).toLocaleString()}
-                            </span>
+                          <div className="text-sm text-orange-600">
+                            ${(it.product.price || 0).toLocaleString()} × {it.quantity}
                           </div>
                         </div>
                       </div>
@@ -147,106 +177,204 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Free Shipping Alert */}
+              {/* Free Shipping Progress */}
               {subtotal < cart.freeShippingThreshold && (
-                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-4 text-blue-800 animate-pulse-slow">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shrink-0">
-                    <FaTruck />
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg shadow-sm">
+                      <FaTruck className="text-white text-lg" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-1">Free Shipping Available!</h3>
+                      <p className="text-sm text-gray-600">
+                        Add ${(cart.freeShippingThreshold - subtotal).toLocaleString()} more to qualify for free shipping
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold">Add $ {(cart.freeShippingThreshold - subtotal).toLocaleString()} more for FREE shipping!</p>
-                    <div className="w-full bg-blue-200 rounded-full h-1.5 mt-2 overflow-hidden">
-                      <div
-                        className="bg-blue-600 h-full transition-all duration-500"
-                        style={{ width: `${(subtotal / cart.freeShippingThreshold) * 100}%` }}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-orange-700">Progress to free shipping</span>
+                      <span className="font-medium text-orange-900">{shippingProgress.toFixed(0)}%</span>
+                    </div>
+                    <div className="w-full bg-amber-100 rounded-full h-2.5 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500 shadow-sm"
+                        style={{ width: `${shippingProgress}%` }}
                       ></div>
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Security & Features */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl border border-orange-200 p-4 text-center hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaLock className="text-orange-600" />
+                  </div>
+                  <h4 className="font-medium text-gray-900 mb-1">Secure Payment</h4>
+                  <p className="text-xs text-orange-600">256-bit SSL encryption</p>
+                </div>
+                <div className="bg-white rounded-xl border border-orange-200 p-4 text-center hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaBox className="text-amber-600" />
+                  </div>
+                  <h4 className="font-medium text-gray-900 mb-1">Easy Returns</h4>
+                  <p className="text-xs text-amber-600">30-day return policy</p>
+                </div>
+                <div className="bg-white rounded-xl border border-orange-200 p-4 text-center hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaShieldAlt className="text-yellow-600" />
+                  </div>
+                  <h4 className="font-medium text-gray-900 mb-1">Quality Guarantee</h4>
+                  <p className="text-xs text-yellow-600">Premium products only</p>
+                </div>
+              </div>
             </div>
 
-            {/* Summary Panel */}
+            {/* Right Column - Order Summary */}
             <div className="lg:w-1/3">
-              <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8 sticky top-24">
-                <h3 className="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">Order Summary</h3>
-
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal ({cart.items.reduce((s: number, i: any) => s + i.quantity, 0)} items)</span>
-                    <span className="font-bold text-gray-900">$ {subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span className="flex items-center gap-1.5">
-                      Shipping Fee
-                      {shipping === 0 && <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">FREE</span>}
-                    </span>
-                    <span className={`font-bold ${shipping === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                      {shipping === 0 ? '$ 0' : `$ ${shipping.toLocaleString()}`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Estimated Taxes</span>
-                    <span className="font-bold text-gray-900">Calculated at checkout</span>
-                  </div>
+              <div className="bg-white rounded-2xl shadow-lg border border-orange-100 sticky top-6">
+                {/* Order Summary Header */}
+                <div className="px-6 py-6 border-b border-orange-100 bg-gradient-to-r from-amber-50/50 to-orange-50/50">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-3">
+                    <FaShoppingCart className="text-orange-500" />
+                    Order Summary
+                  </h3>
                 </div>
 
-                <div className="pt-6 border-t border-dashed border-gray-200 mb-8">
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Total Amount</span>
-                      <div className="text-xs text-green-600 font-bold mt-1 flex items-center gap-1">
-                        <FaCheckCircle className="text-[10px]" />
-                        Inclusive of all duties
+                {/* Order Details */}
+                <div className="p-6 space-y-6">
+                  {/* Items List Preview */}
+                  <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                    {cart.items.map((it: any) => (
+                      <div key={it.product._id} className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-amber-50 rounded-lg border border-orange-200 overflow-hidden flex-shrink-0">
+                          <img
+                            src={getImageUrl(it.product.image)}
+                            alt={it.product.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{it.product.name}</p>
+                          <p className="text-xs text-orange-600">Qty: {it.quantity}</p>
+                        </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          ${((it.product.price || 0) * it.quantity).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Price Breakdown */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="font-medium text-gray-900">${subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shipping</span>
+                      <span className={`font-medium ${shipping === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                        {shipping === 0 ? 'FREE' : `$${shipping.toLocaleString()}`}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Tax</span>
+                      <span className="font-medium text-gray-900">Calculated at checkout</span>
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="border-t border-orange-200 pt-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-lg font-bold text-gray-900">Total</span>
+                      <span className="text-2xl font-bold text-gray-900">${total.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <FaCheckCircle />
+                      <span>All taxes included</span>
+                    </div>
+                  </div>
+
+                  {/* Checkout Buttons */}
+                  <div className="space-y-4">
+                    {!auth.user ? (
+                      <button
+                        onClick={() => navigate('/login?redirect=/cart')}
+                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3.5 rounded-lg font-medium hover:shadow-lg hover:shadow-orange-200 transition-all flex items-center justify-center gap-2 shadow-md"
+                      >
+                        <FaUser />
+                        Sign In to Checkout
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => navigate('/checkout')}
+                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3.5 rounded-lg font-medium hover:shadow-lg hover:shadow-orange-200 transition-all flex items-center justify-center gap-2 shadow-md"
+                      >
+                        <FaCreditCard />
+                        Proceed to Checkout
+                      </button>
+                    )}
+                    <Link
+                      to="/products"
+                      className="w-full border border-orange-300 text-orange-700 py-3.5 rounded-lg font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <FaShoppingCart />
+                      Continue Shopping
+                    </Link>
+                  </div>
+
+                  {/* Security Badge */}
+                  <div className="pt-6 border-t border-orange-200">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <FaLock className="text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Secure Checkout</p>
+                        <p className="text-xs text-orange-600">Your payment information is protected</p>
                       </div>
                     </div>
-                    <span className="text-3xl font-black text-gray-900">
-                      $ {total.toLocaleString()}
-                    </span>
+                  </div>
+
+                  {/* Clear Cart Button */}
+                  <div className="text-center pt-4">
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to clear your cart?')) {
+                          cart.clearCart();
+                        }
+                      }}
+                      className="text-sm text-gray-500 hover:text-red-600 font-medium transition-colors flex items-center gap-2 mx-auto"
+                    >
+                      <FaTrash />
+                      Clear Shopping Cart
+                    </button>
                   </div>
                 </div>
+              </div>
 
-                {!auth.user ? (
-                  <button
-                    onClick={() => navigate('/login?redirect=/cart')}
-                    className="w-full bg-gray-900 text-white py-5 rounded-2xl font-black text-xl hover:bg-black transition-all shadow-xl shadow-gray-900/30 hover:-translate-y-1 mb-6 flex items-center justify-center gap-3 active:scale-95"
-                  >
-                    Login to Checkout
-                    <FaShoppingCart />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => navigate('/checkout')}
-                    className="w-full bg-amber-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-amber-700 transition-all shadow-xl shadow-amber-600/30 hover:-translate-y-1 mb-6 flex items-center justify-center gap-3 active:scale-95"
-                  >
-                    Checkout Now
-                    <FaShoppingCart />
-                  </button>
-                )}
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <FaShieldAlt className="text-gray-400" />
-                    <span className="text-xs text-gray-500">Secure 256-bit SSL encrypted checkout</span>
+              {/* Support Info */}
+              <div className="mt-6 bg-white rounded-2xl border border-orange-100 p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <FaTag className="text-orange-600" />
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <FaTruck className="text-gray-400" />
-                    <span className="text-xs text-gray-500">Island-wide delivery within 3-5 days</span>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Have a Promo Code?</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Enter your promo code at checkout to save on your order.
+                    </p>
+                    <input
+                      type="text"
+                      placeholder="Enter promo code"
+                      className="w-full px-4 py-2.5 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                    <button className="w-full mt-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 text-orange-700 py-2.5 rounded-lg font-medium hover:bg-orange-100 transition-colors">
+                      Apply Code
+                    </button>
                   </div>
-                </div>
-
-                <div className="mt-8 text-center pt-6 border-t border-gray-100">
-                  <button
-                    onClick={() => {
-                      if (window.confirm('Are you sure you want to clear your entire cart?')) {
-                        cart.clearCart();
-                      }
-                    }}
-                    className="text-gray-400 hover:text-red-500 text-xs font-bold transition-colors flex items-center gap-2 mx-auto"
-                  >
-                    <FaTrash />
-                    Clear Shopping Cart
-                  </button>
                 </div>
               </div>
             </div>
