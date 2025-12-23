@@ -114,7 +114,7 @@ export default function AdminNotification() {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllAsRead}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary1 text-white rounded-lg font-semibold hover:bg-indigo-50 transition-all shadow-md"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary1 text-white rounded-lg font-semibold hover:bg-orange-500 transition-all shadow-md"
             >
               <FiCheck className="w-4 h-4" />
               Mark All as Read ({unreadCount})
@@ -179,7 +179,7 @@ export default function AdminNotification() {
             Filters:
           </div>
           <div className="flex flex-wrap gap-3 flex-1">
-            <select
+            {/* <select
               value={filterType}
               onChange={e => setFilterType(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm bg-white"
@@ -188,8 +188,8 @@ export default function AdminNotification() {
               <option value="order">Orders</option>
               <option value="product">Products</option>
               <option value="user">Users</option>
-              {/* <option value="system">System</option> */}
-            </select>
+              <option value="system">System</option>
+            </select> */}
             <select
               value={filterRead}
               onChange={e => setFilterRead(e.target.value)}

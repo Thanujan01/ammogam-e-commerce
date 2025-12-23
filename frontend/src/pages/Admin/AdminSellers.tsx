@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiCheck, FiX, FiEye, FiExternalLink } from 'react-icons/fi';
-import { Store, UserCheck, Clock } from 'lucide-react';
+import { FiSearch, FiCheck, FiX, FiEye, FiExternalLink, FiTrash2 } from 'react-icons/fi';
+import { Store, UserCheck, Clock, StoreIcon } from 'lucide-react';
 import { api } from '../../api/api';
 
 interface Seller {
@@ -71,6 +71,19 @@ export default function AdminSellers() {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (confirm('Are you sure you want to permanently delete this seller? This action cannot be undone.')) {
+            try {
+                await api.delete(`/sellers/${id}`);
+                alert('Seller deleted successfully');
+                await fetchSellers();
+            } catch (error: any) {
+                console.error("Failed to delete seller", error);
+                alert('Failed to delete seller: ' + (error?.response?.data?.message || error.message));
+            }
+        }
+    };
+
     const filteredPending = pendingSellers.filter(s =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -87,6 +100,17 @@ export default function AdminSellers() {
 
     return (
         <div className="space-y-6">
+            <div className="bg-white rounded-xl p-6 ">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                      <div className='space-y-2'>
+                        <h1 className="text-2xl lg:text-3xl font-bold mb-2">Seller Management</h1>
+                        <p className="text-gray-400 flex items-center gap-2">
+                          <StoreIcon className="w-4 h-4" />
+                          Manage product hierarchy and visual themes
+                        </p>
+                      </div>
+                    </div>
+                  </div>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="bg-white rounded-xl shadow-lg p-6  border-blue-500">
@@ -132,7 +156,7 @@ export default function AdminSellers() {
                 <div className="p-6 border-b border-gray-200">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-800">Seller Management</h1>
+                            {/* <h1 className="text-2xl font-bold text-gray-800">Seller Management</h1> */}
                             <div className="flex mt-4 bg-gray-100 p-1 rounded-lg w-fit">
                                 <button
                                     onClick={() => setActiveTab('pending')}
@@ -213,13 +237,22 @@ export default function AdminSellers() {
                                                     <FiEye className="w-5 h-5" />
                                                 </button>
                                                 {activeTab === 'approved' && (
-                                                    <button
-                                                        onClick={() => navigate(`/admin/sellers/${seller._id}`)}
-                                                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                                        title="View Portfolio & Orders"
-                                                    >
-                                                        <FiExternalLink className="w-5 h-5" />
-                                                    </button>
+                                                    <>
+                                                        <button
+                                                            onClick={() => navigate(`/admin/sellers/${seller._id}`)}
+                                                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                            title="View Portfolio & Orders"
+                                                        >
+                                                            <FiExternalLink className="w-5 h-5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(seller._id)}
+                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                            title="Delete Seller"
+                                                        >
+                                                            <FiTrash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </>
                                                 )}
                                                 {activeTab === 'pending' && (
                                                     <>
@@ -237,6 +270,13 @@ export default function AdminSellers() {
                                                         >
                                                             <FiX className="w-5 h-5" />
                                                         </button>
+                                                        {/* <button
+                                                            onClick={() => handleDelete(seller._id)}
+                                                            className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                                            title="Delete Seller"
+                                                        >
+                                                            <FiTrash2 className="w-5 h-5" />
+                                                        </button> */}
                                                     </>
                                                 )}
                                             </div>

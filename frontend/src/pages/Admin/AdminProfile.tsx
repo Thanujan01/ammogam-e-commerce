@@ -50,7 +50,7 @@ export default function AdminProfile() {
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">My Profile</h1>
-            <p className="tex flex items-center gap-2">
+            <p className="tex flex text-gray-400 items-center gap-2">
               <User className="w-4 h-4" />
               Manage your personal information and settings
             </p>
@@ -97,13 +97,13 @@ export default function AdminProfile() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <FiUser className="w-5 h-5 text-pink-600" />
+                <FiUser className="w-5 h-5 text-primary1" />
                 Personal Information
               </h3>
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary1 hover:bg-pink-700 text-white rounded-lg font-edium transition-all"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary1 hover:bg-orange-500 text-white rounded-lg font-edium transition-all"
                 >
                   <FiEdit className="w-4 h-4" />
                   Edit Profile
