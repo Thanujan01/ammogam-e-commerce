@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { CartContext } from '../contexts/CartContext';
@@ -8,7 +8,7 @@ import { WishlistContext } from '../contexts/WishlistContext';
 import {
   FaStar, FaShoppingCart, FaHeart, FaEye, FaChevronRight,
   FaMobileAlt, FaCamera, FaDog, FaBaby,
-  FaGem, FaGlobeAsia,   FaTools,
+  FaGem, FaGlobeAsia, FaTools,
   FaLaptop, FaPrint,
   FaTag,
   FaRuler, FaCheckCircle,
@@ -57,8 +57,6 @@ export default function Home() {
   const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
   const [showCartNotification, setShowCartNotification] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [showProductModal, setShowProductModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Check for mobile device
@@ -102,8 +100,8 @@ export default function Home() {
           ...p,
           id: p._id,
           name: p.name,
-          currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
-          originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
+          currentPrice: `Rs ${(p.price || 0).toFixed(2)}`,
+          originalPrice: (p.discount > 0 && p.price) ? `Rs ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
           rating: p.rating || 0,
           sold: p.sold || 0,
           badge: p.badge,
@@ -126,11 +124,10 @@ export default function Home() {
             'Durable and long lasting',
             'Warranty included'
           ],
-          deliveryInfo: 'Free shipping on orders over $ 100',
+          deliveryInfo: 'Free shipping on orders over Rs 100',
           warranty: '1-year warranty',
           returnPolicy: '30-day return policy',
           certified: true,
-          similarItems: []
         }));
 
         setProducts(dbProducts);
@@ -153,17 +150,6 @@ export default function Home() {
     }, 3000);
   };
 
-  const openProductModal = (product: any) => {
-    setSelectedProduct(product);
-    setShowProductModal(true);
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeProductModal = () => {
-    setShowProductModal(false);
-    document.body.style.overflow = 'auto';
-  };
-
   const handleToggleWishlist = async (productId: string) => {
     if (!user) {
       navigate('/login');
@@ -180,6 +166,11 @@ export default function Home() {
   // Handle category click to navigate to products page
   const handleCategorySelect = (categoryId: string) => {
     navigate(`/products?category=${categoryId}`);
+  };
+
+  // Handle product click - Navigate to product detail page
+  const handleProductClick = (productId: string) => {
+    navigate(`/products/${productId}`);
   };
 
   // Professional categories display component from ProductList.tsx
@@ -324,275 +315,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Product Detail Modal */}
-      {showProductModal && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black bg-opacity-75">
-          <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center p-3 sm:p-6 border-b border-gray-200">
-              <div>
-                <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Product Details</h2>
-                <p className="text-xs sm:text-sm text-gray-600">Explore product information and similar items</p>
-              </div>
-              <button
-                onClick={closeProductModal}
-                className="text-gray-500 hover:text-gray-700 p-1 sm:p-2 rounded-full hover:bg-gray-100"
-              >
-                <FaClose className="text-lg sm:text-xl" />
-              </button>
-            </div>
-
-            {/* Modal Content - Scrollable */}
-            <div className="overflow-y-auto max-h-[calc(95vh-80px)] sm:max-h-[calc(90vh-80px)]">
-              <div className="p-3 sm:p-6">
-                {/* Product Main Info */}
-                <div className="flex flex-col lg:flex-row gap-4 sm:gap-8 mb-6 sm:mb-8">
-                  {/* Left Column - Product Image */}
-                  <div className="lg:w-1/2">
-                    <div className="relative bg-gray-100 rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4">
-                      <img
-                        src={selectedProduct.image}
-                        alt={selectedProduct.name}
-                        className="w-full h-48 sm:h-72 md:h-96 object-cover"
-                      />
-                      {selectedProduct.badge && (
-                        <div className="absolute top-2 sm:top-4 left-2 sm:left-4">
-                          <div className="bg-amber-600 text-white text-xs sm:text-sm font-bold px-2 sm:px-4 py-1 sm:py-2 rounded-full shadow-lg flex items-center gap-1 sm:gap-2">
-                            {selectedProduct.badgeIcon}
-                            <span>{selectedProduct.badge}</span>
-                          </div>
-                        </div>
-                      )}
-                      {selectedProduct.discountPercent && (
-                        <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
-                          <div className="bg-red-500 text-white text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded">
-                            -{selectedProduct.discountPercent}% OFF
-                          </div>
-                        </div>
-                      )}
-                      {/* See Preview Button */}
-                      <button className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 bg-white text-gray-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium hover:bg-gray-50 shadow-md flex items-center gap-1 sm:gap-2 text-sm">
-                        <FaEye className="text-gray-600" />
-                        See preview
-                      </button>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 sm:gap-3">
-                      <button
-                        onClick={() => {
-                          addToCart(selectedProduct);
-                          closeProductModal();
-                        }}
-                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2 sm:py-3 rounded-lg font-semibold flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
-                      >
-                        <FaShoppingCart />
-                        Add to Cart
-                      </button>
-                      <button 
-                        onClick={() => handleToggleWishlist(selectedProduct.id)}
-                        className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
-                      >
-                        <FaHeart className={`text-gray-600 text-sm sm:text-base ${isInWishlist(selectedProduct.id) ? 'text-red-500' : ''}`} />
-                      </button>
-                      <button className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <FaShareAlt className="text-gray-600 text-sm sm:text-base" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Right Column - Product Details */}
-                  <div className="lg:w-1/2">
-                    {/* Category Tags */}
-                    <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-                      {selectedProduct.tags?.map((tag: string, index: number) => (
-                        <span key={index} className="bg-amber-100 text-amber-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                          {tag}
-                        </span>
-                      ))}
-                      {selectedProduct.certified && (
-                        <span className="bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1">
-                          <FaCheck className="text-xs" />
-                          {selectedProduct.certificationBadge || 'Certified'}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Product Name */}
-                    <h1 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
-                      {selectedProduct.name}
-                    </h1>
-
-                    {/* Price Section */}
-                    <div className="mb-4 sm:mb-6">
-                      <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
-                        <span className="text-xl sm:text-3xl font-bold text-gray-900">
-                          {selectedProduct.currentPrice}
-                        </span>
-                        {selectedProduct.originalPrice && (
-                          <span className="text-sm sm:text-lg text-gray-500 line-through">
-                            {selectedProduct.originalPrice}
-                          </span>
-                        )}
-                        {selectedProduct.discountPercent && (
-                          <span className="text-xs sm:text-sm font-bold text-red-500">
-                            Save {selectedProduct.discountPercent}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Rating and Sold */}
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <FaStar
-                              key={i}
-                              className={`text-sm sm:text-lg ${i < Math.floor(selectedProduct.rating)
-                                ? 'text-yellow-400'
-                                : 'text-gray-300'
-                                }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="font-medium text-gray-900 text-sm sm:text-base">
-                          {selectedProduct.rating}
-                        </span>
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        | {selectedProduct.sold.toLocaleString()}+ sold
-                      </div>
-                    </div>
-
-                    {/* Promotions */}
-                    {selectedProduct.promotions && selectedProduct.promotions.length > 0 && (
-                      <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
-                        {selectedProduct.promotions.map((promo: any, index: number) => (
-                          <div key={index} className="flex items-center gap-2 sm:gap-3 bg-gray-50 p-2 sm:p-3 rounded-lg">
-                            <div className="text-base sm:text-lg">
-                              {promo.icon}
-                            </div>
-                            <span className="text-gray-700 font-medium text-xs sm:text-sm">
-                              {promo.text}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Bundle Deals */}
-                    <div className="mb-4 sm:mb-6">
-                      <button className="text-amber-700 hover:text-amber-800 font-semibold text-base sm:text-lg flex items-center gap-1 sm:gap-2">
-                        Bundle deals <FaChevronRightIcon className="text-xs sm:text-sm" />
-                      </button>
-                    </div>
-
-                    {/* Product Features */}
-                    {selectedProduct.features && (
-                      <div className="mb-4 sm:mb-6">
-                        <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Features:</h3>
-                        <ul className="space-y-1 sm:space-y-2">
-                          {selectedProduct.features.map((feature: string, index: number) => (
-                            <li key={index} className="flex items-start gap-2 text-gray-700 text-xs sm:text-sm">
-                              <FaCheck className="text-green-500 mt-0.5 flex-shrink-0" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Additional Info */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <div className="flex items-center gap-2">
-                        <FaShipping className="text-gray-500 text-sm sm:text-base" />
-                        <span className="text-xs sm:text-sm text-gray-700">{selectedProduct.deliveryInfo}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FaShieldAlt className="text-gray-500 text-sm sm:text-base" />
-                        <span className="text-xs sm:text-sm text-gray-700">{selectedProduct.warranty}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FaRedo className="text-gray-500 text-sm sm:text-base" />
-                        <span className="text-xs sm:text-sm text-gray-700">{selectedProduct.returnPolicy}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Similar Items Section */}
-                {selectedProduct.similarItems && selectedProduct.similarItems.length > 0 && (
-                  <div className="border-t border-gray-200 pt-4 sm:pt-8">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Similar items</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
-                      {selectedProduct.similarItems.map((item: any) => (
-                        <div key={item.id} className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-3 hover:shadow-md transition-shadow">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-20 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3"
-                          />
-                          <div className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 mb-1 sm:mb-2">
-                            {item.name}
-                          </div>
-                          <div className="text-sm sm:text-base font-bold text-amber-700 mb-1 sm:mb-2">
-                            {item.price}
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <FaStar className="text-yellow-400 text-xs" />
-                              {item.rating}
-                            </div>
-                            <span>{item.sold} sold</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
-                <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-hide">
-                  <button className="text-gray-700 hover:text-gray-900 font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap">
-                    <FaDownload className="text-xs sm:text-sm" />
-                    Downloads
-                  </button>
-                  <button className="text-gray-700 hover:text-gray-900 font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap">
-                    <FaEnvelope className="text-xs sm:text-sm" />
-                    Email
-                  </button>
-                  <button className="text-gray-700 hover:text-gray-900 font-medium text-xs sm:text-sm whitespace-nowrap">
-                    Select
-                  </button>
-                </div>
-                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-                  <button
-                    onClick={closeProductModal}
-                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
-                  >
-                    Close
-                  </button>
-                  <button
-                    onClick={() => {
-                      addToCart(selectedProduct);
-                      closeProductModal();
-                    }}
-                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-[#8B4513] text-white rounded-lg hover:bg-[#6B3510] text-sm sm:text-base"
-                  >
-                    OK
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Floating Cart Icon */}
       <div className={`fixed ${isMobile ? 'bottom-6 right-6' : 'bottom-8 right-8'} z-40`}>
         <div className="relative">
@@ -699,7 +421,7 @@ export default function Home() {
                   >
                     {/* Quick Add Icon */}
                     <button
-                      onClick={() => addToCart(product)}
+                      onClick={(e) => { e.stopPropagation(); addToCart(product); }}
                       className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 bg-white/90 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110"
                       title="Add to cart"
                     >
@@ -709,7 +431,7 @@ export default function Home() {
                     {/* Product Image */}
                     <div
                       className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
-                      onClick={() => openProductModal(product)}
+                      onClick={() => handleProductClick(product.id)}
                     >
                       <img
                         src={product.image}
@@ -751,7 +473,7 @@ export default function Home() {
                       {/* Product Name */}
                       <h3
                         className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
-                        onClick={() => openProductModal(product)}
+                        onClick={() => handleProductClick(product.id)}
                       >
                         {product.name}
                       </h3>
@@ -821,12 +543,12 @@ export default function Home() {
                       <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                         <button
                           className="text-amber-700 hover:text-amber-800 font-medium text-xs flex items-center gap-0.5"
-                          onClick={() => openProductModal(product)}
+                          onClick={() => handleProductClick(product.id)}
                         >
                           Bundle deals <FaChevronRightIcon className="text-xs" />
                         </button>
                         <button
-                          onClick={() => addToCart(product)}
+                          onClick={(e) => { e.stopPropagation(); addToCart(product); }}
                           className="bg-amber-600 hover:bg-amber-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors"
                         >
                           <FaCartPlus className="text-xs" />
@@ -919,11 +641,11 @@ export default function Home() {
                         src={product.image}
                         alt={product.name}
                         className="w-full h-24 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3 cursor-pointer"
-                        onClick={() => openProductModal(product)}
+                        onClick={() => handleProductClick(product.id)}
                       />
                       <div
                         className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 cursor-pointer hover:text-amber-700"
-                        onClick={() => openProductModal(product)}
+                        onClick={() => handleProductClick(product.id)}
                       >
                         {product.name}
                       </div>
