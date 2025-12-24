@@ -15,11 +15,11 @@ import {
     FaPlus, 
     FaFilter,
     FaChartLine, 
-    FaBox,
+    
     FaBusinessTime,
     FaClipboardCheck, 
     FaFileInvoiceDollar, 
-    FaPercentage
+   
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
@@ -167,8 +167,8 @@ export default function Wishlist() {
                 </div>
             </div>
 
-            Executive Dashboard
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-6 relative z-10">
+            {/* Executive Dashboard */}
+            {/* <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                         <div className="flex items-center justify-between mb-3">
@@ -204,7 +204,7 @@ export default function Wishlist() {
                         <div className="text-xs text-gray-500 mt-2">With current discounts</div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Control Panel */}
             {products.length > 0 && (
@@ -254,7 +254,7 @@ export default function Wishlist() {
                                     </select>
                                 </div>
                                 
-                                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 ">
                                     <button
                                         onClick={() => setViewMode('grid')}
                                         className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-600'}`}
@@ -546,13 +546,13 @@ export default function Wishlist() {
                                         <FaTrash className="text-sm" />
                                         Clear Entire Wishlist
                                     </button>
-                                    <Link
+                                    {/* <Link
                                         to="/cart"
                                         className="px-5 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                                     >
                                         Proceed to Checkout
                                         <FaChevronRight className="text-xs" />
-                                    </Link>
+                                    </Link> */}
                                 </div>
                                 
                                 {/* Divider Line */}
