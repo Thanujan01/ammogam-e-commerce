@@ -282,28 +282,28 @@ export default function SellerOrders() {
             {viewDialogOpen && selectedOrder && (
                 <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col border border-white">
-                        <div className="bg-gray-900 px-8 py-6 flex items-center justify-between text-white">
+                        <div className="bg-primary1 px-8 py-6 flex items-center justify-between text-white">
                             <div>
                                 <h2 className="text-xl font-bold flex items-center gap-3">
                                     Order Details
-                                    <span className="text-gray-500">#{selectedOrder._id.slice(-8).toUpperCase()}</span>
+                                    <span className="text-white">#{selectedOrder._id.slice(-8).toUpperCase()}</span>
                                 </h2>
                                 <div className="flex items-center gap-4 mt-2">
-                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                    <div className="flex items-center gap-2 text-xs text-white">
                                         <FiClock className="text-orange-500" />
                                         {new Date(selectedOrder.createdAt).toLocaleString()}
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-400 border-l border-gray-800 pl-4">
-                                        <FiTruck className="text-blue-500" />
+                                    <div className="flex items-center gap-2 text-xs text-white border-l border-gray-800 pl-4">
+                                        <FiTruck className="text-white" />
                                         {selectedOrder.items.length} Products
                                     </div>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setViewDialogOpen(false)}
-                                className="w-12 h-12 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-2xl transition-all"
+                                className="w-12 h-12 flex items-center justify-center bg-white hover:bg-gray-700 rounded-2xl transition-all"
                             >
-                                <FiX className="text-xl" />
+                                <FiX className="text-xl text-gray-900" />
                             </button>
                         </div>
 
@@ -373,20 +373,20 @@ export default function SellerOrders() {
                                             </div>
                                         </div>
 
-                                        <div className="bg-gray-900 rounded-[2rem] p-6 text-white relative overflow-hidden">
+                                        <div className="bg-primary1 rounded-[2rem] p-6 text-white relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                                            <h5 className="text-sm font-semibold text-gray-500 mb-4">Earnings Summary</h5>
+                                            <h5 className="text-sm font-semibold text-white mb-4">Earnings Summary</h5>
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-gray-400">Items Subtotal</span>
+                                                    <span className="text-white">Items Subtotal</span>
                                                     <span>$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</span>
                                                 </div>
                                                 <div className="flex justify-between items-center text-xs font-bold">
-                                                    <span className="text-gray-400">Shipping Portion</span>
-                                                    <span className="text-gray-500 italic">Excluded</span>
+                                                    <span className="text-white">Shipping Portion</span>
+                                                    <span className="text-white italic">Excluded</span>
                                                 </div>
-                                                <div className="pt-4 border-t border-gray-800 flex justify-between items-end">
-                                                    <span className="text-sm font-black uppercase tracking-widest text-orange-500">Your Income</span>
+                                                <div className="pt-4 border-t border-white flex justify-between items-end">
+                                                    <span className="text-sm font-medium uppercase  text-white">Your Income</span>
                                                     <span className="text-3xl font-black">$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</span>
                                                 </div>
                                             </div>
@@ -419,7 +419,7 @@ export default function SellerOrders() {
                             </button>
                             <button
                                 onClick={() => handlePrintLabel(selectedOrder)}
-                                className="px-10 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl font-semibold text-sm transition-all shadow-xl shadow-gray-900/20 active:scale-95 flex items-center gap-2"
+                                className="px-10 py-4 bg-primary1 hover:bg-orange-500 text-white rounded-2xl font-semibold text-sm transition-all shadow-xl shadow-gray-900/20 active:scale-95 flex items-center gap-2"
                             >
                                 <FiCheckCircle className="text-green-500" />
                                 Print Shipping Label
