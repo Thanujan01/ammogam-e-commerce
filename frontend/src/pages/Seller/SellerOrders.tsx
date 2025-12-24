@@ -123,7 +123,7 @@ export default function SellerOrders() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-gray-600 mb-2">To Process</h3>
@@ -142,7 +142,7 @@ export default function SellerOrders() {
                         <FiTruck className="text-2xl" />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                {/* <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-gray-600 mb-2">Success Rate</h3>
                         <p className="text-3xl font-bold text-gray-900">98%</p>
@@ -150,7 +150,7 @@ export default function SellerOrders() {
                     <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
                         <FiCheckCircle className="text-2xl" />
                     </div>
-                </div>
+                </div> */}
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-gray-600 mb-2">My Revenue</h3>
