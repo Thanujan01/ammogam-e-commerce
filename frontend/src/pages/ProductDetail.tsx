@@ -496,11 +496,11 @@ export default function ProductDetail() {
                   <div className="text-sm text-gray-600 mb-1">Price</div>
                   <div className="flex items-baseline gap-4">
                     <span className="text-4xl font-black text-gray-900">
-                      Rs {currentPrice.toLocaleString()}
+                      $ {currentPrice.toLocaleString()}
                     </span>
                     {originalPrice && (
                       <span className="text-xl text-gray-400 line-through">
-                        Rs {Math.round(originalPrice).toLocaleString()}
+                        $ {Math.round(originalPrice).toLocaleString()}
                       </span>
                     )}
                   </div>
