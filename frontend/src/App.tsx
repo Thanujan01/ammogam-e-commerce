@@ -12,7 +12,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import UserDashboard from './pages/UserDashboard';
-import PaymentSimulator from './pages/PaymentSimulator';
+// import PaymentSimulator from './pages/PaymentSimulator';
 import OrderSuccess from './pages/OrderSuccess';
 import PaymentFailed from './pages/PaymentFailed';
 import OrderDetails from './pages/OrderDetails';
@@ -109,14 +109,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/payment/:orderId"
             element={
               <ProtectedRoute>
                 <PaymentSimulator />
               </ProtectedRoute>
             }
-          />
+          /> */}
           <Route
             path="/order-success/:orderId"
             element={
