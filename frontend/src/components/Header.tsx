@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
@@ -50,6 +50,7 @@ export default function Header() {
   const cart = useContext(CartContext)!;
   const { wishlistCount } = useContext(WishlistContext)!;
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +65,14 @@ export default function Header() {
   const categoryMenuRef = useRef<HTMLDivElement>(null);
 
   const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+
+  // Check if current path is active
+  const isActivePath = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   // Check mobile viewport
   useEffect(() => {
@@ -359,14 +368,14 @@ export default function Header() {
                 className="hidden md:flex flex-col items-center p-2 hover:bg-amber-50 rounded-lg transition-colors group"
               >
                 <div className="relative">
-                  <FaRegHeart className="text-xl text-gray-600 group-hover:text-red-500" />
+                  <FaRegHeart className={`text-xl ${isActivePath('/wishlist') ? 'text-red-500' : 'text-gray-600'} group-hover:text-red-500`} />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                         {wishlistCount}
                     </span>
                   )}
                 </div>
-                <span className="text-xs mt-1 hidden lg:block">Wishlist</span>
+                <span className={`text-xs mt-1 hidden lg:block ${isActivePath('/wishlist') ? 'text-red-500 font-semibold' : ''}`}>Wishlist</span>
               </Link>
 
               {/* Desktop Notifications Bell */}
@@ -563,10 +572,13 @@ export default function Header() {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className="flex items-center gap-2 text-gray-700 hover:text-[#8B4513] transition-colors font-medium text-sm xl:text-base"
+                  className={`flex items-center gap-2 transition-colors font-medium text-sm xl:text-base relative pb-1 ${isActivePath(link.path) ? 'text-[#8B4513]' : 'text-gray-700 hover:text-[#8B4513]'}`}
                 >
                   {link.icon}
                   {link.name}
+                  {isActivePath(link.path) && (
+                    <div className="absolute -bottom-3 left-0 right-0 h-0.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] rounded-full"></div>
+                  )}
                 </Link>
               ))}
             </div>
@@ -865,10 +877,10 @@ export default function Header() {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
+                    className={`flex items-center gap-3 px-3 py-3.5 rounded-lg transition-colors text-sm font-medium ${isActivePath(link.path) ? 'bg-gradient-to-r from-amber-50 to-yellow-50 text-[#8B4513] border-l-4 border-[#8B4513]' : 'text-gray-700 hover:text-[#8B4513] hover:bg-amber-50'}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <div className="text-amber-500">{link.icon}</div>
+                    <div className={`${isActivePath(link.path) ? 'text-[#8B4513]' : 'text-amber-500'}`}>{link.icon}</div>
                     {link.name}
                     {link.name === 'Wishlist' && wishlistCount > 0 && (
                         <span className="ml-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{wishlistCount}</span>
