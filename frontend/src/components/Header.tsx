@@ -62,7 +62,11 @@ export default function Header() {
   const [searchActive, setSearchActive] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
 
@@ -122,27 +126,14 @@ export default function Header() {
       if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
         setShowCategoryMenu(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
-      setIsMenuOpen(false);
-      setSearchActive(false);
-    }
-  };
-
-  const handleLogout = () => {
-    auth.logout();
-    navigate('/');
-    setIsMenuOpen(false);
-    setShowUserMenu(false);
-  };
 
   // State for dynamic categories from DB
   const [categories, setCategories] = useState<any[]>([]);
@@ -201,11 +192,120 @@ export default function Header() {
     fetchCategories();
   }, [searchParams]);
 
+  // Fetch products for search
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get('/products');
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Search suggestions logic
+  useEffect(() => {
+    if (searchQuery.trim().length === 0) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const suggestions: any[] = [];
+
+    // Search in categories
+    categories.forEach(category => {
+      if (category.name.toLowerCase().includes(query)) {
+        suggestions.push({
+          type: 'category',
+          id: category.id,
+          name: category.name,
+          displayName: `${category.name} (Category)`,
+          icon: category.icon,
+          color: category.color
+        });
+      }
+
+      // Search in subcategories
+      if (category.mainSubcategories) {
+        category.mainSubcategories.forEach((subcategoryGroup: any) => {
+          subcategoryGroup.items.forEach((subcategory: string) => {
+            if (subcategory.toLowerCase().includes(query)) {
+              suggestions.push({
+                type: 'subcategory',
+                id: category.id,
+                name: subcategory,
+                displayName: `${subcategory} (${category.name})`,
+                categoryName: category.name,
+                icon: category.icon,
+                color: category.color
+              });
+            }
+          });
+        });
+      }
+    });
+
+    // Search in products
+    products.forEach(product => {
+      if (product.name.toLowerCase().includes(query) || 
+          product.description?.toLowerCase().includes(query) ||
+          product.brand?.toLowerCase().includes(query)) {
+        suggestions.push({
+          type: 'product',
+          id: product._id,
+          name: product.name,
+          displayName: `${product.name} (Product)`,
+          price: product.price,
+          image: product.images?.[0],
+          categoryId: product.category?._id
+        });
+      }
+    });
+
+    // Limit suggestions to 10
+    setSearchSuggestions(suggestions.slice(0, 10));
+    setShowSuggestions(suggestions.length > 0);
+  }, [searchQuery, categories, products]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+      setIsMenuOpen(false);
+      setSearchActive(false);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: any) => {
+    if (suggestion.type === 'category') {
+      navigate(`/products?category=${suggestion.id}`);
+    } else if (suggestion.type === 'subcategory') {
+      navigate(`/products?category=${suggestion.id}&subcategory=${encodeURIComponent(suggestion.name)}`);
+    } else if (suggestion.type === 'product') {
+      navigate(`/product/${suggestion.id}`);
+    }
+    setSearchQuery('');
+    setShowSuggestions(false);
+    setIsMenuOpen(false);
+    setSearchActive(false);
+  };
+
+  const handleLogout = () => {
+    auth.logout();
+    navigate('/');
+    setIsMenuOpen(false);
+    setShowUserMenu(false);
+  };
+
   // ========== ROUTING FUNCTIONS ==========
 
   // 1. Main Category Click - Goes to products page with category parameter
   const handleMainCategoryClick = (category: any) => {
-    // Navigate to products page with category ID parameter
     navigate(`/products?category=${category.id}`);
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -213,7 +313,6 @@ export default function Header() {
 
   // 2. Subcategory Click - Goes to products page with BOTH category and subcategory parameters
   const handleSubcategoryClick = (category: any, subcategory: string) => {
-    // Navigate to products page with both category ID and subcategory as parameters
     navigate(`/products?category=${category.id}&subcategory=${encodeURIComponent(subcategory)}`);
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -221,7 +320,6 @@ export default function Header() {
 
   // 3. View All Category - Goes to products page with category parameter
   const handleViewAllCategory = (category: any) => {
-    // Same as main category click - goes to products page
     navigate(`/products?category=${category.id}`);
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -230,7 +328,6 @@ export default function Header() {
   const quickLinks = [
     { name: 'Home', path: '/', icon: <FaHome className="text-lg" /> },
     { name: 'Products', path: '/products', icon: <FaShoppingBag className="text-lg" /> },
-    // { name: 'Flash Sale', path: '/flash-sale', icon: <FaTag className="text-lg text-orange-500" /> },
     { name: 'Wishlist', path: '/wishlist', icon: <FaHeart className="text-lg text-red-500" /> },
   ];
 
@@ -256,8 +353,44 @@ export default function Header() {
             className="w-full pl-10 pr-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 text-sm" />
+          
+          {/* Mobile Search Suggestions */}
+          {showSuggestions && searchSuggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border max-h-64 overflow-y-auto z-50">
+              {searchSuggestions.map((suggestion, index) => (
+                <button
+                  key={`${suggestion.type}-${suggestion.id}-${index}`}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3"
+                >
+                  {suggestion.type === 'category' && (
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${suggestion.color} flex items-center justify-center`}>
+                      <CategoryIcon name={suggestion.icon} className="text-white text-sm" />
+                    </div>
+                  )}
+                  {suggestion.type === 'subcategory' && (
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                      <FaChevronRight className="text-amber-600 text-xs" />
+                    </div>
+                  )}
+                  {suggestion.type === 'product' && (
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <FaShoppingBag className="text-gray-600 text-sm" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-800">{suggestion.displayName}</div>
+                    {suggestion.type === 'product' && suggestion.price && (
+                      <div className="text-sm text-amber-600 font-semibold">₹{suggestion.price}</div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <button
           type="button"
@@ -304,8 +437,8 @@ export default function Header() {
               />
             </Link>
 
-            {/* Desktop Search Bar */}
-            <div className="hidden lg:flex flex-1 max-w-2xl mx-4 xl:mx-8">
+            {/* Desktop Search Bar with Suggestions */}
+            <div className="hidden lg:flex flex-1 max-w-2xl mx-4 xl:mx-8" ref={searchRef}>
               <form onSubmit={handleSearch} className="relative w-full">
                 <div className="relative">
                   <input
@@ -314,6 +447,7 @@ export default function Header() {
                     className="w-full pl-12 pr-4 py-3 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-sm xl:text-base"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
                   />
                   <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-500" />
                   <button
@@ -322,6 +456,73 @@ export default function Header() {
                   >
                     Search
                   </button>
+                  
+                  {/* Desktop Search Suggestions */}
+                  {showSuggestions && searchSuggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border max-h-80 overflow-y-auto z-50">
+                      <div className="p-3 border-b bg-gray-50">
+                        <div className="text-sm font-semibold text-gray-700">
+                          {searchSuggestions.length} results for "{searchQuery}"
+                        </div>
+                      </div>
+                      
+                      {searchSuggestions.map((suggestion, index) => (
+                        <button
+                          key={`${suggestion.type}-${suggestion.id}-${index}`}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3 group"
+                        >
+                          {suggestion.type === 'category' && (
+                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${suggestion.color} flex items-center justify-center flex-shrink-0`}>
+                              <CategoryIcon name={suggestion.icon} className="text-white" />
+                            </div>
+                          )}
+                          {suggestion.type === 'subcategory' && (
+                            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                              <FaChevronRight className="text-amber-600" />
+                            </div>
+                          )}
+                          {suggestion.type === 'product' && (
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                              {suggestion.image ? (
+                                <img 
+                                  src={suggestion.image} 
+                                  alt={suggestion.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <FaShoppingBag className="text-gray-600" />
+                              )}
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-800 truncate">{suggestion.displayName}</div>
+                            {suggestion.type === 'subcategory' && (
+                              <div className="text-xs text-gray-500 truncate">in {suggestion.categoryName}</div>
+                            )}
+                            {suggestion.type === 'product' && suggestion.price && (
+                              <div className="text-sm text-amber-600 font-semibold">₹{suggestion.price}</div>
+                            )}
+                          </div>
+                          
+                          <div className={`text-xs px-2 py-1 rounded-full ${suggestion.type === 'category' ? 'bg-blue-100 text-blue-800' : suggestion.type === 'subcategory' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                            {suggestion.type}
+                          </div>
+                        </button>
+                      ))}
+                      
+                      <div className="p-3 border-t bg-gray-50">
+                        <button
+                          type="button"
+                          onClick={handleSearch}
+                          className="w-full text-center py-2 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg hover:opacity-90 text-sm font-medium"
+                        >
+                          View all results for "{searchQuery}"
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
@@ -828,8 +1029,41 @@ export default function Header() {
                   className="w-full pl-10 pr-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500" />
+                
+                {/* Mobile Search Suggestions in Menu */}
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border max-h-64 overflow-y-auto z-50">
+                    {searchSuggestions.map((suggestion, index) => (
+                      <button
+                        key={`mobile-${suggestion.type}-${suggestion.id}-${index}`}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3"
+                      >
+                        {suggestion.type === 'category' && (
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${suggestion.color} flex items-center justify-center`}>
+                            <CategoryIcon name={suggestion.icon} className="text-white text-sm" />
+                          </div>
+                        )}
+                        {suggestion.type === 'subcategory' && (
+                          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <FaChevronRight className="text-amber-600 text-xs" />
+                          </div>
+                        )}
+                        {suggestion.type === 'product' && (
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                            <FaShoppingBag className="text-gray-600 text-sm" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-800 text-sm">{suggestion.displayName}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </form>
 
