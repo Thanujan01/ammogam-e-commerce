@@ -662,14 +662,14 @@ export default function Header() {
                           <FaHome className="text-amber-500" />
                           My Dashboard
                         </Link>
-                        <Link
+                        {/* <Link
                           to="/orders"
                           className="dropdown-item"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaShoppingBag className="text-amber-500" />
                           My Orders
-                        </Link>
+                        </Link> */}
                         <Link
                           to="/wishlist"
                           className="dropdown-item"
@@ -1201,9 +1201,9 @@ export default function Header() {
                     <Link to="/dashboard" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
                       Dashboard
                     </Link>
-                    <Link to="/orders" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
+                    {/* <Link to="/orders" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
                       My Orders
-                    </Link>
+                    </Link> */}
                     <Link to="/wishlist" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
                       Wishlist
                     </Link>
