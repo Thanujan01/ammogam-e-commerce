@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaApple, FaArrowLeft, FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaArrowLeft, FaLock, FaEnvelope } from 'react-icons/fa';
 
 export default function Login() {
   const auth = useContext(AuthContext)!;
@@ -25,7 +25,7 @@ export default function Login() {
 
       if (user?.role === 'admin') nav('/admin');
       else if (user?.role === 'seller') nav('/seller');
-      else nav('/dashboard');
+      else nav('/'); // CHANGED: Customer goes to home page instead of dashboard
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || err.message || 'Login failed';
       setError(errorMessage);
@@ -167,7 +167,7 @@ export default function Login() {
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
             </div>
 
-            {/* Social Login */}
+            {/* Social Login
             <div className="space-y-3 mb-6">
               <button
                 type="button"
@@ -193,7 +193,7 @@ export default function Login() {
                 <FaApple className="text-black text-lg" />
                 Continue with Apple
               </button>
-            </div>
+            </div> */}
 
             {/* Register Link */}
             <div className="pt-6 border-t border-gray-200 text-center">
