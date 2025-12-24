@@ -105,15 +105,15 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/products" className="footer-link">
-                  All Products
+                  Products
                 </Link>
               </li>
               <li>
-                <Link to="/categories" className="footer-link">
-                  Categories
+                <Link to="/wishlist" className="footer-link">
+                  Wishlist
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/deals" className="footer-link">
                   <span className="flex items-center gap-2">
                     <FaGift className="text-amber-500" />
@@ -128,7 +128,7 @@ export default function Footer() {
                     Trending Products
                   </span>
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
