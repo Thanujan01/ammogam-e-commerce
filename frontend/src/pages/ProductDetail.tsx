@@ -12,7 +12,7 @@ import {
   FaTruck, FaStar, FaPlus, FaMinus,
   FaCheckCircle, FaPalette,
   FaChevronRight, FaChevronLeft as FaChevronLeftIcon,
-  FaCheck, FaSyncAlt
+  FaCheck, FaSyncAlt, FaWhatsapp, FaFacebook, FaLink
 } from 'react-icons/fa';
 
 interface ProductVariation {
@@ -44,6 +44,8 @@ export default function ProductDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [showAllColors, setShowAllColors] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
   
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
@@ -133,6 +135,28 @@ export default function ProductDetail() {
     return product?.image ? [product.image] : [];
   };
 
+  // Share functionality
+  const copyLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    setShowShareModal(false);
+  };
+
+  const shareOnWhatsApp = () => {
+    if (!product) return;
+    const message = `Check out this amazing product: ${product.name}\nPrice: Rs ${getCurrentPrice().toLocaleString()}\n${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    setShowShareModal(false);
+  };
+
+  const shareOnFacebook = () => {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+    setShowShareModal(false);
+  };
+
   const availableColors = useMemo(() => {
     if (!product?.variations) return [];
     return product.variations.map(v => ({
@@ -183,6 +207,75 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-gray-900">Share Via:</h3>
+              <button 
+                onClick={() => setShowShareModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Blue Underlined Link */}
+              {/* <a 
+                href={window.location.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block bg-blue-50 border border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded-lg px-4 py-3 text-sm transition-colors underline text-center"
+              >
+                Click to open product
+              </a>
+               */}
+              {/* Share via: with only 3 icons */}
+              <div>
+                {/* <div className="text-sm font-medium text-gray-700 mb-4 text-center">Share via:</div> */}
+                <div className="flex items-center justify-center gap-6">
+                  <button 
+                    onClick={shareOnWhatsApp}
+                    className="p-3 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors"
+                    title="Share on WhatsApp"
+                  >
+                    <FaWhatsapp className="text-2xl text-emerald-600" />
+                  </button>
+                  
+                  <button 
+                    onClick={shareOnFacebook}
+                    className="p-3 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                    title="Share on Facebook"
+                  >
+                    <FaFacebook className="text-2xl text-blue-600" />
+                  </button>
+                  
+                  <button 
+                    onClick={copyLink}
+                    className={`p-3 rounded-full transition-colors ${copied ? 'bg-emerald-100' : 'bg-gray-100 hover:bg-gray-200'}`}
+                    title={copied ? 'Link Copied!' : 'Copy URL'}
+                  >
+                    <FaLink className={`text-2xl ${copied ? 'text-emerald-600' : 'text-gray-600'}`} />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Product info */}
+              <div className="pt-4 border-t border-gray-200 text-center">
+                <p className="text-sm text-gray-600 mb-1">
+                  {product.name}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {copied ? '✓ Link copied to clipboard' : 'Click icons to share'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
         <button
@@ -294,7 +387,11 @@ export default function ProductDetail() {
                 >
                   <FaHeart />
                 </button>
-                <button className="p-3 rounded-full bg-gray-50 text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md" title="Share">
+                <button 
+                  onClick={() => setShowShareModal(true)}
+                  className="p-3 rounded-full bg-gray-50 text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md" 
+                  title="Share"
+                >
                   <FaShareAlt />
                 </button>
               </div>
