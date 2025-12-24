@@ -19,6 +19,10 @@ import OrderDetails from './pages/OrderDetails';
 import Notifications from './pages/Notifications';
 import Wishlist from './pages/Wishlist';
 
+// Legal/Policy Pages
+import TermsAndConditions from './pages/TermsAndConditions';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+
 import { AdminDashboardLayout } from './components/AdminDashboardLayout/AdminDashboardLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
@@ -53,10 +57,23 @@ function App() {
       {(!isAdminRoute && !isSellerRoute) && <Header />}
       <main className="flex-1">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
+          
+          {/* Authentication Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          {/* Legal/Policy Routes */}
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          
+          {/* User Protected Routes */}
           <Route
             path="/checkout"
             element={
@@ -65,10 +82,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/notifications"
             element={
@@ -172,14 +185,52 @@ function App() {
             <Route path="sellers/:id" element={<AdminSellerDetails />} />
           </Route>
 
-          {/* Additional routes for categories */}
+          {/* Category Routes */}
           <Route path="/category/:category" element={<ProductList />} />
           <Route path="/category/:category/:subcategory" element={<ProductList />} />
+          
+          {/* Additional Policy Routes (Placeholders for future implementation) */}
+          <Route path="/shipping" element={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center p-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Shipping Policy</h1>
+                <p className="text-gray-600">Coming Soon</p>
+                <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
+                  Back to Home
+                </Link>
+              </div>
+            </div>
+          } />
+          <Route path="/returns" element={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center p-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Returns & Refunds Policy</h1>
+                <p className="text-gray-600">Coming Soon</p>
+                <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
+                  Back to Home
+                </Link>
+              </div>
+            </div>
+          } />
+          <Route path="/cookies" element={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center p-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Cookie Policy</h1>
+                <p className="text-gray-600">Coming Soon</p>
+                <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
+                  Back to Home
+                </Link>
+              </div>
+            </div>
+          } />
         </Routes>
       </main>
       {(!isAdminRoute && !isSellerRoute) && <Footer />}
     </div>
   );
 }
+
+// Add this import if not already present
+import { Link } from 'react-router-dom';
 
 export default App;
