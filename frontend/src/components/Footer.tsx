@@ -4,7 +4,7 @@ import {
   FaShieldAlt, FaTruck, FaHeadset, FaMapMarkerAlt,
   FaPhone, FaEnvelope, FaClock, FaCcVisa, FaCcMastercard, FaCcPaypal,
   FaCcAmex, FaShoppingBag, FaTag,
-  FaGift, FaStar, FaAward, FaRecycle
+  FaStar, FaAward, FaRecycle
 } from 'react-icons/fa';
 
 export default function Footer() {
