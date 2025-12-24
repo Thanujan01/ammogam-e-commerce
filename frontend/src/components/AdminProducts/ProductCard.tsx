@@ -84,6 +84,35 @@ export default function ProductCard({ product, onEdit, onDelete }: ProductCardPr
             </span>
           )}
         </div>
+
+        {/* Color Variants Display */}
+        {product.colorVariants && product.colorVariants.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs font-semibold text-gray-600 mb-2">Available Colors ({product.colorVariants.length})</p>
+            <div className="flex flex-wrap gap-2">
+              {product.colorVariants.slice(0, 5).map((variant: any, idx: number) => (
+                <div
+                  key={idx}
+                  className="group/color relative"
+                  title={`${variant.colorName} - ${variant.stock} in stock`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-primary1 transition-all cursor-pointer shadow-sm hover:shadow-md"
+                    style={{ backgroundColor: variant.colorCode }}
+                  />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover/color:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    {variant.colorName} ({variant.stock})
+                  </div>
+                </div>
+              ))}
+              {product.colorVariants.length > 5 && (
+                <div className="w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-500 font-medium">
+                  +{product.colorVariants.length - 5}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

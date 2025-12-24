@@ -11,6 +11,13 @@ export interface ColorVariation {
   sku?: string;
 }
 
+export interface ColorVariant {
+  colorName: string;
+  colorCode: string;
+  stock: number;
+  image?: string;
+}
+
 export interface IUser {
   _id: string;
   name: string;
@@ -44,6 +51,7 @@ export interface IProduct {
   badge?: string;
   brand?: string;
   variations?: ColorVariation[];
+  colorVariants?: ColorVariant[];
   hasVariations?: boolean;
   defaultColor?: string;
   specifications?: Array<{ key: string; value: string }>;
