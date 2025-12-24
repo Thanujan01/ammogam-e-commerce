@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaStore, FaShoppingBag } from 'react-icons/fa';
+import { useNavigate, Link } from 'react-router-dom';
+import { FaArrowLeft, FaStore, FaShoppingBag,  } from 'react-icons/fa';
 import CustomerRegisterForm from '../components/Auth/CustomerRegisterForm';
 import SellerRegisterForm from '../components/Auth/SellerRegisterForm';
 
@@ -98,16 +98,125 @@ export default function Register() {
               />
             )}
 
+            {/* Terms and Privacy Information Section */}
+            <div className="mt-8 space-y-6">
+              {/* Security Information */}
+              {/* <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-blue-100 rounded-lg">
+                    <FaLock className="text-blue-600 text-lg" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Secure Registration</h4>
+                    <p className="text-sm text-blue-700">
+                      Your information is protected with industry-standard encryption. 
+                      We never share your personal data with third parties without your consent.
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+
+              {/* Terms and Conditions Section */}
+              {/* <div className="p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-2.5 bg-amber-100 rounded-lg">
+                    <FaFileContract className="text-amber-600 text-lg" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-amber-800 mb-1">Terms & Conditions</h4>
+                    <p className="text-sm text-amber-700">
+                      By creating an account, you agree to our platform policies and guidelines.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 ml-12">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <p className="text-sm text-amber-800">
+                      Read our full{' '}
+                      <Link 
+                        to="/terms" 
+                        className="font-semibold text-amber-700 hover:text-amber-900 underline hover:no-underline transition-colors duration-200"
+                        target="_blank"
+                      >
+                        Terms & Conditions
+                      </Link>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <p className="text-sm text-amber-800">
+                      Review our{' '}
+                      <Link 
+                        to="/privacy" 
+                        className="font-semibold text-amber-700 hover:text-amber-900 underline hover:no-underline transition-colors duration-200"
+                        target="_blank"
+                      >
+                        Privacy Policy
+                      </Link>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <p className="text-sm text-amber-800">
+                      {accountType === 'seller' 
+                        ? 'Understand seller responsibilities and commission structure'
+                        : 'Learn about buyer rights and purchase protections'}
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+
+              {/* Account Responsibilities */}
+              {/* <div className="p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-emerald-100 rounded-lg">
+                    <FaShieldAlt className="text-emerald-600 text-lg" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-emerald-800 mb-1">Account Responsibilities</h4>
+                    <p className="text-sm text-emerald-700">
+                      {accountType === 'seller' 
+                        ? 'As a seller, you are responsible for accurate product listings, timely order fulfillment, and customer support.'
+                        : 'As a customer, you are responsible for providing accurate information and maintaining account security.'}
+                    </p>
+                    <p className="text-xs text-emerald-600 mt-2">
+                      Violation of platform policies may result in account suspension or termination.
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+            </div>
+
             {/* Login Link */}
             <div className="pt-6 border-t border-gray-200 text-center mt-6">
               <p className="text-gray-600 text-sm">
                 Already have an account?
                 <button
                   onClick={() => nav('/login')}
-                  className="text-green-600 hover:text-green-800 font-semibold ml-1.5 transition-colors bg-transparent border-none cursor-pointer"
+                  className="text-green-600 hover:text-green-800 font-semibold ml-1.5 transition-colors bg-transparent border-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-200 rounded"
                 >
                   Sign in here
                 </button>
+              </p>
+              <p className="text-xs text-gray-500 mt-3">
+                By creating an account, you acknowledge that you have read and agree to our{' '}
+                <Link 
+                  to="/terms" 
+                  className="text-green-600 hover:text-green-800 font-medium underline hover:no-underline"
+                  target="_blank"
+                >
+                  Terms
+                </Link>{' '}
+                and{' '}
+                <Link 
+                  to="/privacy" 
+                  className="text-green-600 hover:text-green-800 font-medium underline hover:no-underline"
+                  target="_blank"
+                >
+                  Privacy Policy
+                </Link>
               </p>
             </div>
           </div>

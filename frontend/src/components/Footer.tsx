@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { 
   FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube,
-  FaShieldAlt, FaTruck, FaHeadset, FaMapMarkerAlt,
-  FaPhone, FaEnvelope, FaClock, FaCcVisa, FaCcMastercard, FaCcPaypal,
-  FaCcAmex, FaShoppingBag, FaTag,
-  FaStar, FaAward, FaRecycle
+  FaShieldAlt, FaTruck, FaHeadset, 
+   FaEnvelope, FaCcVisa, FaCcMastercard, FaCcPaypal,
+  FaCcAmex, FaShoppingBag, FaTag, FaFileContract, FaLock, FaUserShield,
+  FaStar, FaAward, FaRecycle, 
 } from 'react-icons/fa';
 
 export default function Footer() {
@@ -22,6 +22,8 @@ export default function Footer() {
     { icon: <FaTruck className="text-xl" />, text: 'Free Shipping', color: 'text-amber-600' },
     { icon: <FaHeadset className="text-xl" />, text: '24/7 Support', color: 'text-blue-600' },
     { icon: <FaRecycle className="text-xl" />, text: 'Easy Returns', color: 'text-purple-600' },
+    { icon: <FaLock className="text-xl" />, text: 'SSL Encrypted', color: 'text-red-600' },
+    { icon: <FaUserShield className="text-xl" />, text: 'GDPR Compliant', color: 'text-indigo-600' },
   ];
 
   const socialLinks = [
@@ -32,21 +34,28 @@ export default function Footer() {
     { icon: <FaYoutube />, link: 'https://youtube.com/ammogam', color: 'hover:bg-red-600', label: 'YouTube' },
   ];
 
+  const legalDocuments = [
+    { name: 'Terms & Conditions', path: '/terms', icon: <FaFileContract className="text-amber-400" />, description: 'Platform rules and user agreements' },
+    { name: 'Privacy Policy', path: '/privacy', icon: <FaLock className="text-blue-400" />, description: 'How we protect your data' },
+  //   { name: 'Cookie Policy', path: '/cookies', icon: <FaFileSignature className="text-green-400" />, description: 'Cookie usage information' },
+  //   { name: 'Return Policy', path: '/returns', icon: <FaRecycle className="text-purple-400" />, description: 'Returns and refunds' },
+  //   { name: 'Shipping Policy', path: '/shipping', icon: <FaTruck className="text-red-400" />, description: 'Delivery information' },
+  //   { name: 'Seller Agreement', path: '/seller-agreement', icon: <FaGavel className="text-indigo-400" />, description: 'Seller terms and conditions' },
+  // 
+  ];
+
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white mt-20">
       {/* Trust Badges Section */}
       <div className="bg-gradient-to-r from-amber-900/20 via-amber-800/20 to-amber-900/20 border-y border-amber-800/30">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             {trustBadges.map((badge, index) => (
-              <div key={index} className="flex items-center gap-3 p-4 bg-white/5 rounded-xl backdrop-blur-sm">
-                <div className={`p-3 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/20 ${badge.color}`}>
+              <div key={index} className="flex flex-col items-center text-center p-3 bg-white/5 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
+                <div className={`p-3 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/20 ${badge.color} mb-2`}>
                   {badge.icon}
                 </div>
-                <div>
-                  <div className="font-bold text-sm">{badge.text}</div>
-                  <div className="text-xs text-gray-400">Guaranteed</div>
-                </div>
+                <div className="font-bold text-xs">{badge.text}</div>
               </div>
             ))}
           </div>
@@ -70,7 +79,7 @@ export default function Footer() {
                 <p className="text-sm text-gray-400">Premium E-Commerce</p>
               </div>
             </div>
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-sm">
               Your trusted online destination for quality products at amazing prices. 
               We're committed to providing the best shopping experience with secure payments 
               and fast delivery.
@@ -82,7 +91,7 @@ export default function Footer() {
                   href={social.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center ${social.color} transition-colors duration-300`}
+                  className={`w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center ${social.color} transition-colors duration-300 hover:scale-110`}
                   aria-label={social.label}
                 >
                   {social.icon}
@@ -114,19 +123,18 @@ export default function Footer() {
                 </Link>
               </li>
               {/* <li>
-                <Link to="/deals" className="footer-link">
-                  <span className="flex items-center gap-2">
-                    <FaGift className="text-amber-500" />
-                    Hot Deals
-                  </span>
+                <Link to="/category/electronics" className="footer-link">
+                  Electronics
                 </Link>
               </li>
               <li>
-                <Link to="/trending" className="footer-link">
-                  <span className="flex items-center gap-2">
-                    <FaStar className="text-yellow-500" />
-                    Trending Products
-                  </span>
+                <Link to="/category/fashion" className="footer-link">
+                  Fashion
+                </Link>
+              </li>
+              <li>
+                <Link to="/category/home" className="footer-link">
+                  Home & Living
                 </Link>
               </li> */}
             </ul>
@@ -150,16 +158,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/shipping" className="footer-link">
-                  Shipping Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/returns" className="footer-link">
-                  Returns & Refunds
-                </Link>
-              </li>
-              <li>
                 <Link to="/track-order" className="footer-link">
                   Track Your Order
                 </Link>
@@ -169,54 +167,78 @@ export default function Footer() {
                   Size Guide
                 </Link>
               </li>
+              <li>
+                <Link to="/about" className="footer-link">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/careers" className="footer-link">
+                  Careers
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Legal Documents */}
           <div>
             <h4 className="text-lg font-bold mb-4 pb-3 border-b border-amber-800/30 flex items-center gap-2">
-              <FaMapMarkerAlt className="text-amber-500" />
-              Contact Info
+              <FaFileContract className="text-amber-500" />
+              Legal Documents
             </h4>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <FaMapMarkerAlt className="text-amber-500 mt-1" />
-                <div>
-                  <div className="font-semibold">Address</div>
-                  <div className="text-gray-300 text-sm">
-                    123 E-Commerce Street,<br />
-                    Colombo 01000,<br />
-                    Sri Lanka
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <FaPhone className="text-amber-500" />
-                <div>
-                  <div className="font-semibold">Phone</div>
-                  <div className="text-gray-300 text-sm">+94 77 123 4567</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <FaEnvelope className="text-amber-500" />
-                <div>
-                  <div className="font-semibold">Email</div>
-                  <div className="text-gray-300 text-sm">support@ammogam.com</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <FaClock className="text-amber-500" />
-                <div>
-                  <div className="font-semibold">Business Hours</div>
-                  <div className="text-gray-300 text-sm">9:00 AM - 8:00 PM (GMT+5:30)</div>
-                </div>
-              </div>
-            </div>
+            <ul className="space-y-3">
+              {legalDocuments.map((doc, index) => (
+                <li key={index}>
+                  <Link 
+                    to={doc.path} 
+                    className="footer-link group"
+                    title={doc.description}
+                  >
+                    <span className="flex items-center gap-2">
+                      {doc.icon}
+                      {doc.name}
+                    </span>
+                    <span className="text-xs text-gray-500 group-hover:text-amber-400 transition-colors duration-300 block ml-6 mt-1">
+                      {doc.description}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
+
+        {/* Legal Compliance Banner */}
+        {/* <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 mb-8 border border-gray-700">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-amber-600/20 to-amber-800/20 rounded-xl">
+                <FaShieldAlt className="text-2xl text-amber-500" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-1">Legal Compliance & Security</h3>
+                <p className="text-gray-400 text-sm">
+                  AMMOGAM complies with all applicable e-commerce regulations and data protection laws.
+                  Your security and privacy are our top priorities.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                to="/terms"
+                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center"
+              >
+                Read Terms
+              </Link>
+              <Link
+                to="/privacy"
+                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors duration-300 text-center"
+              >
+                Privacy Policy
+              </Link>
+            </div>
+          </div>
+        </div> */}
 
         {/* Newsletter Subscription */}
         <div className="bg-gradient-to-r from-amber-900/30 to-amber-800/30 rounded-2xl p-6 mb-8 border border-amber-800/30">
@@ -229,16 +251,27 @@ export default function Footer() {
               <p className="text-gray-300">
                 Get exclusive deals, new arrivals, and insider updates directly in your inbox.
               </p>
+              <p className="text-xs text-gray-400 mt-2">
+                By subscribing, you agree to our{' '}
+                <Link to="/terms" className="text-amber-400 hover:text-amber-300 underline">
+                  Terms
+                </Link>{' '}
+                and acknowledge our{' '}
+                <Link to="/privacy" className="text-amber-400 hover:text-amber-300 underline">
+                  Privacy Policy
+                </Link>
+              </p>
             </div>
             <form className="flex gap-2">
               <input
                 type="email"
                 placeholder="Enter your email address"
-                className="flex-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder-gray-500"
+                required
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 Subscribe
               </button>
@@ -251,7 +284,11 @@ export default function Footer() {
           <h4 className="text-center text-gray-400 mb-4">We Accept</h4>
           <div className="flex flex-wrap justify-center gap-4">
             {paymentMethods.map((method, index) => (
-              <div key={index} className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+              <div 
+                key={index} 
+                className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors hover:scale-110 duration-300"
+                title={method.name}
+              >
                 {method.icon}
               </div>
             ))}
@@ -260,22 +297,22 @@ export default function Footer() {
 
         {/* Awards & Recognition */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 bg-gray-800/50 rounded-xl text-center">
+          <div className="p-4 bg-gray-800/50 rounded-xl text-center hover:bg-gray-800/70 transition-colors duration-300">
             <FaAward className="text-3xl text-amber-500 mx-auto mb-2" />
             <div className="font-bold">Trusted Store</div>
             <div className="text-sm text-gray-400">Since 2020</div>
           </div>
-          <div className="p-4 bg-gray-800/50 rounded-xl text-center">
+          <div className="p-4 bg-gray-800/50 rounded-xl text-center hover:bg-gray-800/70 transition-colors duration-300">
             <FaStar className="text-3xl text-yellow-500 mx-auto mb-2" />
             <div className="font-bold">4.9/5 Rating</div>
             <div className="text-sm text-gray-400">Customer Reviews</div>
           </div>
-          <div className="p-4 bg-gray-800/50 rounded-xl text-center">
+          <div className="p-4 bg-gray-800/50 rounded-xl text-center hover:bg-gray-800/70 transition-colors duration-300">
             <FaShoppingBag className="text-3xl text-green-500 mx-auto mb-2" />
             <div className="font-bold">10,000+</div>
             <div className="text-sm text-gray-400">Products Sold</div>
           </div>
-          <div className="p-4 bg-gray-800/50 rounded-xl text-center">
+          <div className="p-4 bg-gray-800/50 rounded-xl text-center hover:bg-gray-800/70 transition-colors duration-300">
             <FaTruck className="text-3xl text-blue-500 mx-auto mb-2" />
             <div className="font-bold">Islandwide</div>
             <div className="text-sm text-gray-400">Free Shipping</div>
@@ -291,25 +328,42 @@ export default function Footer() {
               <p className="text-gray-400">
                 © {currentYear} <span className="text-amber-500 font-semibold">AMMOGAM</span>. All rights reserved.
               </p>
-              <p className="text-sm text-gray-500">
-                Designed & Developed with ❤️ for premium shopping experience
+              <p className="text-sm text-gray-500 mt-1">
+                Registered e-commerce business in Sri Lanka | VAT No: 123456789
               </p>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-6">
-              <Link to="/terms" className="footer-legal-link">
-                Terms of Service
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link to="/terms" className="footer-legal-link group">
+                <span className="flex items-center gap-1">
+                  <FaFileContract className="text-amber-500 group-hover:text-amber-400 transition-colors" />
+                  Terms & Conditions
+                </span>
               </Link>
-              <Link to="/privacy" className="footer-legal-link">
-                Privacy Policy
+              <Link to="/privacy" className="footer-legal-link group">
+                <span className="flex items-center gap-1">
+                  <FaLock className="text-blue-500 group-hover:text-blue-400 transition-colors" />
+                  Privacy Policy
+                </span>
               </Link>
-              <Link to="/cookies" className="footer-legal-link">
+              {/* <Link to="/cookies" className="footer-legal-link">
                 Cookie Policy
               </Link>
               <Link to="/sitemap" className="footer-legal-link">
                 Sitemap
-              </Link>
+              </Link> */}
             </div>
+          </div>
+          
+          {/* Regulatory Compliance Notice */}
+          <div className="mt-4 pt-4 border-t border-gray-800 text-center">
+            <p className="text-xs text-gray-500">
+              AMMOGAM complies with the Consumer Protection Act and Electronic Transactions Act of Sri Lanka.
+              This website is protected by SSL encryption and follows PCI DSS compliance for payment security.
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              For any legal inquiries, please contact: legal@ammogam.com
+            </p>
           </div>
         </div>
       </div>
@@ -319,14 +373,23 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-bold">Get the AMMOGAM App</div>
-              <div className="text-sm">Shop on the go</div>
+              <div className="font-bold flex items-center gap-2">
+                <FaShoppingBag />
+                Get the AMMOGAM App
+              </div>
+              <div className="text-sm text-amber-100">Shop on the go</div>
             </div>
             <div className="flex gap-2">
-              <button className="px-3 py-2 bg-black rounded-lg text-sm font-semibold">
+              <button 
+                className="px-3 py-2 bg-black rounded-lg text-sm font-semibold hover:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+                aria-label="Download on App Store"
+              >
                 App Store
               </button>
-              <button className="px-3 py-2 bg-black rounded-lg text-sm font-semibold">
+              <button 
+                className="px-3 py-2 bg-black rounded-lg text-sm font-semibold hover:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+                aria-label="Get it on Google Play"
+              >
                 Google Play
               </button>
             </div>
