@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaArrowLeft, FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaArrowLeft, FaLock, FaEnvelope, } from 'react-icons/fa';
 
 export default function Login() {
   const auth = useContext(AuthContext)!;
@@ -138,6 +138,55 @@ export default function Login() {
                 </Link>
               </div>
 
+              {/* Terms Acceptance - ADDED SECTION */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+                {/* <div className="flex items-start gap-3 mb-3">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <FaFileContract className="text-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-amber-800 flex items-center gap-2">
+                      <FaShieldAlt className="text-amber-600" />
+                      Terms & Conditions
+                    </h4>
+                    <p className="text-sm text-amber-700 mt-1">
+                      By signing in, you agree to our platform policies
+                    </p>
+                  </div>
+                </div> */}
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <div className="relative mt-1">
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5 border-2 border-amber-300 rounded accent-amber-600 focus:ring-2 focus:ring-amber-300 transition-colors duration-200"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <span className="text-sm text-amber-800">
+                    I agree to the{' '}
+                    <Link 
+                      to="/terms" 
+                      className="text-amber-700 hover:text-amber-900 font-semibold underline hover:no-underline transition-colors duration-200"
+                      target="_blank"
+                    >
+                      Terms & Conditions
+                    </Link>{' '}
+                    and{' '}
+                    <Link 
+                      to="/privacy" 
+                      className="text-amber-700 hover:text-amber-900 font-semibold underline hover:no-underline transition-colors duration-200"
+                      target="_blank"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+                <p className="text-xs text-amber-600 mt-2 ml-8">
+                  You must accept our terms to continue using AMMOGAM.
+                </p>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -161,11 +210,11 @@ export default function Login() {
             </form>
 
             {/* Divider */}
-            <div className="my-8 flex items-center">
+            {/* <div className="my-8 flex items-center">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
               <span className="px-4 text-xs text-gray-500 font-medium uppercase tracking-wider">or continue with</span>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-            </div>
+            </div> */}
 
             {/* Social Login
             <div className="space-y-3 mb-6">
@@ -210,14 +259,14 @@ export default function Login() {
             </div>
 
             {/* Admin Note */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
+            {/* <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
               <div className="flex items-start gap-3">
                 <span className="text-amber-500 text-lg">💡</span>
                 <p className="text-sm text-amber-800">
                   Use same login for both admin & customer. Admins must be created in DB or seeded.
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
