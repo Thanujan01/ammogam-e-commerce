@@ -769,13 +769,13 @@ export default function ProductList() {
               }
             </h1>
             <p className="text-gray-600">
-              {selectedSubcategory 
+              {/* {selectedSubcategory 
                 ? `Discover amazing ${selectedSubcategory} products with premium quality` 
                 : (currentCategory 
                   ? `Explore our curated ${currentCategory?.name} collection` 
                   : `Browse our collection of ${allProducts.length} premium products across ${categories.length} categories`
                 )
-              }
+              } */}
             </p>
           </div>
           {!selectedCategory && (

@@ -5,7 +5,7 @@ import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
 import { 
    FaShoppingCart, FaUser, FaSignOutAlt, FaBars, FaTimes, 
-   FaSearch, FaTag, FaCrown, FaHome, FaShoppingBag,
+   FaSearch,  FaCrown, FaHome, FaShoppingBag,
    FaCaretDown, FaMobileAlt, FaBoxOpen, 
    FaTruck, FaClock, FaChartLine, FaLaptop, FaTshirt,
    FaUsers, FaShieldAlt, FaCreditCard, FaFire,
@@ -221,7 +221,7 @@ export default function Header() {
   const quickLinks = [
     { name: 'Home', path: '/', icon: <FaHome className="text-lg" /> },
     { name: 'Products', path: '/products', icon: <FaShoppingBag className="text-lg" /> },
-    { name: 'Flash Sale', path: '/flash-sale', icon: <FaTag className="text-lg text-orange-500" /> },
+    // { name: 'Flash Sale', path: '/flash-sale', icon: <FaTag className="text-lg text-orange-500" /> },
     { name: 'Wishlist', path: '/wishlist', icon: <FaHeart className="text-lg text-red-500" /> },
   ];
 

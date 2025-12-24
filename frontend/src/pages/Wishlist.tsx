@@ -16,11 +16,11 @@ import {
     FaPlus, 
     FaFilter,
     FaChartLine, 
-    FaBox,
+   
     FaBusinessTime,
     FaClipboardCheck, 
     FaFileInvoiceDollar, 
-    FaPercentage
+    
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
@@ -168,7 +168,7 @@ export default function Wishlist() {
                 </div>
             </div>
 
-            {/* Executive Dashboard */}
+            {/* Executive Dashboard
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -205,7 +205,7 @@ export default function Wishlist() {
                         <div className="text-xs text-gray-500 mt-2">With current discounts</div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Control Panel */}
             {products.length > 0 && (
