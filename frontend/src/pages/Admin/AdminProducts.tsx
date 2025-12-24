@@ -6,14 +6,27 @@ import type { IProduct, ICategory } from '../../types';
 import ProductStats from '../../components/AdminProducts/ProductStats';
 import ProductFilters from '../../components/AdminProducts/ProductFilters';
 import ProductCard from '../../components/AdminProducts/ProductCard';
-import ProductDialog from '../../components/AdminProducts/ProductDialog';
+import ProductDialog, { type ColorVariant } from '../../components/AdminProducts/ProductDialog';
 
 export default function AdminProducts() {
   const [productList, setProductList] = useState<IProduct[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    price: string;
+    stock: string;
+    category: string;
+    subCategory: string;
+    mainSubcategory: string;
+    image: string;
+    brand: string;
+    discount: string;
+    badge: string;
+    colorVariants?: ColorVariant[];
+  }>({
     name: '',
     description: '',
     price: '',
@@ -24,7 +37,8 @@ export default function AdminProducts() {
     image: '',
     brand: '',
     discount: '',
-    badge: ''
+    badge: '',
+    colorVariants: []
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -80,13 +94,15 @@ export default function AdminProducts() {
         image: product.image,
         brand: product.brand || '',
         discount: product.discount?.toString() || '',
-        badge: product.badge || ''
+        badge: product.badge || '',
+        colorVariants: product.colorVariants || []
       });
     } else {
       setEditingProduct(null);
       setFormData({
         name: '', description: '', price: '', stock: '', category: '',
-        mainSubcategory: '', subCategory: '', image: '', brand: '', discount: '', badge: ''
+        mainSubcategory: '', subCategory: '', image: '', brand: '', discount: '', badge: '',
+        colorVariants: []
       });
     }
     setDialogOpen(true);
@@ -102,7 +118,8 @@ export default function AdminProducts() {
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock) || 0
+        stock: parseInt(formData.stock) || 0,
+        colorVariants: formData.colorVariants || []
       };
 
       if (editingProduct) {
