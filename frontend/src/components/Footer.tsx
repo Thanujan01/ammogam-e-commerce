@@ -103,11 +103,7 @@ export default function Footer() {
                   Wishlist
                 </Link>
               </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
-                  Contact Us
-                </Link>
-              </li>
+             
             </ul>
           </div>
 
