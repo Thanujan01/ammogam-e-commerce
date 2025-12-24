@@ -73,10 +73,10 @@ export default function AdminReports() {
     }
   };
 
-  const handleDownloadReport = (reportType: string) => {
-    alert(`Downloading ${reportType} report...`);
-    // In a real application, this would generate and download a PDF or Excel file
-  };
+  // const handleDownloadReport = (reportType: string) => {
+  //   alert(`Downloading ${reportType} report...`);
+    
+  // };
 
 
 
@@ -298,7 +298,7 @@ export default function AdminReports() {
           gradient="from-white to-blue-50"
           iconBg="bg-blue-100"
           iconColor="text-blue-600"
-          onDownload={() => handleDownloadReport('Sales')}
+          
         />
         <ReportCard
           title="Revenue Report"
@@ -307,7 +307,7 @@ export default function AdminReports() {
           gradient="from-white to-green-50"
           iconBg="bg-green-100"
           iconColor="text-green-600"
-          onDownload={() => handleDownloadReport('Revenue')}
+          
         />
         <ReportCard
           title="Product Report"
@@ -316,7 +316,7 @@ export default function AdminReports() {
           gradient="from-white to-purple-50"
           iconBg="bg-purple-100"
           iconColor="text-purple-600"
-          onDownload={() => handleDownloadReport('Product')}
+          
         />
       </div>
 
