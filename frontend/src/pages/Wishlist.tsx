@@ -10,17 +10,16 @@ import {
     FaChevronRight,
     FaRegHeart, 
     FaStar, 
-    FaShareAlt, 
     FaEye,
     FaCheckCircle, 
     FaPlus, 
     FaFilter,
     FaChartLine, 
-   
+    FaBox,
     FaBusinessTime,
     FaClipboardCheck, 
     FaFileInvoiceDollar, 
-    
+    FaPercentage
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
@@ -71,9 +70,9 @@ export default function Wishlist() {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
                 <div className="relative">
-                    <div className="w-16 h-16 border-4 border-gray-300 border-t-[#d97706] rounded-full animate-spin"></div>
+                    <div className="w-16 h-16 border-4 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <FaHeart className="text-[#d97706] animate-pulse text-xl" />
+                        <FaHeart className="text-orange-600 animate-pulse text-xl" />
                     </div>
                 </div>
                 <p className="mt-6 text-gray-600 font-medium">Loading your corporate wishlist...</p>
@@ -115,7 +114,7 @@ export default function Wishlist() {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Enterprise Header */}
-            <div className="bg-gradient-to-r from-[#d97706] via-[#d97706] to-[#d97706] border-b border-[#d97706] shadow-sm">
+            <div className="bg-gradient-to-r from-orange-600 via-orange-600 to-orange-600 border-b border-orange-600 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                         <div className="flex items-center gap-4">
@@ -168,6 +167,45 @@ export default function Wishlist() {
                 </div>
             </div>
 
+            Executive Dashboard
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="text-gray-500 text-sm font-medium">Total Items</div>
+                            <FaBox className="text-orange-500" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">{products.length}</div>
+                        <div className="text-xs text-gray-500 mt-2">Saved for procurement</div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="text-gray-500 text-sm font-medium">Total Value</div>
+                            <FaChartLine className="text-green-500" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">
+                            ${products.reduce((sum, p) => sum + (p?.price || 0), 0).toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-2">Current market price</div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="text-gray-500 text-sm font-medium">Potential Savings</div>
+                            <FaPercentage className="text-red-500" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">
+                            ${products.reduce((sum, p) => {
+                                const discount = p?.discount || 0;
+                                return sum + (p?.price * discount / 100 || 0);
+                            }, 0).toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-2">With current discounts</div>
+                    </div>
+                </div>
+            </div>
+
             {/* Control Panel */}
             {products.length > 0 && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
@@ -179,7 +217,7 @@ export default function Wishlist() {
                                         type="checkbox"
                                         checked={selectedItems.length === products.length}
                                         onChange={selectAll}
-                                        className="w-4 h-4 text-[#d97706] border-gray-300 rounded focus:ring-[#d97706]"
+                                        className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                                     />
                                     <span className="text-sm font-medium text-gray-700">
                                         Select All ({selectedItems.length}/{products.length})
@@ -188,7 +226,7 @@ export default function Wishlist() {
                                 
                                 {selectedItems.length > 0 && (
                                     <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-lg">
-                                        <span className="text-sm font-medium text-[#d97706]">
+                                        <span className="text-sm font-medium text-orange-800">
                                             Selected: ${selectedTotal.toLocaleString()}
                                         </span>
                                         {selectedSavings > 0 && (
@@ -219,13 +257,13 @@ export default function Wishlist() {
                                 <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                                     <button
                                         onClick={() => setViewMode('grid')}
-                                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-[#d97706]' : 'text-gray-600'}`}
+                                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-600'}`}
                                     >
                                         Grid
                                     </button>
                                     <button
                                         onClick={() => setViewMode('list')}
-                                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-[#d97706]' : 'text-gray-600'}`}
+                                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-600'}`}
                                     >
                                         List
                                     </button>
@@ -257,7 +295,7 @@ export default function Wishlist() {
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <Link 
                                     to="/products" 
-                                    className="inline-flex items-center justify-center gap-3 bg-[#d97706] text-white px-8 py-3.5 rounded-lg font-semibold hover:bg-[#b45309] transition-all duration-200 shadow-md hover:shadow-lg"
+                                    className="inline-flex items-center justify-center gap-3 bg-orange-600 text-white px-8 py-3.5 rounded-lg font-semibold hover:bg-orange-700 transition-all duration-200 shadow-md hover:shadow-lg"
                                 >
                                     <FaShoppingCart className="text-lg" />
                                     Browse Products Catalog
@@ -276,7 +314,7 @@ export default function Wishlist() {
                 ) : viewMode === 'grid' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {sortedProducts.filter((p: any) => p !== null).map((product: any) => (
-                            <div key={product._id} className="bg-white rounded-xl border border-gray-200 hover:border-[#d97706] transition-all duration-300 shadow-sm hover:shadow-md">
+                            <div key={product._id} className="bg-white rounded-xl border border-gray-200 hover:border-orange-300 transition-all duration-300 shadow-sm hover:shadow-md">
                                 <div className="p-6">
                                     {/* Header with Checkbox and Category */}
                                     <div className="flex items-start justify-between mb-4">
@@ -285,10 +323,10 @@ export default function Wishlist() {
                                                 type="checkbox"
                                                 checked={selectedItems.includes(product._id)}
                                                 onChange={() => toggleSelectItem(product._id)}
-                                                className="mt-1 w-4 h-4 text-[#d97706] border-gray-300 rounded focus:ring-[#d97706]"
+                                                className="mt-1 w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                                             />
                                             <div>
-                                                <div className="text-xs font-semibold text-[#d97706] uppercase tracking-wider mb-1">
+                                                <div className="text-xs font-semibold text-orange-600 uppercase tracking-wider mb-1">
                                                     {product.category?.name || 'PRODUCT'}
                                                 </div>
                                                 <h4 className="text-lg font-bold text-gray-900 leading-tight">
@@ -371,14 +409,14 @@ export default function Wishlist() {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => cart.addToCart(product)}
-                                            className="flex-1 bg-[#d97706] text-white py-3 rounded-lg font-semibold hover:bg-[#b45309] transition-colors flex items-center justify-center gap-2"
+                                            className="flex-1 bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors flex items-center justify-center gap-2"
                                         >
                                             <FaShoppingCart />
                                             Add to Cart
                                         </button>
-                                        <button className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        {/* <button className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                                             <FaShareAlt className="text-gray-600" />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
@@ -394,7 +432,7 @@ export default function Wishlist() {
                                             type="checkbox"
                                             checked={selectedItems.length === products.length}
                                             onChange={selectAll}
-                                            className="w-4 h-4 text-[#d97706] border-gray-300 rounded focus:ring-[#d97706]"
+                                            className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                                         />
                                     </th>
                                     <th className="py-4 px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
@@ -412,7 +450,7 @@ export default function Wishlist() {
                                                 type="checkbox"
                                                 checked={selectedItems.includes(product._id)}
                                                 onChange={() => toggleSelectItem(product._id)}
-                                                className="w-4 h-4 text-[#d97706] border-gray-300 rounded focus:ring-[#d97706]"
+                                                className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                                             />
                                         </td>
                                         <td className="py-4 px-6">
@@ -456,7 +494,7 @@ export default function Wishlist() {
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => cart.addToCart(product)}
-                                                    className="px-3 py-1.5 bg-[#d97706] text-white text-sm font-medium rounded hover:bg-[#b45309] transition-colors flex items-center gap-1"
+                                                    className="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded hover:bg-orange-700 transition-colors flex items-center gap-1"
                                                 >
                                                     <FaShoppingCart />
                                                     Cart
@@ -496,7 +534,7 @@ export default function Wishlist() {
                                     <button
                                         onClick={addAllToCart}
                                         disabled={selectedItems.length === 0}
-                                        className={`px-5 py-3 bg-[#d97706] text-white text-sm font-medium rounded-lg hover:bg-[#b45309] transition-colors flex items-center gap-2 ${selectedItems.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`px-5 py-3 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 ${selectedItems.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <FaShoppingCart className="text-sm" />
                                         Add Selected to Cart (${selectedItems.length === 0 ? '0' : selectedTotal.toLocaleString()})

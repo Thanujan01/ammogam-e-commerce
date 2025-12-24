@@ -6,9 +6,10 @@ import {
     FaBox, FaChevronLeft, FaChevronRight,
     FaPhoneAlt, FaCreditCard,
     FaExclamationCircle, FaReceipt, FaTruck,
-    FaCheckCircle, FaClock, FaPrint, FaShareAlt,
-    FaDownload, FaCopy, FaShoppingBag, FaCalendarAlt,
-    FaUser, FaHome, FaCreditCard as FaCard, FaTag
+    FaCheckCircle, FaClock,  FaShareAlt,
+     FaCopy, FaShoppingBag, FaCalendarAlt,
+    FaUser, FaHome, FaCreditCard as FaCard, FaTag,
+    FaWhatsapp, FaFacebook, FaLink
 } from 'react-icons/fa';
 
 export default function OrderDetails() {
@@ -17,6 +18,7 @@ export default function OrderDetails() {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -60,6 +62,25 @@ export default function OrderDetails() {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const copyLink = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const shareOnWhatsApp = () => {
+        const message = `Check out my order #${order?._id?.slice(-8).toUpperCase()}\nStatus: ${order?.status}\nTotal: $${order?.totalAmount?.toLocaleString()}\n${window.location.href}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        setShowShareModal(false);
+    };
+
+    const shareOnFacebook = () => {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+        setShowShareModal(false);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -98,6 +119,75 @@ export default function OrderDetails() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* Simple Share Modal */}
+            {showShareModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-bold text-gray-900">Share Via:</h3>
+                            <button 
+                                onClick={() => setShowShareModal(false)}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-6">
+                            {/* Blue Underlined Link */}
+                            {/* <a 
+                                href={window.location.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block bg-blue-50 border border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded-lg px-4 py-3 text-sm transition-colors underline text-center"
+                            >
+                                Click to open order
+                            </a>
+                             */}
+                            {/* Share via: with only 3 icons */}
+                            <div>
+                                {/* <div className="text-sm font-medium text-gray-700 mb-4 text-center">Share via:</div> */}
+                                <div className="flex items-center justify-center gap-6">
+                                    <button 
+                                        onClick={shareOnWhatsApp}
+                                        className="p-3 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors"
+                                        title="Share on WhatsApp"
+                                    >
+                                        <FaWhatsapp className="text-2xl text-emerald-600" />
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={shareOnFacebook}
+                                        className="p-3 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                                        title="Share on Facebook"
+                                    >
+                                        <FaFacebook className="text-2xl text-blue-600" />
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={copyLink}
+                                        className={`p-3 rounded-full transition-colors ${copied ? 'bg-emerald-100' : 'bg-gray-100 hover:bg-gray-200'}`}
+                                        title={copied ? 'Link Copied!' : 'Copy URL'}
+                                    >
+                                        <FaLink className={`text-2xl ${copied ? 'text-emerald-600' : 'text-gray-600'}`} />
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Order info */}
+                            <div className="pt-4 border-t border-gray-200 text-center">
+                                <p className="text-sm text-gray-600 mb-1">
+                                    Order #{order?._id?.slice(-8).toUpperCase()}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                    {copied ? '✓ Link copied to clipboard' : 'Click icons to share'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="bg-white border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 py-6">
@@ -139,13 +229,12 @@ export default function OrderDetails() {
                         </div>
                         
                         <div className="flex items-center gap-3">
-                            <button className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
+                            <button 
+                                onClick={() => setShowShareModal(true)}
+                                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                            >
                                 <FaShareAlt />
                                 Share
-                            </button>
-                            <button className="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2">
-                                <FaPrint />
-                                Print
                             </button>
                         </div>
                     </div>
@@ -301,11 +390,6 @@ export default function OrderDetails() {
                                     </span>
                                 </div>
                             </div>
-
-                            <button className="w-full mt-6 bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3.5 rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-3">
-                                <FaDownload />
-                                Download Invoice
-                            </button>
                         </div>
 
                         {/* Customer Information */}
@@ -384,17 +468,6 @@ export default function OrderDetails() {
                                     <span className="font-mono text-sm text-gray-900">{order._id.slice(-12)}</span>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Support & Help */}
-                        <div className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-2xl border border-amber-200 p-6">
-                            <h3 className="font-bold text-gray-900 mb-3">Need Help?</h3>
-                            <p className="text-sm text-gray-600 mb-4">
-                                If you have any questions about your order, our support team is here to help.
-                            </p>
-                            <button className="w-full bg-white text-amber-700 border border-amber-300 py-2.5 rounded-lg font-medium hover:bg-amber-50 transition-colors">
-                                Contact Support
-                            </button>
                         </div>
                     </div>
                 </div>
