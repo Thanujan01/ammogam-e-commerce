@@ -412,9 +412,9 @@ export default function ProductDetail() {
                 </div>
                 <span className="text-gray-700 font-medium">{product.rating || 4.5}</span>
               </div>
-              <span className="text-gray-500 border-l border-gray-200 pl-6">
+              {/* <span className="text-gray-500 border-l border-gray-200 pl-6">
                 {product.sold || 124} Units Sold
-              </span>
+              </span> */}
             </div>
 
             {/* Color Variations Section */}
