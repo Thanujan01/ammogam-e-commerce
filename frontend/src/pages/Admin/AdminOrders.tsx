@@ -3,6 +3,7 @@ import { FiSearch, FiEye, FiX, FiCheckCircle, FiTruck, FiClock, FiAlertCircle, F
 import { ShoppingCart } from 'lucide-react';
 import { api } from '../../api/api';
 import { getImageUrl } from '../../utils/imageUrl';
+import { useLocation } from 'react-router-dom';
 import OrderStatsCard from '../../components/AdminOrders/OrderStatsCard';
 
 export default function AdminOrders() {
@@ -14,15 +15,28 @@ export default function AdminOrders() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
 
+  const location = useLocation();
+
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders().then((data) => {
+      const searchParams = new URLSearchParams(location.search);
+      const orderId = searchParams.get('id');
+      if (orderId && data) {
+        const order = data.find((o: any) => o._id === orderId);
+        if (order) {
+          setSelectedOrder(order);
+          setViewDialogOpen(true);
+        }
+      }
+    });
+  }, [location]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const res = await api.get('/orders');
       setOrders(res.data);
+      return res.data;
     } catch (error) {
       console.error("Failed to fetch orders", error);
     } finally {
@@ -119,6 +133,7 @@ export default function AdminOrders() {
                 <tr>
                   <td>
                     <strong>${item.product?.name || 'Product'}</strong>
+                    ${item.color ? `<br><span style="font-size: 11px; color: #64748b;">Color: <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${item.colorCode || '#000'}; border: 1px solid #ccc; vertical-align: middle;"></span> ${item.color}</span>` : ''}
                     ${item.product?.seller ? `<br><span style="font-size: 11px; color: #64748b;">Seller: ${item.product.seller.businessName || item.product.seller.name}</span>` : ''}
                   </td>
                   <td style="text-align: center;">${item.quantity}</td>
@@ -134,9 +149,13 @@ export default function AdminOrders() {
               <div class="totals-label">Subtotal:</div>
               <div class="totals-value">$${(order.storeTotal || order.totalAmount).toLocaleString()}</div>
             </div>
+            <div class="totals-row">
+              <div class="totals-label">Shipping Fee:</div>
+              <div class="totals-value">$${(order.shippingFee || 0).toLocaleString()}</div>
+            </div>
             <div class="totals-row total-final">
               <div class="totals-label">Total Amount:</div>
-              <div class="totals-value">$${(order.storeTotal || order.totalAmount).toLocaleString()}</div>
+              <div class="totals-value">$${((order.storeTotal || order.totalAmount) + (order.shippingFee || 0)).toLocaleString()}</div>
             </div>
           </div>
 
@@ -451,7 +470,28 @@ export default function AdminOrders() {
                           </div>
                           <div className="flex-1">
                             <div className="font-bold text-slate-900 text-sm">{item.product?.name}</div>
-                            <div className="text-xs text-slate-400">{item.quantity} × $ {item.price.toLocaleString()}</div>
+                            {item.color && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <div
+                                  className="w-3 h-3 rounded-full border border-gray-300"
+                                  style={{ backgroundColor: item.colorCode || '#000' }}
+                                />
+                                <span className="text-xs text-gray-500">{item.color}</span>
+                              </div>
+                            )}
+                            {item.product?.seller && (
+                              <div className="text-[10px] text-blue-600 font-bold uppercase tracking-wider mt-1">
+                                Seller: {item.product.seller.businessName || item.product.seller.name}
+                              </div>
+                            )}
+                            <div className="text-xs text-slate-400">
+                              {item.quantity} × $ {item.price.toLocaleString()}
+                              {item.shippingFee > 0 && (
+                                <span className="ml-1 text-[#d97706] font-medium">
+                                  (+ $ {item.shippingFee.toLocaleString()} Shipping)
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <div className="text-right font-bold text-slate-900 text-sm">
                             $ {(item.price * item.quantity).toLocaleString()}
@@ -461,12 +501,19 @@ export default function AdminOrders() {
                     </div>
                     <div className="mt-6 pt-6 border-t border-dashed border-slate-200 space-y-3">
                       <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
-                        <span>Store Subtotal</span>
-                        <span>$ {(selectedOrder.storeTotal || selectedOrder.totalAmount).toLocaleString()}</span>
+                        <span>Items Subtotal</span>
+                        <span>$ {(selectedOrder.totalAmount - (selectedOrder.shippingFee || 0)).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center text-lg font-bold text-slate-900">
-                        <span>Store Total</span>
-                        <span className="text-orange-600">$ {(selectedOrder.storeTotal || selectedOrder.totalAmount).toLocaleString()}</span>
+                      <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
+                        <span>Delivery Charges</span>
+                        <div className="text-right">
+                          <p>$ {(selectedOrder.shippingFee || 0).toLocaleString()}</p>
+                          <p className="text-[10px] text-orange-500 font-medium">(Product-specific fees included)</p>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center text-lg font-bold text-slate-900 border-t border-slate-100 pt-3">
+                        <span>Grand Total</span>
+                        <span className="text-orange-600">$ {selectedOrder.totalAmount.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>

@@ -1,3 +1,40 @@
+// Delete seller (admin only)
+exports.deleteSeller = async (req, res) => {
+  try {
+    const seller = await User.findById(req.params.id);
+    if (!seller || seller.role !== 'seller') {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Seller deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// Update seller info (admin only)
+exports.updateSeller = async (req, res) => {
+  try {
+    const sellerId = req.params.id;
+    const updateFields = req.body;
+    const seller = await User.findById(sellerId);
+    if (!seller || seller.role !== 'seller') {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    // Update allowed fields only (customize as needed)
+    if (updateFields.name !== undefined) seller.name = updateFields.name;
+    if (updateFields.email !== undefined) seller.email = updateFields.email;
+    if (updateFields.phone !== undefined) seller.phone = updateFields.phone;
+    if (updateFields.businessName !== undefined) seller.businessName = updateFields.businessName;
+    if (updateFields.businessAddress !== undefined) seller.businessAddress = updateFields.businessAddress;
+    if (updateFields.businessPhone !== undefined) seller.businessPhone = updateFields.businessPhone;
+    if (updateFields.taxId !== undefined) seller.taxId = updateFields.taxId;
+    // Add more fields as needed
+    await seller.save();
+    res.json({ message: 'Seller updated successfully', seller: { ...seller.toObject(), password: undefined } });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");

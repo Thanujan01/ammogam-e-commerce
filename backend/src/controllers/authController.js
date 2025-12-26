@@ -58,10 +58,15 @@ exports.login = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, address } = req.body;
+    const { name, email, phone, address } = req.body;
     const user = await User.findById(req.user._id);
 
     if (user) {
+      if (email && email !== user.email) {
+        const emailExists = await User.findOne({ email });
+        if (emailExists) return res.status(400).json({ message: "Email already exists" });
+        user.email = email;
+      }
       user.name = name || user.name;
       user.phone = phone || user.phone;
       user.address = address || user.address;

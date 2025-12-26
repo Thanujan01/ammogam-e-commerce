@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiBell, FiFilter, FiCheck, FiShoppingCart, FiBox } from 'react-icons/fi';
 import { Bell } from 'lucide-react';
 import { api } from '../../api/api';
+import { Link } from 'react-router-dom';
 
 interface Notification {
     _id: string;
@@ -12,12 +13,13 @@ interface Notification {
     isRead: boolean;
     createdAt: string;
     orderId?: string;
+    productId?: string;
 }
 
 export default function SellerNotifications() {
     const [notificationList, setNotificationList] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterRead, setFilterRead] = useState<string>('all');
+    const [filterRead, setFilterRead] = useState<string>('unread');
 
     useEffect(() => {
         fetchNotifications();
@@ -54,7 +56,7 @@ export default function SellerNotifications() {
         }
     };
 
-   
+
 
     const filteredNotifications = notificationList.filter(notif => {
         const matchesRead =
@@ -181,14 +183,27 @@ export default function SellerNotifications() {
                                         </div>
                                         <p className="text-sm text-gray-600 leading-relaxed max-w-2xl">{notification.message}</p>
 
-                                        {!notification.isRead && (
-                                            <button
-                                                onClick={() => handleMarkAsRead(notification._id)}
-                                                className="mt-3 text-xs font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                                            >
-                                                Mark as read <FiCheck />
-                                            </button>
-                                        )}
+                                        <div className="flex items-center justify-between mt-3">
+                                            <div className="flex items-center gap-3">
+                                                {!notification.isRead && (
+                                                    <button
+                                                        onClick={() => handleMarkAsRead(notification._id)}
+                                                        className="text-xs font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-3 py-1.5 rounded-lg transition-all"
+                                                    >
+                                                        Mark as read <FiCheck />
+                                                    </button>
+                                                )}
+                                                {(notification.orderId || notification.productId) && (
+                                                    <Link
+                                                        to={notification.orderId ? `/seller/orders?id=${notification.orderId}` : `/seller/products?id=${notification.productId}`}
+                                                        onClick={() => !notification.isRead && handleMarkAsRead(notification._id)}
+                                                        className="text-xs font-black text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-all shadow-sm"
+                                                    >
+                                                        {notification.orderId ? 'View Order' : 'View Product'}
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

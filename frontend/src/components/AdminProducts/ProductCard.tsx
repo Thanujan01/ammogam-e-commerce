@@ -61,11 +61,20 @@ export default function ProductCard({ product, onEdit, onDelete }: ProductCardPr
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div>
             <p className="text-xs text-gray-500 mb-1">Price</p>
-            <p className="text-xl font-bold text-blue-600">${product.price.toFixed(2)}</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-xl font-bold text-blue-600">
+                ${(product.discount ? product.price * (1 - product.discount / 100) : product.price).toFixed(2)}
+              </p>
+              {(product.discount || 0) > 0 && (
+                <p className="text-sm text-gray-400 line-through">
+                  ${product.price.toFixed(2)}
+                </p>
+              )}
+            </div>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500 mb-1">Sales</p>
-            <p className="text-lg font-semibold text-gray-700">{product.sales}</p>
+            <p className="text-lg font-semibold text-gray-700">{product.sold || 0}</p>
           </div>
         </div>
 

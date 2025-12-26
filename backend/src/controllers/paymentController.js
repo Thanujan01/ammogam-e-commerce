@@ -3,6 +3,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const emailService = require("../services/emailService");
 const User = require("../models/User");
+const productService = require("../services/productService");
 
 exports.createCheckoutSession = async (req, res) => {
   try {
@@ -111,8 +112,17 @@ exports.verifyPayment = async (req, res) => {
                   .populate('items.product');
 
                 if (order) {
+                    // Check if already paid to prevent double processing
+                    if (order.paymentStatus === 'paid') {
+                        return res.json({ success: true, message: "Payment already processed" });
+                    }
+
                     order.paymentStatus = 'paid';
                     order.status = 'processed';
+                    
+                    // Reduce stock and update sold count
+                    await productService.handleOrderPayment(order);
+                    
                     await order.save();
                     
                     // Send Confirmation Email

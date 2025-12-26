@@ -9,7 +9,7 @@ import {
   FaMapMarkerAlt, FaPhoneAlt, FaLock, FaShieldAlt,
   FaHome, FaUser, FaShoppingBag,
   FaList, FaReceipt, FaArrowRight, FaArrowLeft,
-  FaRegCreditCard, 
+  FaRegCreditCard,
 } from 'react-icons/fa';
 import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
 import { RiSecurePaymentLine } from 'react-icons/ri';
@@ -46,19 +46,29 @@ export default function Checkout() {
 
   const subtotal = cart.totalAmount;
   const itemCount = cart.items.reduce((s: number, i: any) => s + i.quantity, 0);
-  const shipping = subtotal > cart.freeShippingThreshold ? 0 : cart.shippingFee + (Math.max(0, itemCount - 1) * cart.feePerAdditionalItem);
+  const shipping = cart.shippingFee;
   const total = subtotal + shipping;
 
   async function handlePlaceOrder() {
     setIsProcessing(true);
     setLoading(true);
-    
+
     try {
-      const items = cart.items.map(it => ({
-        product: it.product._id,
-        quantity: it.quantity,
-        price: it.product.price || 0
-      }));
+      const items = cart.items.map(it => {
+        const itemPrice = it.product.discount && it.product.discount > 0
+          ? Math.round(it.product.price * (1 - it.product.discount / 100))
+          : it.product.price;
+
+        return {
+          product: it.product._id,
+          quantity: it.quantity,
+          price: itemPrice || 0,
+          color: it.selectedColor || undefined,
+          colorCode: it.selectedColorCode || undefined,
+          variationId: it.variationId || undefined,
+          shippingFee: it.product.shippingFee || 0
+        };
+      });
 
       // Combine country code and phone number
       const fullPhoneNumber = `+${formData.countryCode} ${formData.phone}`;
@@ -158,26 +168,24 @@ export default function Checkout() {
           <div className="flex items-center justify-between relative">
             {/* Progress Line */}
             <div className="absolute top-4 left-0 right-0 h-1 bg-[#d97706]/20 -z-10">
-              <div 
+              <div
                 className="h-1 bg-gradient-to-r from-[#d97706] to-[#b45309] transition-all duration-500"
                 style={{ width: `${(step - 1) * 50}%` }}
               ></div>
             </div>
-            
+
             {steps.map((stepItem) => (
               <div key={stepItem.number} className="flex flex-col items-center relative z-10">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${
-                  step > stepItem.number 
-                    ? 'bg-emerald-500 text-white' 
-                    : step === stepItem.number 
-                    ? 'bg-gradient-to-r from-[#d97706] to-[#b45309] text-white shadow-lg' 
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${step > stepItem.number
+                  ? 'bg-emerald-500 text-white'
+                  : step === stepItem.number
+                    ? 'bg-gradient-to-r from-[#d97706] to-[#b45309] text-white shadow-lg'
                     : 'bg-[#d97706]/10 text-[#d97706]/60'
-                }`}>
+                  }`}>
                   {step > stepItem.number ? <FaCheckCircle /> : stepItem.icon}
                 </div>
-                <span className={`text-sm font-medium ${
-                  step >= stepItem.number ? 'text-gray-900' : 'text-[#d97706]/60'
-                }`}>
+                <span className={`text-sm font-medium ${step >= stepItem.number ? 'text-gray-900' : 'text-[#d97706]/60'
+                  }`}>
                   {stepItem.title}
                 </span>
               </div>
@@ -204,7 +212,7 @@ export default function Checkout() {
                     </div>
                   </div>
                   {step > 1 && (
-                    <button 
+                    <button
                       onClick={() => setStep(1)}
                       className="text-[#d97706] hover:text-[#b45309] font-medium text-sm px-4 py-2 hover:bg-[#d97706]/10 rounded-lg transition-colors"
                     >
@@ -233,7 +241,7 @@ export default function Checkout() {
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
                       />
                     </div>
-                    
+
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
@@ -250,7 +258,7 @@ export default function Checkout() {
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all resize-none"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
@@ -267,7 +275,7 @@ export default function Checkout() {
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Postal Code
@@ -281,7 +289,7 @@ export default function Checkout() {
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
                       />
                     </div>
-                    
+
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
@@ -325,7 +333,7 @@ export default function Checkout() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <Link 
+                    <Link
                       to="/cart"
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
                     >
@@ -370,22 +378,34 @@ export default function Checkout() {
                     {cart.items.map(it => (
                       <div key={it.product._id} className="flex items-center gap-4 p-4 border border-[#d97706]/20 rounded-lg hover:bg-[#d97706]/5 transition-colors">
                         <div className="w-20 h-20 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-2 flex-shrink-0">
-                          <img 
-                            src={getImageUrl(it.product.image)} 
-                            className="w-full h-full object-contain" 
+                          <img
+                            src={getImageUrl(it.product.image)}
+                            className="w-full h-full object-contain"
                             alt={it.product.name}
                           />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-900 mb-1">{it.product.name}</h4>
+                          {it.selectedColor && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-gray-500">Color:</span>
+                              <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                <div
+                                  className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                  style={{ backgroundColor: it.selectedColorCode || '#000' }}
+                                />
+                                <span className="text-xs font-medium text-gray-700">{it.selectedColor}</span>
+                              </div>
+                            </div>
+                          )}
                           <p className="text-sm text-[#d97706]">Quantity: {it.quantity}</p>
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-gray-900">
-                            ${((it.product.price || 0) * it.quantity).toLocaleString()}
+                            ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
                           </div>
                           <div className="text-sm text-[#d97706]">
-                            ${(it.product.price || 0).toLocaleString()} each
+                            ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} each
                           </div>
                         </div>
                       </div>
@@ -542,8 +562,8 @@ export default function Checkout() {
                       <div>
                         <h5 className="font-medium text-gray-900 mb-2">Secure Checkout Process</h5>
                         <p className="text-sm text-gray-600">
-                          <strong>Important:</strong> This is an online-only business. Your order will be shipped only after 
-                          successful payment confirmation. All transactions are protected with 256-bit SSL encryption 
+                          <strong>Important:</strong> This is an online-only business. Your order will be shipped only after
+                          successful payment confirmation. All transactions are protected with 256-bit SSL encryption
                           and PCI-DSS compliance. We never store your card details on our servers.
                         </p>
                       </div>
@@ -598,18 +618,27 @@ export default function Checkout() {
                   {cart.items.map(it => (
                     <div key={it.product._id} className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-1 flex-shrink-0">
-                        <img 
-                          src={getImageUrl(it.product.image)} 
-                          className="w-full h-full object-contain" 
+                        <img
+                          src={getImageUrl(it.product.image)}
+                          className="w-full h-full object-contain"
                           alt={it.product.name}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-medium text-gray-900 truncate">{it.product.name}</h4>
+                        {it.selectedColor && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <div
+                              className="w-3 h-3 rounded-full border border-gray-300"
+                              style={{ backgroundColor: it.selectedColorCode || '#000' }}
+                            />
+                            <span className="text-xs text-gray-500">{it.selectedColor}</span>
+                          </div>
+                        )}
                         <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
                       </div>
                       <div className="text-sm font-medium text-gray-900">
-                        ${((it.product.price || 0) * it.quantity).toLocaleString()}
+                        ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
                       </div>
                     </div>
                   ))}
@@ -622,15 +651,23 @@ export default function Checkout() {
                   <span className="text-gray-600">Subtotal ({itemCount} items)</span>
                   <span className="font-medium text-gray-900">${subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className={`font-medium ${shipping === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
-                    {shipping === 0 ? 'FREE' : `$${shipping.toLocaleString()}`}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span className="font-medium text-gray-900">$0.00</span>
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-col">
+                    <span className="text-gray-600">Shipping</span>
+                    <div className="mt-1 space-y-1">
+                      {Array.from(new Set(cart.items.map(it => it.product._id))).map(productId => {
+                        const item = cart.items.find(it => it.product._id === productId);
+                        if (!item) return null;
+                        return (
+                          <div key={productId} className="text-[10px] text-gray-500 flex items-center gap-1">
+                            <span className="truncate max-w-[120px]">{item.product.name}</span>:
+                            <span>${(item.product.shippingFee || 0).toLocaleString()}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <span className="font-medium text-gray-900">${shipping.toLocaleString()}</span>
                 </div>
               </div>
 

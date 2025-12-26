@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { 
+import {
   FaFacebook, FaInstagram, FaLinkedin, FaYoutube,
   FaShieldAlt, FaTruck, FaHeadset, FaShoppingBag,
   FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcAmex
@@ -10,7 +10,7 @@ export default function Footer() {
 
   const trustBadges = [
     { icon: <FaShieldAlt className="text-xl" />, text: 'Secure Payment', color: 'text-green-500' },
-    { icon: <FaTruck className="text-xl" />, text: 'Free Shipping', color: 'text-amber-500' },
+    { icon: <FaTruck className="text-xl" />, text: 'Safe Delivery', color: 'text-amber-500' },
     { icon: <FaHeadset className="text-xl" />, text: '24/7 Support', color: 'text-blue-500' },
   ];
 
@@ -51,7 +51,7 @@ export default function Footer() {
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          
+
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function Footer() {
                   Wishlist
                 </Link>
               </li>
-             
+
             </ul>
           </div>
 
@@ -140,8 +140,8 @@ export default function Footer() {
             <div className="space-y-4">
               <div className="flex flex-wrap gap-3">
                 {paymentMethods.map((method, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 ${method.color}`}
                     title={method.name}
                   >
@@ -168,7 +168,7 @@ export default function Footer() {
                 © {currentYear} <span className="text-amber-500 font-semibold">AMMOGAM</span>. All rights reserved.
               </p>
             </div>
-            
+
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/terms" className="text-gray-400 hover:text-amber-400 text-xs transition-colors">
                 Terms & Conditions

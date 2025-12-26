@@ -3,7 +3,7 @@ import { api } from '../../api/api';
 import { FaTruck, FaSave, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 
 export default function AdminSettings() {
-    const [settings, setSettings] = useState({ shippingFee: 0, freeShippingThreshold: 0, feePerAdditionalItem: 0 });
+    const [settings, setSettings] = useState({ shippingFee: 0, feePerAdditionalItem: 0 });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
@@ -54,7 +54,7 @@ export default function AdminSettings() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">Store Settings</h1>
-                        <p className="text-gray-500 text-sm">Configure shipping fees and delivery thresholds</p>
+                        <p className="text-gray-500 text-sm">Configure shipping fees and delivery charges</p>
                     </div>
                 </div>
 
@@ -83,18 +83,6 @@ export default function AdminSettings() {
                             />
                             <p className="text-xs text-gray-400">Added for each unique item beyond the first. Set to 0 for flat fee.</p>
                         </div>
-
-                        <div className="space-y-2 col-span-1 md:col-span-2">
-                            <label className="text-sm font-semibold text-gray-600">Free Shipping Threshold ($)</label>
-                            <input
-                                type="number"
-                                value={settings.freeShippingThreshold}
-                                onChange={e => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
-                                placeholder="5000"
-                            />
-                            <p className="text-xs text-gray-400">Order amount required to qualify for free delivery.</p>
-                        </div>
                     </div>
 
                     {message.text && (
@@ -121,23 +109,6 @@ export default function AdminSettings() {
                 </form>
             </div>
 
-            {/* Preview Section */}
-            <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6">
-                <h3 className="text-sm font-semibold text-orange-800 mb-4">Customer Experience Preview</h3>
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-orange-100 flex items-center gap-4">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
-                        <FaTruck />
-                    </div>
-                    <div>
-                        <p className="text-sm font-bold text-gray-900">
-                            Orders above $ {settings.freeShippingThreshold.toLocaleString()} get FREE shipping!
-                        </p>
-                        <p className="text-xs text-gray-500">
-                            Below this, a flat fee of $ {settings.shippingFee.toLocaleString()} applies.
-                        </p>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

@@ -464,7 +464,7 @@ export default function Wishlist() {
                                                 </div>
                                                 <div>
                                                     <div className="font-semibold text-gray-900">{product.name}</div>
-                                                    <div className="text-sm text-gray-600">SKU: {product._id.slice(-8)}</div>
+                                                    
                                                     <div className="flex items-center gap-1 mt-1">
                                                         <FaStar className="text-yellow-400 text-xs" />
                                                         <span className="text-sm">{product.rating || '4.5'}</span>

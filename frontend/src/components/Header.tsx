@@ -3,16 +3,16 @@ import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-do
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
-import { 
-   FaShoppingCart, FaUser, FaSignOutAlt, FaBars, FaTimes, 
-   FaSearch,  FaCrown, FaHome, FaShoppingBag,
-   FaCaretDown, FaMobileAlt, FaBoxOpen, 
-   FaTruck, FaClock, FaChartLine, FaLaptop, FaTshirt,
-   FaUsers, FaShieldAlt, FaCreditCard, FaFire,
-    FaRegHeart, FaHeart, FaBell, FaAngleRight,
-   FaChevronRight, FaArrowRight, FaCheck, FaShippingFast,
-   FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,
-   FaTools, FaPrint, FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet
+import {
+  FaShoppingCart, FaUser, FaSignOutAlt, FaBars, FaTimes,
+  FaSearch, FaCrown, FaHome, FaShoppingBag,
+  FaCaretDown, FaMobileAlt, FaBoxOpen,
+  FaTruck, FaClock, FaChartLine, FaLaptop, FaTshirt,
+  FaUsers, FaShieldAlt, FaCreditCard, FaFire,
+  FaRegHeart, FaHeart, FaBell, FaAngleRight,
+  FaChevronRight, FaArrowRight, FaCheck, FaShippingFast,
+  FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,
+  FaTools, FaPrint, FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet
 } from 'react-icons/fa';
 import { api } from '../api/api';
 
@@ -174,7 +174,7 @@ export default function Header() {
           textColor: 'text-white'
         }));
         setCategories(transformedCategories);
-        
+
         // Set active category based on URL params or first category
         const categoryParam = searchParams.get('category');
         if (categoryParam) {
@@ -251,9 +251,9 @@ export default function Header() {
 
     // Search in products
     products.forEach(product => {
-      if (product.name.toLowerCase().includes(query) || 
-          product.description?.toLowerCase().includes(query) ||
-          product.brand?.toLowerCase().includes(query)) {
+      if (product.name.toLowerCase().includes(query) ||
+        product.description?.toLowerCase().includes(query) ||
+        product.brand?.toLowerCase().includes(query)) {
         suggestions.push({
           type: 'product',
           id: product._id,
@@ -356,7 +356,7 @@ export default function Header() {
             onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 text-sm" />
-          
+
           {/* Mobile Search Suggestions */}
           {showSuggestions && searchSuggestions.length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border max-h-64 overflow-y-auto z-50">
@@ -456,7 +456,7 @@ export default function Header() {
                   >
                     Search
                   </button>
-                  
+
                   {/* Desktop Search Suggestions */}
                   {showSuggestions && searchSuggestions.length > 0 && (
                     <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border max-h-80 overflow-y-auto z-50">
@@ -465,7 +465,7 @@ export default function Header() {
                           {searchSuggestions.length} results for "{searchQuery}"
                         </div>
                       </div>
-                      
+
                       {searchSuggestions.map((suggestion, index) => (
                         <button
                           key={`${suggestion.type}-${suggestion.id}-${index}`}
@@ -485,8 +485,8 @@ export default function Header() {
                           {suggestion.type === 'product' && (
                             <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                               {suggestion.image ? (
-                                <img 
-                                  src={suggestion.image} 
+                                <img
+                                  src={suggestion.image}
                                   alt={suggestion.name}
                                   className="w-full h-full object-cover"
                                 />
@@ -495,7 +495,7 @@ export default function Header() {
                               )}
                             </div>
                           )}
-                          
+
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-800 truncate">{suggestion.displayName}</div>
                             {suggestion.type === 'subcategory' && (
@@ -505,13 +505,13 @@ export default function Header() {
                               <div className="text-sm text-amber-600 font-semibold">₹{suggestion.price}</div>
                             )}
                           </div>
-                          
+
                           <div className={`text-xs px-2 py-1 rounded-full ${suggestion.type === 'category' ? 'bg-blue-100 text-blue-800' : suggestion.type === 'subcategory' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
                             {suggestion.type}
                           </div>
                         </button>
                       ))}
-                      
+
                       <div className="p-3 border-t bg-gray-50">
                         <button
                           type="button"
@@ -572,7 +572,7 @@ export default function Header() {
                   <FaRegHeart className={`text-xl ${isActivePath('/wishlist') ? 'text-red-500' : 'text-gray-600'} group-hover:text-red-500`} />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                        {wishlistCount}
+                      {wishlistCount}
                     </span>
                   )}
                 </div>
@@ -792,7 +792,7 @@ export default function Header() {
               </div>
               <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-full px-4 py-2">
                 <FaTruck className="text-blue-600" />
-                <span className="text-sm font-semibold">Free Shipping</span>
+                <span className="text-sm font-semibold">Safe Delivery</span>
               </div>
             </div>
           </div>
@@ -978,7 +978,7 @@ export default function Header() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
                           <FaShippingFast className="text-green-600 text-lg mx-auto mb-1" />
-                          <div className="text-xs font-medium text-gray-800">Free Shipping</div>
+                          <div className="text-xs font-medium text-gray-800">Safe Delivery</div>
                         </div>
                         <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg text-center">
                           <FaShieldAlt className="text-blue-600 text-lg mx-auto mb-1" />
@@ -1032,7 +1032,7 @@ export default function Header() {
                   onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500" />
-                
+
                 {/* Mobile Search Suggestions in Menu */}
                 {showSuggestions && searchSuggestions.length > 0 && (
                   <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border max-h-64 overflow-y-auto z-50">
@@ -1117,14 +1117,14 @@ export default function Header() {
                     <div className={`${isActivePath(link.path) ? 'text-[#8B4513]' : 'text-amber-500'}`}>{link.icon}</div>
                     {link.name}
                     {link.name === 'Wishlist' && wishlistCount > 0 && (
-                        <span className="ml-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{wishlistCount}</span>
+                      <span className="ml-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{wishlistCount}</span>
                     )}
                     <FaAngleRight className="ml-auto text-gray-400" />
                   </Link>
                 ))}
 
                 {auth.user && (
-                   <Link
+                  <Link
                     to="/notifications"
                     className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
                     onClick={() => setIsMenuOpen(false)}
@@ -1259,7 +1259,7 @@ export default function Header() {
                 </div>
                 <div className="flex flex-col items-center">
                   <FaTruck className="text-amber-600 text-lg mb-1" />
-                  <span className="text-xs">Free Shipping</span>
+                  <span className="text-xs">Safe Delivery</span>
                 </div>
               </div>
               <p className="text-[10px]">© 2025 AMMOGAM. All rights reserved.</p>

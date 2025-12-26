@@ -8,8 +8,8 @@ import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
 import { getImageUrl } from '../utils/imageUrl';
 import {
-  FaShoppingCart, FaHeart, FaShareAlt, 
-  FaTruck, FaStar, FaPlus, FaMinus,
+  FaShoppingCart, FaHeart, FaShareAlt,
+  FaStar, FaPlus, FaMinus,
   FaCheckCircle, FaPalette,
   FaChevronRight, FaChevronLeft as FaChevronLeftIcon,
   FaCheck, FaSyncAlt, FaWhatsapp, FaFacebook, FaLink
@@ -46,7 +46,9 @@ export default function ProductDetail() {
   const [showAllColors, setShowAllColors] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
   const { isInWishlist, toggleWishlist: contextToggle } = useContext(WishlistContext)!;
@@ -57,16 +59,25 @@ export default function ProductDetail() {
 
     api.get(`/products/${id}`)
       .then(res => {
+        const variations = res.data.colorVariants || res.data.variations || [];
+        const normalizedVariations = variations.map((v: any) => ({
+          ...v,
+          _id: v._id || Math.random().toString(36).substr(2, 9),
+          color: v.colorName || v.color, // Map colorName to color for compatibility
+          colorName: v.colorName || v.color,
+          images: v.images || (v.image ? [v.image] : []),
+        }));
+
         const productData: EnhancedProduct = {
           ...res.data,
-          hasVariations: res.data.variations && res.data.variations.length > 0,
-          variations: res.data.variations || [],
-          categoryName: res.data.category?.name || 
-                       (typeof res.data.category === 'string' ? res.data.category : 'Category')
+          hasVariations: normalizedVariations.length > 0,
+          variations: normalizedVariations,
+          categoryName: res.data.category?.name ||
+            (typeof res.data.category === 'string' ? res.data.category : 'Category')
         };
-        
+
         setProduct(productData);
-        
+
         // Set initial variation
         if (productData.hasVariations && productData.variations && productData.variations.length > 0) {
           const defaultVariation = productData.variations.find(v => v.color === productData.defaultColor) || productData.variations[0];
@@ -80,6 +91,13 @@ export default function ProductDetail() {
       .finally(() => {
         setLoading(false);
       });
+
+    // Fetch reviews
+    setReviewsLoading(true);
+    api.get(`/reviews/product/${id}`)
+      .then(res => setReviews(res.data))
+      .catch(err => console.error("Error fetching reviews:", err))
+      .finally(() => setReviewsLoading(false));
   }, [id]);
 
   const handleAddToCart = () => {
@@ -105,7 +123,7 @@ export default function ProductDetail() {
 
   const handleColorSelect = (color: string) => {
     if (!product?.variations) return;
-    
+
     const variation = product.variations.find(v => v.color === color);
     if (variation) {
       setSelectedVariation(variation);
@@ -192,10 +210,11 @@ export default function ProductDetail() {
   }
 
   const currentImages = getCurrentImages();
-  const currentPrice = getCurrentPrice();
-  const currentStock = getCurrentStock();
+  const basePrice = getCurrentPrice();
   const discountPercent = product.discount || 0;
-  const originalPrice = discountPercent > 0 ? (currentPrice / (1 - discountPercent / 100)) : null;
+  const currentPrice = discountPercent > 0 ? (basePrice * (1 - discountPercent / 100)) : basePrice;
+  const originalPrice = discountPercent > 0 ? basePrice : null;
+  const currentStock = getCurrentStock();
 
   // Get category name safely
   const getCategoryName = () => {
@@ -213,14 +232,14 @@ export default function ProductDetail() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-gray-900">Share Via:</h3>
-              <button 
+              <button
                 onClick={() => setShowShareModal(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="space-y-6">
               {/* Blue Underlined Link */}
               {/* <a 
@@ -236,23 +255,23 @@ export default function ProductDetail() {
               <div>
                 {/* <div className="text-sm font-medium text-gray-700 mb-4 text-center">Share via:</div> */}
                 <div className="flex items-center justify-center gap-6">
-                  <button 
+                  <button
                     onClick={shareOnWhatsApp}
                     className="p-3 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors"
                     title="Share on WhatsApp"
                   >
                     <FaWhatsapp className="text-2xl text-emerald-600" />
                   </button>
-                  
-                  <button 
+
+                  <button
                     onClick={shareOnFacebook}
                     className="p-3 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
                     title="Share on Facebook"
                   >
                     <FaFacebook className="text-2xl text-blue-600" />
                   </button>
-                  
-                  <button 
+
+                  <button
                     onClick={copyLink}
                     className={`p-3 rounded-full transition-colors ${copied ? 'bg-emerald-100' : 'bg-gray-100 hover:bg-gray-200'}`}
                     title={copied ? 'Link Copied!' : 'Copy URL'}
@@ -261,7 +280,7 @@ export default function ProductDetail() {
                   </button>
                 </div>
               </div>
-              
+
               {/* Product info */}
               <div className="pt-4 border-t border-gray-200 text-center">
                 <p className="text-sm text-gray-600 mb-1">
@@ -325,7 +344,7 @@ export default function ProductDetail() {
                     alt={product.name}
                     className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                   />
-                  
+
                   {/* Badges */}
                   {discountPercent > 0 && (
                     <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
@@ -337,7 +356,7 @@ export default function ProductDetail() {
                       {product.badge}
                     </div>
                   )}
-                  
+
                   {/* Image Navigation */}
                   {currentImages.length > 1 && (
                     <>
@@ -356,7 +375,7 @@ export default function ProductDetail() {
                     </>
                   )}
                 </div>
-                
+
                 {/* Image Counter */}
                 {currentImages.length > 1 && (
                   <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
@@ -387,9 +406,9 @@ export default function ProductDetail() {
                 >
                   <FaHeart />
                 </button>
-                <button 
+                <button
                   onClick={() => setShowShareModal(true)}
-                  className="p-3 rounded-full bg-gray-50 text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md" 
+                  className="p-3 rounded-full bg-gray-50 text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md"
                   title="Share"
                 >
                   <FaShareAlt />
@@ -412,9 +431,9 @@ export default function ProductDetail() {
                 </div>
                 <span className="text-gray-700 font-medium">{product.rating || 4.5}</span>
               </div>
-              {/* <span className="text-gray-500 border-l border-gray-200 pl-6">
-                {product.sold || 124} Units Sold
-              </span> */}
+              <span className="text-gray-500 border-l border-gray-200 pl-6">
+                {product.sold || 0} Units Sold
+              </span>
             </div>
 
             {/* Color Variations Section */}
@@ -435,7 +454,7 @@ export default function ProductDetail() {
                     </button>
                   )}
                 </div>
-                
+
                 {/* Color Swatches */}
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 mb-4">
                   {displayedColors.map((color) => (
@@ -463,7 +482,7 @@ export default function ProductDetail() {
                     </button>
                   ))}
                 </div>
-                
+
                 {/* Selected Color Info */}
                 {selectedVariation && (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -475,7 +494,7 @@ export default function ProductDetail() {
                         />
                         <div>
                           <div className="font-bold text-gray-900">Selected: {selectedVariation.colorName}</div>
-                          <div className="text-sm text-gray-600">SKU: {selectedVariation.sku || 'N/A'}</div>
+
                         </div>
                       </div>
                       <div className="text-sm font-medium text-gray-700">
@@ -569,8 +588,8 @@ export default function ProductDetail() {
                 className={`flex-1 flex items-center justify-center gap-3 px-8 py-5 rounded-2xl font-black text-lg transition-all duration-300 transform ${isAdded
                   ? 'bg-green-500 text-white'
                   : currentStock === 0
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-amber-600 text-white hover:bg-amber-700 hover:-translate-y-1 shadow-lg shadow-amber-600/30'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-amber-600 text-white hover:bg-amber-700 hover:-translate-y-1 shadow-lg shadow-amber-600/30'
                   }`}
               >
                 {isAdded ? (
@@ -608,87 +627,102 @@ export default function ProductDetail() {
               </button>
             </div>
 
-           
+
           </div>
         </div>
 
-        {/* Additional Info Tabs */}
-        <div className="border-t border-gray-200 p-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Reviews Section */}
+        <div className="mt-12 bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+          <div className="p-8 md:p-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Specifications</h3>
-                <div className="space-y-3">
-                  {product.specifications?.map((spec: any, index: number) => (
-                    <div key={index} className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="text-gray-600">{spec.key}</span>
-                      <span className="font-medium text-gray-900">{spec.value}</span>
-                    </div>
-                  )) || (
-                    <>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-gray-600">Material</span>
-                        <span className="font-medium text-gray-900">Premium Quality</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-gray-600">Dimensions</span>
-                        <span className="font-medium text-gray-900">Standard Size</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-gray-600">Weight</span>
-                        <span className="font-medium text-gray-900">Lightweight</span>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <h2 className="text-3xl font-black text-gray-900">Ratings & Reviews</h2>
+                <p className="text-gray-500 mt-2 font-medium">What our customers are saying about this product</p>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Shipping Information</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <FaTruck className="text-amber-600 mt-1" />
-                    <div>
-                      <div className="font-medium text-gray-900">Express Shipping</div>
-                      <div className="text-sm text-gray-600">3-5 business days • Rs 9.99</div>
-                    </div>
+              <div className="flex items-center gap-6 px-8 py-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <div className="text-center">
+                  {/* <div className="text-4xl font-black text-gray-900">{product.rating || 0}</div> */}
+                  <div className="flex items-center text-yellow-400 mt-1 text-xs">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar key={i} className={i < Math.floor(product.rating || 0) ? 'fill-current' : 'text-gray-300'} />
+                    ))}
                   </div>
-                  <div className="flex items-start gap-3">
-                    <FaTruck className="text-amber-600 mt-1" />
-                    <div>
-                      <div className="font-medium text-gray-900">Standard Shipping</div>
-                      <div className="text-sm text-gray-600">7-10 business days • Rs 4.99</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <FaTruck className="text-amber-600 mt-1" />
-                    <div>
-                      <div className="font-medium text-gray-900">Free Shipping</div>
-                      <div className="text-sm text-gray-600">Orders over $100 • 5-8 business days</div>
-                    </div>
-                  </div>
+                </div>
+                <div className="h-12 w-px bg-gray-200"></div>
+                <div>
+                  {/* <div className="text-lg font-bold text-gray-900">{reviews.length} Reviews</div> */}
+                  <div className="text-sm text-emerald-600 font-bold mt-1">100% Verified Purchases</div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Related Products Section */}
-      <div className="mt-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Related Products</h2>
-            <p className="text-gray-600">You might also like these items</p>
+            {reviewsLoading ? (
+              <div className="py-20 text-center">
+                <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-500 font-medium">Loading authentic reviews...</p>
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="py-20 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300 shadow-sm">
+                  <FaStar className="text-4xl" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">No reviews yet</h3>
+                <p className="text-gray-500 mt-2 max-w-sm mx-auto">Be the first to review this product after your purchase!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {reviews.map((review: any) => (
+                  <div key={review._id} className="p-8 bg-gray-50 rounded-[2rem] border border-gray-100 hover:border-amber-200 transition-all group">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-bold text-amber-600 shadow-sm group-hover:bg-amber-100 transition-colors">
+                          {review.user?.name?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-sm">{review.user?.name || 'Anonymous'}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex text-yellow-400 text-[10px]">
+                              {[...Array(5)].map((_, i) => (
+                                <FaStar key={i} className={i < review.rating ? 'fill-current' : 'text-gray-200'} />
+                              ))}
+                            </div>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                        Verified
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 leading-relaxed italic">
+                      "{review.comment}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <button
-            onClick={() => navigate('/products')}
-            className="text-amber-600 hover:text-amber-700 font-medium flex items-center gap-2"
-          >
-            View All Products
-            <FaChevronRight />
-          </button>
         </div>
-        {/* Related products would be fetched and displayed here */}
+
+        {/* Related Products Section */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Related Products</h2>
+              <p className="text-gray-600">You might also like these items</p>
+            </div>
+            <button
+              onClick={() => navigate('/products')}
+              className="text-amber-600 hover:text-amber-700 font-medium flex items-center gap-2"
+            >
+              View All Products
+              <FaChevronRight />
+            </button>
+          </div>
+          {/* Related products would be fetched and displayed here */}
+        </div>
       </div>
     </div>
   );

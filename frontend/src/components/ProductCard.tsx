@@ -13,8 +13,6 @@ type CartContextType = {
   totalItems: number;
   shippingFee: number;
   feePerAdditionalItem: number;
-  freeShippingThreshold: number;
-  isFreeShipping: boolean;
   calculateShipping: () => number;
   getItemQuantity: (productId: string, variationId?: string) => number;
 };
@@ -31,10 +29,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return [];
     }
   });
-  
+
   const [shippingFee, setShippingFee] = useState(10);
   const [feePerAdditionalItem, setFeePerAdditionalItem] = useState(2);
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(100);
 
   // Load settings from backend
   useEffect(() => {
@@ -44,7 +41,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (res.data) {
           setShippingFee(res.data.shippingFee || 10);
           setFeePerAdditionalItem(res.data.feePerAdditionalItem || 2);
-          setFreeShippingThreshold(res.data.freeShippingThreshold || 100);
         }
       } catch (error) {
         console.error('Failed to load shipping settings:', error);
@@ -66,12 +62,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const syncProductPrices = async () => {
       if (items.length === 0) return;
-      
+
       try {
         const productIds = items.map(item => item.product._id);
         const res = await api.post('/products/batch', { ids: productIds });
         const updatedProducts = res.data;
-        
+
         if (updatedProducts && Array.isArray(updatedProducts)) {
           setItems(prev => prev.map(item => {
             const updatedProduct = updatedProducts.find(p => p._id === item.product._id);
@@ -104,7 +100,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Add to cart with color variation support
   function addToCart(product: IProduct, quantity = 1, variationId?: string, color?: string, colorCode?: string) {
     if (!product || quantity <= 0) return;
-    
+
     const productId = product._id || (product as any).id;
     if (!productId) {
       console.error('Product ID is missing');
@@ -121,28 +117,28 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setItems(prev => {
-      const existingIndex = prev.findIndex(item => 
-        item.product._id === productId && 
+      const existingIndex = prev.findIndex(item =>
+        item.product._id === productId &&
         item.variationId === variationId
       );
 
       if (existingIndex >= 0) {
         // Update existing item
-        return prev.map((item, index) => 
-          index === existingIndex 
-            ? { 
-                ...item, 
-                quantity: item.quantity + quantity,
-                selectedColor: color || item.selectedColor,
-                selectedColorCode: colorCode || item.selectedColorCode
-              }
+        return prev.map((item, index) =>
+          index === existingIndex
+            ? {
+              ...item,
+              quantity: item.quantity + quantity,
+              selectedColor: color || item.selectedColor,
+              selectedColorCode: colorCode || item.selectedColorCode
+            }
             : item
         );
       } else {
         // Add new item
         const variations = product.variations || [];
         const selectedVariation = variationId ? variations.find(v => v._id === variationId) : null;
-        
+
         const newItem: ICartItem = {
           product: processedProduct,
           quantity,
@@ -158,7 +154,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Remove from cart with variation support
   function removeFromCart(productId: string, variationId?: string) {
-    setItems(prev => prev.filter(item => 
+    setItems(prev => prev.filter(item =>
       !(item.product._id === productId && item.variationId === variationId)
     ));
   }
@@ -169,8 +165,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       removeFromCart(productId, variationId);
       return;
     }
-    
-    setItems(prev => prev.map(item => 
+
+    setItems(prev => prev.map(item =>
       item.product._id === productId && item.variationId === variationId
         ? { ...item, quantity: Math.max(1, quantity) }
         : item
@@ -193,24 +189,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Calculate total items count
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
-  // Check if free shipping applies
-  const isFreeShipping = totalAmount >= freeShippingThreshold;
 
   // Calculate shipping cost
   const calculateShipping = () => {
-    if (isFreeShipping) return 0;
-    
+
     const baseFee = shippingFee;
     const additionalItems = Math.max(0, totalItems - 1);
     const additionalFees = additionalItems * feePerAdditionalItem;
-    
+
     return baseFee + additionalFees;
   };
 
   // Get quantity for specific product variation
   const getItemQuantity = (productId: string, variationId?: string) => {
-    const item = items.find(item => 
-      item.product._id === productId && 
+    const item = items.find(item =>
+      item.product._id === productId &&
       item.variationId === variationId
     );
     return item ? item.quantity : 0;
@@ -226,8 +219,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     totalItems,
     shippingFee,
     feePerAdditionalItem,
-    freeShippingThreshold,
-    isFreeShipping,
     calculateShipping,
     getItemQuantity,
   };

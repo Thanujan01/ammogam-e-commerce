@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiCheck, FiX, FiEye, FiExternalLink, FiTrash2 } from 'react-icons/fi';
+import { FiSearch, FiCheck, FiX, FiEye, FiExternalLink, FiTrash2, FiEdit } from 'react-icons/fi';
 import { Store, UserCheck, Clock, StoreIcon } from 'lucide-react';
 import { api } from '../../api/api';
 
@@ -26,6 +26,16 @@ export default function AdminSellers() {
     const [loading, setLoading] = useState(true);
     const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        businessName: '',
+        businessAddress: '',
+        businessPhone: '',
+        taxId: ''
+    });
 
     useEffect(() => {
         fetchSellers();
@@ -84,6 +94,35 @@ export default function AdminSellers() {
         }
     };
 
+    const handleEdit = (seller: Seller) => {
+        setSelectedSeller(seller);
+        setEditFormData({
+            name: seller.name,
+            email: seller.email,
+            phone: seller.phone,
+            businessName: seller.businessName,
+            businessAddress: seller.businessAddress,
+            businessPhone: seller.businessPhone,
+            taxId: seller.taxId
+        });
+        setEditModalOpen(true);
+    };
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedSeller) return;
+
+        try {
+            await api.put(`/sellers/${selectedSeller._id}`, editFormData);
+            alert('Seller updated successfully');
+            setEditModalOpen(false);
+            await fetchSellers();
+        } catch (error: any) {
+            console.error("Failed to update seller", error);
+            alert('Failed to update seller: ' + (error?.response?.data?.message || error.message));
+        }
+    };
+
     const filteredPending = pendingSellers.filter(s =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -101,16 +140,16 @@ export default function AdminSellers() {
     return (
         <div className="space-y-6">
             <div className="bg-white rounded-xl p-6 ">
-                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                      <div className='space-y-2'>
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div className='space-y-2'>
                         <h1 className="text-2xl lg:text-3xl font-bold mb-2">Seller Management</h1>
                         <p className="text-gray-400 flex items-center gap-2">
-                          <StoreIcon className="w-4 h-4" />
-                          Manage product hierarchy and visual themes
+                            <StoreIcon className="w-4 h-4" />
+                            Manage product hierarchy and visual themes
                         </p>
-                      </div>
                     </div>
-                  </div>
+                </div>
+            </div>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="bg-white rounded-xl shadow-lg p-6  border-blue-500">
@@ -246,6 +285,13 @@ export default function AdminSellers() {
                                                             <FiExternalLink className="w-5 h-5" />
                                                         </button>
                                                         <button
+                                                            onClick={() => handleEdit(seller)}
+                                                            className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                                            title="Edit Seller"
+                                                        >
+                                                            <FiEdit className="w-5 h-5" />
+                                                        </button>
+                                                        <button
                                                             onClick={() => handleDelete(seller._id)}
                                                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                             title="Delete Seller"
@@ -270,13 +316,20 @@ export default function AdminSellers() {
                                                         >
                                                             <FiX className="w-5 h-5" />
                                                         </button>
-                                                        {/* <button
+                                                        <button
+                                                            onClick={() => handleEdit(seller)}
+                                                            className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                                            title="Edit Seller"
+                                                        >
+                                                            <FiEdit className="w-5 h-5" />
+                                                        </button>
+                                                        <button
                                                             onClick={() => handleDelete(seller._id)}
-                                                            className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                             title="Delete Seller"
                                                         >
                                                             <FiTrash2 className="w-5 h-5" />
-                                                        </button> */}
+                                                        </button>
                                                     </>
                                                 )}
                                             </div>
@@ -384,6 +437,111 @@ export default function AdminSellers() {
                                 )}
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Seller Modal */}
+            {editModalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+                        <form onSubmit={handleUpdate}>
+                            <div className="bg-amber-600 p-6 text-white flex justify-between items-center">
+                                <h3 className="text-xl font-bold">Edit Seller Information</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setEditModalOpen(false)}
+                                    className="hover:bg-white/20 p-2 rounded-full transition-colors"
+                                >
+                                    <FiX className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-4 max-h-[70vh] overflow-y-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-600">Full Name</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.name}
+                                            onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-600">Email Address</label>
+                                        <input
+                                            type="email"
+                                            value={editFormData.email}
+                                            onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-600">Phone</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.phone}
+                                            onChange={e => setEditFormData({ ...editFormData, phone: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-600">Business Name</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.businessName}
+                                            onChange={e => setEditFormData({ ...editFormData, businessName: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-600">Business Phone</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.businessPhone}
+                                            onChange={e => setEditFormData({ ...editFormData, businessPhone: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-600">Tax ID</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.taxId}
+                                            onChange={e => setEditFormData({ ...editFormData, taxId: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-semibold text-gray-600">Business Address</label>
+                                    <textarea
+                                        value={editFormData.businessAddress}
+                                        onChange={e => setEditFormData({ ...editFormData, businessAddress: e.target.value })}
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none min-h-[100px]"
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-8 pt-4 border-t border-gray-100 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditModalOpen(false)}
+                                    className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-8 py-2.5 bg-amber-600 text-white rounded-xl hover:bg-amber-700 shadow-lg transition-all font-semibold active:scale-95"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

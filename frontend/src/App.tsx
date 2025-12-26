@@ -29,7 +29,6 @@ import AdminProducts from './pages/Admin/AdminProducts';
 import AdminCategories from './pages/Admin/AdminCategories';
 import AdminOrders from './pages/Admin/AdminOrders';
 import AdminProfile from './pages/Admin/AdminProfile';
-import AdminSettings from './pages/Admin/AdminSettings';
 import AdminSellers from './pages/Admin/AdminSellers';
 import AdminSellerDetails from './pages/Admin/AdminSellerDetails';
 
@@ -62,17 +61,17 @@ function App() {
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
-          
+
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          
+
           {/* Legal/Policy Routes */}
           <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
-          
+
           {/* User Protected Routes */}
           <Route
             path="/checkout"
@@ -178,7 +177,6 @@ function App() {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="profile" element={<AdminProfile />} />
-            <Route path="settings" element={<AdminSettings />} />
             <Route path="notifications" element={<AdminNotification />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="sellers" element={<AdminSellers />} />
@@ -188,7 +186,7 @@ function App() {
           {/* Category Routes */}
           <Route path="/category/:category" element={<ProductList />} />
           <Route path="/category/:category/:subcategory" element={<ProductList />} />
-          
+
           {/* Additional Policy Routes (Placeholders for future implementation) */}
           <Route path="/shipping" element={
             <div className="min-h-screen flex items-center justify-center">

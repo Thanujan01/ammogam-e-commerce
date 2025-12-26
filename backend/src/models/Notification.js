@@ -17,12 +17,16 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["order_status", "payment", "general"],
-      default: "order_status",
+      enum: ["order_status", "order", "payment", "general", "stock_alert", "seller_registration"],
+      default: "general",
     },
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
+    },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
     },
     isRead: {
       type: Boolean,

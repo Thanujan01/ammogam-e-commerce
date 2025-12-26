@@ -20,5 +20,7 @@ router.post("/reject/:id", auth, admin, sellerCtrl.rejectSeller);
 router.get("/:id", auth, admin, sellerCtrl.getSellerById);
 router.get("/:id/products", auth, admin, sellerCtrl.getSellerProducts);
 router.get("/:id/orders", auth, admin, sellerCtrl.getSellerOrders);
+router.put("/:id", auth, admin, sellerCtrl.updateSeller);
+router.delete("/:id", auth, admin, sellerCtrl.deleteSeller);
 
 module.exports = router;

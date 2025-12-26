@@ -4,7 +4,7 @@ exports.getSettings = async (req, res) => {
   try {
     let settings = await Settings.findOne();
     if (!settings) {
-      settings = await Settings.create({ shippingFee: 350, freeShippingThreshold: 5000 });
+      settings = await Settings.create({ shippingFee: 350 });
     }
     res.json(settings);
   } catch (error) {
@@ -14,13 +14,12 @@ exports.getSettings = async (req, res) => {
 
 exports.updateSettings = async (req, res) => {
   try {
-    const { shippingFee, freeShippingThreshold, feePerAdditionalItem } = req.body;
+    const { shippingFee, feePerAdditionalItem } = req.body;
     let settings = await Settings.findOne();
     if (!settings) {
       settings = new Settings();
     }
     settings.shippingFee = shippingFee !== undefined ? shippingFee : settings.shippingFee;
-    settings.freeShippingThreshold = freeShippingThreshold !== undefined ? freeShippingThreshold : settings.freeShippingThreshold;
     settings.feePerAdditionalItem = feePerAdditionalItem !== undefined ? feePerAdditionalItem : settings.feePerAdditionalItem;
     
     const updated = await settings.save();
