@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 const Product = require("../models/Product");
+const productService = require("../services/productService");
 
 exports.placeOrder = async (req, res) => {
   try {
@@ -77,11 +78,19 @@ exports.placeOrder = async (req, res) => {
 
 exports.updateOrderToPaid = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate('items.product');
 
     if (order) {
+      if (order.paymentStatus === 'paid') {
+        return res.status(400).json({ message: "Order already paid" });
+      }
+
       order.paymentStatus = "paid";
       order.status = "processed";
+      
+      // Reduce stock and update sold count for each item
+      await productService.handleOrderPayment(order);
+
       const updatedOrder = await order.save();
       res.json(updatedOrder);
     } else {
@@ -103,6 +112,8 @@ exports.updateOrderStatus = async (req, res) => {
       order.items.forEach(item => {
         item.status = status;
       });
+
+
       const updatedOrder = await order.save();
 
       // Create notification for customer
@@ -142,21 +153,20 @@ exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("user", "name email")
-      .populate("items.product")
+      .populate({
+        path: "items.product",
+        populate: { path: "seller", select: "name businessName" }
+      })
       .sort("-createdAt");
 
-    // Filter to only include store products (where seller is null)
-    const storeOrders = orders.map(order => {
+    const processedOrders = orders.map(order => {
       const orderObj = order.toObject();
-      orderObj.items = orderObj.items.filter(item => !item.product || !item.product.seller);
-      
-      // Calculate store-specific subtotal for the admin view
-      orderObj.storeTotal = orderObj.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
+      // Calculate subtotal for all items in the order
+      orderObj.subtotal = orderObj.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       return orderObj;
-    }).filter(order => order.items.length > 0); // Only show orders that have at least one store product
+    });
 
-    res.json(storeOrders);
+    res.json(processedOrders);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -166,7 +176,10 @@ exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate("user", "name email")
-      .populate("items.product");
+      .populate({
+        path: "items.product",
+        populate: { path: "seller", select: "name businessName" }
+      });
 
     if (order) {
       // Check if user is owner or admin

@@ -48,7 +48,7 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
       {/* Category Badge */}
-     
+
 
       {/* Brand Badge */}
       {product.badge && !showCategoryBadge && (
@@ -185,7 +185,7 @@ const RelatedProductsSection = ({ products, categories, addToCart, openProductMo
           <p className="text-gray-600 text-sm">You might also like these products</p>
         </div>
         {!showAllRelated && products.length > 6 && (
-          <button 
+          <button
             onClick={onViewAll}
             className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm bg-amber-50 hover:bg-amber-100 px-4 py-2 rounded-lg transition-all duration-300"
           >
@@ -249,7 +249,7 @@ const AllProductsSection = ({ products, categories, addToCart, openProductModal,
           </div>
         </div>
         {!showAllProducts && products.length > 12 && (
-          <button 
+          <button
             onClick={onViewAll}
             className="text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 font-medium flex items-center text-sm px-5 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
           >
@@ -475,14 +475,14 @@ export default function ProductList() {
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Get parameters from URL
   const categoryParam = searchParams.get('category');
   const subcategoryParam = searchParams.get('subcategory');
-  
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(subcategoryParam);
-  
+
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [showAllRelated, setShowAllRelated] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
@@ -554,26 +554,26 @@ export default function ProductList() {
 
     let productsToShow = [];
     let relatedToShow = [];
-    
+
     if (selectedCategory) {
       const targetCat = categories.find(c => c.id === selectedCategory);
       if (targetCat) {
         if (selectedSubcategory) {
           // When subcategory is selected: Show products from that subcategory
-          productsToShow = allProducts.filter(p => 
-            p.categoryId === selectedCategory && 
+          productsToShow = allProducts.filter(p =>
+            p.categoryId === selectedCategory &&
             p.subCategory === selectedSubcategory
           );
-          
+
           // Related Products: Show products from SAME category but DIFFERENT subcategories
-          relatedToShow = allProducts.filter(p => 
-            p.categoryId === selectedCategory && 
+          relatedToShow = allProducts.filter(p =>
+            p.categoryId === selectedCategory &&
             p.subCategory !== selectedSubcategory
           );
         } else {
           // When only category is selected (no subcategory): Show ALL products from that category
           productsToShow = allProducts.filter(p => p.categoryId === selectedCategory);
-          
+
           // Related Products: Show products from OTHER categories
           relatedToShow = allProducts.filter(p => p.categoryId !== selectedCategory);
         }
@@ -581,19 +581,19 @@ export default function ProductList() {
     } else {
       // No category selected: Show first 12 products as featured
       productsToShow = allProducts.slice(0, 12);
-      
+
       // Related Products: Show random products from all categories
       const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
       relatedToShow = shuffled.slice(0, 12);
     }
-    
+
     setFilteredProducts(productsToShow);
     setRelatedProducts(relatedToShow);
   }, [selectedCategory, selectedSubcategory, allProducts, categories]);
 
   const handleCategorySelect = (categoryId: string) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (categoryId && selectedCategory !== categoryId) {
       params.set('category', categoryId);
       params.delete('subcategory');
@@ -605,7 +605,7 @@ export default function ProductList() {
       setSelectedCategory(null);
       setSelectedSubcategory(null);
     }
-    
+
     setShowAllRelated(false);
     setShowAllProducts(false);
     setSearchParams(params);
@@ -613,11 +613,11 @@ export default function ProductList() {
 
   const handleSubcategorySelect = (subcategoryId: string) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (selectedCategory) {
       params.set('category', selectedCategory);
     }
-    
+
     if (subcategoryId && selectedSubcategory !== subcategoryId) {
       params.set('subcategory', subcategoryId);
       setSelectedSubcategory(subcategoryId);
@@ -625,7 +625,7 @@ export default function ProductList() {
       params.delete('subcategory');
       setSelectedSubcategory(null);
     }
-    
+
     setShowAllRelated(false);
     setShowAllProducts(false);
     setSearchParams(params);
@@ -633,7 +633,7 @@ export default function ProductList() {
 
   const handleClearFilters = (type: 'category' | 'subcategory' | 'all') => {
     const params = new URLSearchParams();
-    
+
     if (type === 'all' || type === 'category') {
       setSelectedCategory(null);
       setSelectedSubcategory(null);
@@ -643,7 +643,7 @@ export default function ProductList() {
         params.set('category', selectedCategory);
       }
     }
-    
+
     setShowAllRelated(false);
     setShowAllProducts(false);
     setSearchParams(params);
@@ -671,8 +671,8 @@ export default function ProductList() {
     }, 100);
   };
 
-  const addToCart = (product: any) => { 
-    cart.addToCart(product); 
+  const addToCart = (product: any) => {
+    cart.addToCart(product);
     const notification = document.createElement('div');
     notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in flex items-center gap-2';
     notification.innerHTML = `
@@ -686,9 +686,9 @@ export default function ProductList() {
       document.body.removeChild(notification);
     }, 3000);
   };
-  
-  const openProductModal = (product: any) => { 
-    navigate(`/products/${product.id}`); 
+
+  const openProductModal = (product: any) => {
+    navigate(`/products/${product.id}`);
   };
 
   const handleToggleWishlist = async (productId: string) => {
@@ -760,10 +760,10 @@ export default function ProductList() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              {selectedSubcategory 
-                ? `${selectedSubcategory} Products` 
-                : (currentCategory 
-                  ? `${currentCategory?.name} Collection` 
+              {selectedSubcategory
+                ? `${selectedSubcategory} Products`
+                : (currentCategory
+                  ? `${currentCategory?.name} Collection`
                   : 'Premium Products Collection'
                 )
               }

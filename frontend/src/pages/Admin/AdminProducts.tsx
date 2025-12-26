@@ -3,6 +3,7 @@ import { FiPlus, FiSearch } from 'react-icons/fi';
 import { Package } from 'lucide-react';
 import { api } from '../../api/api';
 import type { IProduct, ICategory } from '../../types';
+import { useLocation } from 'react-router-dom';
 import ProductStats from '../../components/AdminProducts/ProductStats';
 import ProductFilters from '../../components/AdminProducts/ProductFilters';
 import ProductCard from '../../components/AdminProducts/ProductCard';
@@ -25,6 +26,7 @@ export default function AdminProducts() {
     brand: string;
     discount: string;
     badge: string;
+    shippingFee: string;
     colorVariants?: ColorVariant[];
   }>({
     name: '',
@@ -38,15 +40,29 @@ export default function AdminProducts() {
     brand: '',
     discount: '',
     badge: '',
+    shippingFee: '',
     colorVariants: []
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<string>('all');
 
+  const location = useLocation();
+
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData().then((data) => {
+      if (data) {
+        const searchParams = new URLSearchParams(location.search);
+        const productId = searchParams.get('id');
+        if (productId) {
+          const product = data.find((p: any) => p.id === productId);
+          if (product) {
+            openDialog(product);
+          }
+        }
+      }
+    });
+  }, [location]);
 
   const fetchData = async () => {
     try {
@@ -75,8 +91,10 @@ export default function AdminProducts() {
         seller: p.seller || null
       }));
       setProductList(normalizedProducts);
+      return normalizedProducts;
     } catch (error) {
       console.error("Failed to fetch data", error);
+      return null;
     }
   };
 
@@ -95,6 +113,7 @@ export default function AdminProducts() {
         brand: product.brand || '',
         discount: product.discount?.toString() || '',
         badge: product.badge || '',
+        shippingFee: product.shippingFee?.toString() || '',
         colorVariants: product.colorVariants || []
       });
     } else {
@@ -102,6 +121,7 @@ export default function AdminProducts() {
       setFormData({
         name: '', description: '', price: '', stock: '', category: '',
         mainSubcategory: '', subCategory: '', image: '', brand: '', discount: '', badge: '',
+        shippingFee: '',
         colorVariants: []
       });
     }
@@ -118,6 +138,7 @@ export default function AdminProducts() {
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
+        shippingFee: parseFloat(formData.shippingFee) || 0,
         stock: parseInt(formData.stock) || 0,
         colorVariants: formData.colorVariants || []
       };
@@ -148,23 +169,7 @@ export default function AdminProducts() {
     }
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const uploadData = new FormData();
-      uploadData.append('file', file);
 
-      try {
-        const res = await api.post('/uploads/image', uploadData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        setFormData(prev => ({ ...prev, image: res.data.url }));
-      } catch (error) {
-        console.error("Image upload failed", error);
-        alert("Failed to upload image");
-      }
-    }
-  };
 
   const filteredProducts = productList.filter(p => {
     const matchesSearch =
@@ -273,7 +278,6 @@ export default function AdminProducts() {
         onClose={() => setDialogOpen(false)}
         onSubmit={handleSubmit}
         onChange={handleFormChange}
-        onImageChange={handleImageChange}
       />
     </div>
   );

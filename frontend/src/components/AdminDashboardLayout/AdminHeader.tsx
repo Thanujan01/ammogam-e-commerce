@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useContext } from "react";
 import { Menu, Bell, User, LogOut } from "lucide-react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { api } from "../../api/api";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -11,7 +12,24 @@ export function AdminHeader({ onMenuClick }: HeaderProps) {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await api.get('/notifications');
+        const unread = res.data.filter((n: any) => !n.isRead).length;
+        setUnreadCount(unread);
+      } catch (err) {
+        console.error("Failed to fetch notification count", err);
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -59,9 +77,16 @@ export function AdminHeader({ onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-2 relative" ref={dropdownRef}>
 
           {/* Notification */}
-          <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
+          <button
+            onClick={() => navigate('/admin/notifications')}
+            className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
             <Bell className="w-5 h-5 text-gray-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-white text-[10px] text-white flex items-center justify-center font-bold px-1">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </button>
 
           {/* Profile Button */}
@@ -85,7 +110,7 @@ export function AdminHeader({ onMenuClick }: HeaderProps) {
                 <p className="text-sm font-semibold text-gray-800">{auth?.user?.name || 'Admin'}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{auth?.user?.email}</p>
               </div>
-              <button 
+              <button
                 className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 flex items-center gap-3 transition-colors"
                 onClick={() => { setProfileOpen(false); navigate('/admin/profile'); }}
               >

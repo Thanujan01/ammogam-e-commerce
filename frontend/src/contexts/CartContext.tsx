@@ -13,7 +13,6 @@ type CartContextType = {
   totalAmount: number;
   shippingFee: number;
   feePerAdditionalItem: number;
-  freeShippingThreshold: number;
   totalItems: number;
 };
 
@@ -22,28 +21,18 @@ export const CartContext = createContext<CartContextType | undefined>(undefined)
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<ICartItem[]>(() => {
     try {
-      const raw = localStorage.getItem('ammogam_cart'); 
+      const raw = localStorage.getItem('ammogam_cart');
       return raw ? JSON.parse(raw) : [];
     } catch (error) {
       console.error("Error parsing cart from localStorage:", error);
       return [];
     }
   });
-  const [shippingFee, setShippingFee] = useState(10);
-  const [feePerAdditionalItem, setFeePerAdditionalItem] = useState(0);
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(100);
+  const feePerAdditionalItem = 0;
 
   useEffect(() => {
     localStorage.setItem('ammogam_cart', JSON.stringify(items));
   }, [items]);
-
-  useEffect(() => {
-    api.get('/settings').then(res => {
-      setShippingFee(res.data.shippingFee);
-      setFeePerAdditionalItem(res.data.feePerAdditionalItem || 0);
-      setFreeShippingThreshold(res.data.freeShippingThreshold);
-    }).catch(console.error);
-  }, []);
 
   // Sync prices with backend to ensure they are never 0 if products have prices
   useEffect(() => {
@@ -56,14 +45,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           const fresh = products.find((p: any) => p._id === (item.product._id || (item.product as any).id));
           if (fresh && fresh.price !== undefined && fresh.price !== item.product.price) {
             console.log(`Syncing price for ${item.product.name}: ${item.product.price} -> ${fresh.price}`);
-            return { 
-              ...item, 
-              product: { 
-                ...item.product, 
+            return {
+              ...item,
+              product: {
+                ...item.product,
                 price: fresh.price,
                 discount: fresh.discount,
-                stock: fresh.stock 
-              } 
+                stock: fresh.stock
+              }
             };
           }
           return item;
@@ -88,20 +77,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setItems(prev => {
-      const exist = prev.find(it => 
-        (it.product._id || (it.product as any).id) === pid && 
+      const exist = prev.find(it =>
+        (it.product._id || (it.product as any).id) === pid &&
         it.variationId === variationId
       );
-      
+
       if (exist) {
-        return prev.map(it => 
+        return prev.map(it =>
           (it.product._id || (it.product as any).id) === pid && it.variationId === variationId
             ? { ...it, quantity: it.quantity + qty }
             : it
         );
       }
-      return [...prev, { 
-        product: processedProduct, 
+      return [...prev, {
+        product: processedProduct,
         quantity: qty,
         variationId,
         selectedColor: color,
@@ -111,13 +100,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }
 
   function removeFromCart(productId: string, variationId?: string) {
-    setItems(prev => prev.filter(it => 
+    setItems(prev => prev.filter(it =>
       !(it.product._id === productId && it.variationId === variationId)
     ));
   }
 
   function updateQty(productId: string, qty: number, variationId?: string) {
-    setItems(prev => prev.map(it => 
+    setItems(prev => prev.map(it =>
       it.product._id === productId && it.variationId === variationId
         ? { ...it, quantity: qty }
         : it
@@ -137,6 +126,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalItems = items.reduce((s, it) => s + it.quantity, 0);
 
+  // Dynamic Shipping Fee Calculation (Per Unique Product)
+  const shippingFee = items.reduce((acc, it, idx) => {
+    // Only add shipping fee once per unique product ID
+    const isFirstOccurrence = items.findIndex(i => i.product._id === it.product._id) === idx;
+    if (!isFirstOccurrence) return acc;
+    return acc + (it.product.shippingFee || 0);
+  }, 0);
+
   return (
     <CartContext.Provider value={{
       items,
@@ -147,7 +144,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       totalAmount,
       shippingFee,
       feePerAdditionalItem,
-      freeShippingThreshold,
       totalItems
     }}>
       {children}

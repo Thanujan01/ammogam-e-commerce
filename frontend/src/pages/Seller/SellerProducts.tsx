@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FiPlus } from 'react-icons/fi';
 import { Package } from 'lucide-react';
 import { api } from '../../api/api';
@@ -12,6 +13,7 @@ export default function SellerProducts() {
     const [productList, setProductList] = useState<IProduct[]>([]);
     const [categories, setCategories] = useState<ICategory[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [searchParams] = useSearchParams();
     const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
     const [formData, setFormData] = useState<{
         name: string;
@@ -25,6 +27,7 @@ export default function SellerProducts() {
         brand: string;
         discount: string;
         badge: string;
+        shippingFee: string;
         colorVariants?: ColorVariant[];
     }>({
         name: '',
@@ -38,6 +41,7 @@ export default function SellerProducts() {
         brand: '',
         discount: '',
         badge: '',
+        shippingFee: '',
         colorVariants: []
     });
     const [searchQuery, setSearchQuery] = useState('');
@@ -69,6 +73,17 @@ export default function SellerProducts() {
         }
     };
 
+    // Auto-select product if ID is in URL
+    useEffect(() => {
+        const productId = searchParams.get('id');
+        if (productId && productList.length > 0) {
+            const product = productList.find(p => p.id === productId || (p as any)._id === productId);
+            if (product) {
+                openDialog(product);
+            }
+        }
+    }, [searchParams, productList]);
+
     const openDialog = (product?: any) => {
         if (product) {
             setEditingProduct(product);
@@ -84,6 +99,7 @@ export default function SellerProducts() {
                 brand: product.brand || '',
                 discount: product.discount?.toString() || '',
                 badge: product.badge || '',
+                shippingFee: product.shippingFee?.toString() || '',
                 colorVariants: product.colorVariants || []
             });
         } else {
@@ -91,6 +107,7 @@ export default function SellerProducts() {
             setFormData({
                 name: '', description: '', price: '', stock: '', category: '',
                 mainSubcategory: '', subCategory: '', image: '', brand: '', discount: '', badge: '',
+                shippingFee: '',
                 colorVariants: []
             });
         }
@@ -107,6 +124,7 @@ export default function SellerProducts() {
             const payload = {
                 ...formData,
                 price: parseFloat(formData.price),
+                shippingFee: parseFloat(formData.shippingFee) || 0,
                 stock: parseInt(formData.stock) || 0,
                 colorVariants: formData.colorVariants || []
             };
@@ -135,21 +153,7 @@ export default function SellerProducts() {
         }
     };
 
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const uploadData = new FormData();
-            uploadData.append('file', file);
-            try {
-                const res = await api.post('/uploads/image', uploadData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                setFormData(prev => ({ ...prev, image: res.data.url }));
-            } catch (error) {
-                console.error("Image upload failed", error);
-            }
-        }
-    };
+
 
     const filteredProducts = productList.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -219,7 +223,6 @@ export default function SellerProducts() {
                 onClose={() => setDialogOpen(false)}
                 onSubmit={handleSubmit}
                 onChange={(field, val) => setFormData(prev => ({ ...prev, [field]: val }))}
-                onImageChange={handleImageChange}
             />
         </div>
     );

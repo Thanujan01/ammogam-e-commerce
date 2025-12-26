@@ -5,8 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTrash, FaPlus, FaMinus, FaArrowLeft,
-  FaShoppingCart, FaShieldAlt, FaTruck,
-  FaCheckCircle, FaCreditCard, FaBox,
+  FaShoppingCart, FaShieldAlt, FaCreditCard, FaBox,
   FaLock, FaTag, FaUser
 } from 'react-icons/fa';
 
@@ -17,9 +16,8 @@ export default function CartPage() {
 
   const subtotal = cart.totalAmount;
   const itemCount = cart.items.reduce((s: number, i: any) => s + i.quantity, 0);
-  const shipping = subtotal > cart.freeShippingThreshold ? 0 : cart.shippingFee + (Math.max(0, itemCount - 1) * cart.feePerAdditionalItem);
+  const shipping = cart.shippingFee;
   const total = subtotal + shipping;
-  const shippingProgress = Math.min((subtotal / cart.freeShippingThreshold) * 100, 100);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#d97706]/5 to-white">
@@ -34,8 +32,8 @@ export default function CartPage() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
                 <p className="text-sm text-gray-500">
-                  {cart.items.length === 0 
-                    ? 'Your cart is currently empty' 
+                  {cart.items.length === 0
+                    ? 'Your cart is currently empty'
                     : `${itemCount} items in your cart`}
                 </p>
               </div>
@@ -99,11 +97,11 @@ export default function CartPage() {
                 {/* Cart Items List */}
                 <div className="divide-y divide-[#d97706]/10">
                   {cart.items.map((it: any) => (
-                    <div key={it.product._id} className="p-6 hover:bg-[#d97706]/5 transition-colors">
+                    <div key={it.product._id + (it.variationId || '')} className="p-6 hover:bg-[#d97706]/5 transition-colors">
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                         {/* Product Info */}
                         <div className="col-span-6 flex items-center gap-6">
-                          <div 
+                          <div
                             onClick={() => navigate(`/products/${it.product._id}`)}
                             className="w-24 h-24 bg-[#d97706]/5 rounded-xl border border-[#d97706]/20 overflow-hidden flex items-center justify-center p-3 cursor-pointer hover:shadow-md transition-shadow"
                           >
@@ -114,15 +112,28 @@ export default function CartPage() {
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 
+                            <h3
                               onClick={() => navigate(`/products/${it.product._id}`)}
                               className="font-bold text-gray-900 mb-2 hover:text-[#d97706] cursor-pointer transition-colors"
                             >
                               {it.product.name}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">{it.product.description}</p>
+                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{it.product.description}</p>
+                            {/* Display selected color if available */}
+                            {it.selectedColor && (
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-xs text-gray-500">Color:</span>
+                                <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                  <div
+                                    className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                    style={{ backgroundColor: it.selectedColorCode || '#000' }}
+                                  />
+                                  <span className="text-xs font-medium text-gray-700">{it.selectedColor}</span>
+                                </div>
+                              </div>
+                            )}
                             <button
-                              onClick={() => cart.removeFromCart(it.product._id)}
+                              onClick={() => cart.removeFromCart(it.product._id, it.variationId)}
                               className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-2 transition-colors"
                             >
                               <FaTrash className="text-xs" />
@@ -134,8 +145,13 @@ export default function CartPage() {
                         {/* Price (Desktop) */}
                         <div className="hidden md:block col-span-2 text-center">
                           <div className="text-lg font-bold text-gray-900">
-                            ${(it.product.price || 0).toLocaleString()}
+                            ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()}
                           </div>
+                          {it.product.discount > 0 && (
+                            <div className="text-xs text-gray-400 line-through">
+                              ${it.product.price.toLocaleString()}
+                            </div>
+                          )}
                           <div className="text-sm text-[#d97706]">per unit</div>
                         </div>
 
@@ -144,7 +160,7 @@ export default function CartPage() {
                           <div className="flex items-center justify-center">
                             <div className="flex items-center border border-[#d97706] rounded-lg">
                               <button
-                                onClick={() => cart.updateQty(it.product._id, Math.max(1, it.quantity - 1))}
+                                onClick={() => cart.updateQty(it.product._id, Math.max(1, it.quantity - 1), it.variationId)}
                                 className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-l-lg transition-colors"
                               >
                                 <FaMinus className="text-sm" />
@@ -153,7 +169,7 @@ export default function CartPage() {
                                 {it.quantity}
                               </div>
                               <button
-                                onClick={() => cart.updateQty(it.product._id, it.quantity + 1)}
+                                onClick={() => cart.updateQty(it.product._id, it.quantity + 1, it.variationId)}
                                 className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-r-lg transition-colors"
                               >
                                 <FaPlus className="text-sm" />
@@ -165,10 +181,10 @@ export default function CartPage() {
                         {/* Item Total */}
                         <div className="col-span-2 text-right">
                           <div className="text-xl font-bold text-gray-900 mb-1">
-                            ${((it.product.price || 0) * it.quantity).toLocaleString()}
+                            ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
                           </div>
                           <div className="text-sm text-[#d97706]">
-                            ${(it.product.price || 0).toLocaleString()} × {it.quantity}
+                            ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} × {it.quantity}
                           </div>
                         </div>
                       </div>
@@ -177,34 +193,7 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Free Shipping Progress */}
-              {subtotal < cart.freeShippingThreshold && (
-                <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 rounded-2xl border border-[#d97706]/20 p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-gradient-to-r from-[#d97706] to-[#b45309] rounded-lg shadow-sm">
-                      <FaTruck className="text-white text-lg" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-1">Free Shipping Available!</h3>
-                      <p className="text-sm text-gray-600">
-                        Add ${(cart.freeShippingThreshold - subtotal).toLocaleString()} more to qualify for free shipping
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#d97706]">Progress to free shipping</span>
-                      <span className="font-medium text-[#d97706]">{shippingProgress.toFixed(0)}%</span>
-                    </div>
-                    <div className="w-full bg-[#d97706]/10 rounded-full h-2.5 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-[#d97706] to-[#b45309] h-full rounded-full transition-all duration-500 shadow-sm"
-                        style={{ width: `${shippingProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              )}
+
 
               {/* Security & Features */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -248,7 +237,7 @@ export default function CartPage() {
                   {/* Items List Preview */}
                   <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
                     {cart.items.map((it: any) => (
-                      <div key={it.product._id} className="flex items-center gap-3">
+                      <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20 overflow-hidden flex-shrink-0">
                           <img
                             src={getImageUrl(it.product.image)}
@@ -258,10 +247,19 @@ export default function CartPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">{it.product.name}</p>
+                          {it.selectedColor && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <div
+                                className="w-3 h-3 rounded-full border border-gray-300"
+                                style={{ backgroundColor: it.selectedColorCode || '#000' }}
+                              />
+                              <span className="text-xs text-gray-500">{it.selectedColor}</span>
+                            </div>
+                          )}
                           <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
                         </div>
                         <div className="text-sm font-medium text-gray-900">
-                          ${((it.product.price || 0) * it.quantity).toLocaleString()}
+                          ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
                         </div>
                       </div>
                     ))}
@@ -273,27 +271,49 @@ export default function CartPage() {
                       <span className="text-gray-600">Subtotal</span>
                       <span className="font-medium text-gray-900">${subtotal.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Shipping</span>
+                    <div className="flex justify-between relative group">
+                      <span className="text-gray-600 border-b border-dotted border-gray-400 cursor-help">Shipping</span>
                       <span className={`font-medium ${shipping === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
                         {shipping === 0 ? 'FREE' : `$${shipping.toLocaleString()}`}
                       </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Tax</span>
-                      <span className="font-medium text-gray-900">Calculated at checkout</span>
+
+                      {/* Shipping Calculation Breakdown Tooltip/Dropdown */}
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-[#d97706]/20 p-4 z-20 hidden group-hover:block transition-all">
+                        <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3 border-b border-[#d97706]/10 pb-2">
+                          Shipping Breakdown
+                        </h4>
+                        <div className="space-y-2">
+                          {Array.from(new Set(cart.items.map((it: any) => it.product._id))).map((productId: any) => {
+                            const item = cart.items.find((it: any) => it.product._id === productId)!;
+                            const fee = (item.product.shippingFee || 0);
+                            return (
+                              <div key={productId} className="flex justify-between items-center text-xs">
+                                <span className="text-gray-600 truncate max-w-[140px]">{item.product.name}</span>
+                                <span className={'text-gray-900 font-medium'}>
+                                  ${fee.toLocaleString()}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          <div className="pt-2 mt-2 border-t border-[#d97706]/10">
+                            <div className="flex justify-between items-center text-xs font-bold text-gray-900">
+                              <span>Total Shipping</span>
+                              <span>${shipping.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-[#d97706]/10 text-[10px] text-gray-400 text-center">
+                          * Charged once per unique product
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Total */}
                   <div className="border-t border-[#d97706]/20 pt-6">
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center mb-6">
                       <span className="text-lg font-bold text-gray-900">Total</span>
                       <span className="text-2xl font-bold text-gray-900">${total.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-emerald-600">
-                      <FaCheckCircle />
-                      <span>All taxes included</span>
                     </div>
                   </div>
 

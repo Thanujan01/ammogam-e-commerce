@@ -15,7 +15,7 @@ export interface ColorVariant {
   colorName: string;
   colorCode: string;
   stock: number;
-  image?: string;
+  images: string[];
 }
 
 export interface IUser {
@@ -66,7 +66,7 @@ export interface IProduct {
   createdAt?: string;
   updatedAt?: string;
   // Additional fields for enhanced UI
-  freeShipping?: boolean;
+  shippingFee?: number;
   warranty?: string;
   returnPolicy?: string;
   certified?: boolean;

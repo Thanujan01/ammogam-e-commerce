@@ -8,6 +8,10 @@ const OrderSchema = new mongoose.Schema(
         product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
+        color: { type: String }, // Selected color name
+        colorCode: { type: String }, // Selected color hex code
+        variationId: { type: String }, // Color variant ID
+        shippingFee: { type: Number, default: 0 },
         status: {
           type: String,
           enum: ["pending", "processed", "shipped", "delivered", "cancelled"],
@@ -24,7 +28,7 @@ const OrderSchema = new mongoose.Schema(
       phone: { type: String, required: true },
       postalCode: String,
     },
-    paymentMethod: { type: String, default: "Cash on Delivery" },
+    paymentMethod: { type: String, default: "Online Payment" },
     paymentStatus: { type: String, enum: ["unpaid", "paid", "failed"], default: "unpaid" },
     status: {
       type: String,

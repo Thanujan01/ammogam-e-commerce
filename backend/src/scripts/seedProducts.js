@@ -21,10 +21,10 @@ const productsData = [
         features: ['9H hardness protection', 'Bubble-free installation', 'Ultra-clear transparency', 'Oleophobic coating'],
         warranty: '6 months warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
         isCertified: true,
         isChoice: true,
-        bundleDeals: 'Buy 2 Get 1 Free'
+        bundleDeals: 'Buy 2 Get 1 Free',
+        shippingFee: 50
     },
     {
         name: 'Magnetic Silicone Case',
@@ -39,10 +39,57 @@ const productsData = [
         features: ['MagSafe compatible', 'Soft-touch silicone', 'Raised edges for screen protection', 'Wireless charging ready'],
         warranty: '1 year warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: false,
-        freeShippingThreshold: 1500,
+        shippingFee: 40,
         isCertified: true,
-        isChoice: true
+        isChoice: true,
+        colorVariants: [
+            {
+                colorName: 'Midnight Black',
+                colorCode: '#1a1a1a',
+                stock: 30,
+                images: [
+                    'https://images.unsplash.com/photo-1605170328248-c55091bf2e1d?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Ocean Blue',
+                colorCode: '#0066cc',
+                stock: 25,
+                images: [
+                    'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1585060544812-6b45742d762f?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Rose Pink',
+                colorCode: '#ff69b4',
+                stock: 20,
+                images: [
+                    'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Forest Green',
+                colorCode: '#228b22',
+                stock: 15,
+                images: [
+                    'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Pure White',
+                colorCode: '#ffffff',
+                stock: 10,
+                images: [
+                    'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?auto=format&fit=crop&q=80&w=400'
+                ]
+            }
+        ]
     },
     {
         name: 'Fast Charging USB-C Cable',
@@ -56,7 +103,7 @@ const productsData = [
         features: ['60W fast charging', 'Braided nylon design', 'Tangle-free', '10,000+ bend lifespan'],
         warranty: '1 year warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isCertified: true,
         bundleDeals: 'Buy 3 for $ 10'
     },
@@ -75,7 +122,7 @@ const productsData = [
         features: ['1080p Full HD', '360° pan and tilt', 'Night vision up to 10m', 'Two-way audio', 'Motion detection alerts'],
         warranty: '2 years warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isCertified: true,
         isChoice: true
     },
@@ -92,7 +139,7 @@ const productsData = [
         features: ['HD video quality', 'Motion-activated alerts', 'Two-way talk', 'Cloud storage included', 'Night vision'],
         warranty: '2 years warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isCertified: true,
         isChoice: true,
         bundleDeals: 'Free installation kit included'
@@ -110,8 +157,7 @@ const productsData = [
         features: ['100% premium cotton', 'Breathable fabric', 'Wrinkle-resistant', 'Classic fit'],
         warranty: 'Quality guarantee',
         returnPolicy: '30-day return policy',
-        freeShipping: false,
-        freeShippingThreshold: 2000,
+        shippingFee: 60,
         isChoice: true
     },
     {
@@ -126,7 +172,7 @@ const productsData = [
         features: ['Premium denim fabric', 'Slim fit design', 'Five-pocket styling', 'Fade-resistant'],
         warranty: 'Quality guarantee',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isChoice: true
     },
     // Women Fashion
@@ -143,9 +189,53 @@ const productsData = [
         features: ['Lightweight fabric', 'Breathable material', 'Floral print design', 'Perfect for summer'],
         warranty: 'Quality guarantee',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isChoice: true,
-        bundleDeals: 'Buy 2 Get 10% Off'
+        bundleDeals: 'Buy 2 Get 10% Off',
+        colorVariants: [
+            {
+                colorName: 'Coral Sunset',
+                colorCode: '#ff7f50',
+                stock: 25,
+                images: [
+                    'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Sky Blue',
+                colorCode: '#87ceeb',
+                stock: 30,
+                images: [
+                    'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Lavender Dream',
+                colorCode: '#e6e6fa',
+                stock: 15,
+                images: [
+                    'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Mint Fresh',
+                colorCode: '#98ff98',
+                stock: 10,
+                images: [
+                    'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?auto=format&fit=crop&q=80&w=400'
+                ]
+            }
+        ]
     },
     // Electronics
     {
@@ -161,9 +251,50 @@ const productsData = [
         features: ['Active noise cancellation', '20-hour battery life', 'Bluetooth 5.0', 'Foldable design', 'Premium sound quality'],
         warranty: '1 year warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isCertified: true,
-        isChoice: true
+        isChoice: true,
+        colorVariants: [
+            {
+                colorName: 'Matte Black',
+                colorCode: '#2c2c2c',
+                stock: 20,
+                images: [
+                    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1545127398-14699f92334b?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Silver Gray',
+                colorCode: '#c0c0c0',
+                stock: 15,
+                images: [
+                    'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1577174881658-0f30157f72c4?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Rose Gold',
+                colorCode: '#b76e79',
+                stock: 12,
+                images: [
+                    'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1545127398-14699f92334b?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1577174881658-0f30157f72c4?auto=format&fit=crop&q=80&w=400'
+                ]
+            },
+            {
+                colorName: 'Navy Blue',
+                colorCode: '#000080',
+                stock: 13,
+                images: [
+                    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=400',
+                    'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&q=80&w=400'
+                ]
+            }
+        ]
     },
     {
         name: '14" Business Laptop',
@@ -177,7 +308,7 @@ const productsData = [
         features: ['Intel Core i7 processor', '16GB RAM', '512GB SSD storage', 'Full HD display', 'Backlit keyboard'],
         warranty: '1 year warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isCertified: true,
         isChoice: true,
         bundleDeals: 'Free laptop bag + mouse'
@@ -195,7 +326,7 @@ const productsData = [
         features: ['10-piece set', 'Stainless steel construction', 'Dishwasher safe', 'Oven safe up to 500°F', 'Lifetime durability'],
         warranty: 'Lifetime warranty',
         returnPolicy: '30-day return policy',
-        freeShipping: true,
+        shippingFee: 0,
         isCertified: true,
         isChoice: true,
         bundleDeals: 'Free cooking utensils set'

@@ -17,6 +17,7 @@ const wishlistRoutes = require("./src/routes/wishlistRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const sellerRoutes = require("./src/routes/sellerRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
+const reviewRoutes = require("./src/routes/reviewRoutes");
 
 const app = express();
 app.use(cors());
@@ -59,6 +60,9 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/sellers", sellerRoutes);
 app.use("/api/admin", adminRoutes);
+
+// Add review routes
+app.use("/api/reviews", reviewRoutes);
 
 // Error handler
 app.use(errorMiddleware);

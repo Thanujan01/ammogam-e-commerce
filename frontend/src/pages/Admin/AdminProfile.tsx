@@ -2,12 +2,13 @@ import { useState, useContext } from 'react';
 import { FiEdit, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiLock } from 'react-icons/fi';
 import { User, Shield } from 'lucide-react';
 import { AuthContext } from '../../contexts/AuthContext';
+import { api } from '../../api/api';
 
 export default function AdminProfile() {
   const auth = useContext(AuthContext);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   const [profileData, setProfileData] = useState({
     name: auth?.user?.name || 'Admin User',
     email: auth?.user?.email || 'admin@ammogam.com',
@@ -22,13 +23,21 @@ export default function AdminProfile() {
     confirmPassword: '',
   });
 
-  const handleSaveProfile = () => {
-    // Here you would typically make an API call to update the profile
-    setIsEditing(false);
-    alert('Profile updated successfully!');
+  const handleSaveProfile = async () => {
+    try {
+      const { data } = await api.put('/auth/profile', profileData);
+      if (auth?.updateUser) {
+        auth.updateUser(data);
+      }
+      setIsEditing(false);
+      alert('Profile updated successfully!');
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      alert(error.response?.data?.message || 'Failed to update profile');
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('New passwords do not match!');
       return;
@@ -37,10 +46,19 @@ export default function AdminProfile() {
       alert('Password must be at least 6 characters long!');
       return;
     }
-    // Here you would typically make an API call to change the password
-    setIsChangingPassword(false);
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    alert('Password changed successfully!');
+
+    try {
+      await api.put('/auth/change-password', {
+        oldPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      setIsChangingPassword(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      alert('Password changed successfully!');
+    } catch (error: any) {
+      console.error('Failed to change password:', error);
+      alert(error.response?.data?.message || 'Failed to change password');
+    }
   };
 
   return (

@@ -15,7 +15,7 @@ import {
   FaFire, FaCrown, FaCartPlus,
   FaChevronRight as FaChevronRightIcon, FaWallet,
   FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
-  FaImages, FaCreditCard, FaClock, FaCloudSun, 
+  FaImages, FaCreditCard, FaClock, FaCloudSun,
   FaPaw, FaBaby as FaBabyIcon, FaShoppingBag
 } from 'react-icons/fa';
 
@@ -114,7 +114,7 @@ export default function Home() {
           colorOptions: true,
           sizeOptions: true,
           promotions: [
-            { text: p.discount > 0 ? `Save ${p.discount}%` : 'Free Shipping', icon: <FaTag className="text-green-500" /> },
+            { text: p.discount > 0 ? `Save ${p.discount}%` : 'Best Price', icon: <FaTag className="text-green-500" /> },
           ],
           brand: p.brand,
           description: p.description,
@@ -123,7 +123,7 @@ export default function Home() {
             'Durable and long lasting',
             'Warranty included'
           ],
-          deliveryInfo: 'Free shipping on orders over Rs 100',
+          deliveryInfo: 'Fast delivery to your doorstep',
           warranty: '1-year warranty',
           returnPolicy: '30-day return policy',
           certified: true,
@@ -350,7 +350,7 @@ export default function Home() {
                 <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
                   Discover amazing deals on electronics, fashion, and more
                 </p>
-                <button 
+                <button
                   onClick={handleViewAllProducts}
                   className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
                 >
@@ -378,7 +378,7 @@ export default function Home() {
                 Showing {filteredFeaturedProducts.length} of {products.length}+ premium products
               </p>
             </div>
-            <button 
+            <button
               onClick={handleViewAllProducts}
               className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
             >
@@ -396,7 +396,7 @@ export default function Home() {
                   ? 'bg-[#8B4513] text-white shadow-lg'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
                   }`}
-                >
+              >
                 {category}
               </button>
             ))}
@@ -515,7 +515,7 @@ export default function Home() {
                           ))}
                         </div>
                         <span className="text-xs text-gray-600">
-                          {product.rating} | {product.sold.toLocaleString()}+
+                          ({product.sold || 0} sold)
                         </span>
                       </div>
 
@@ -563,8 +563,8 @@ export default function Home() {
                     <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                       Want to see more products?
                     </h3>
-                    
-                    <button 
+
+                    <button
                       onClick={handleViewAllProducts}
                       className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base mx-auto"
                     >
@@ -623,7 +623,7 @@ export default function Home() {
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
                     <p className="text-gray-600 text-sm mt-1">Based on your browsing history</p>
                   </div>
-                  <button 
+                  <button
                     onClick={handleViewAllProducts}
                     className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
                   >

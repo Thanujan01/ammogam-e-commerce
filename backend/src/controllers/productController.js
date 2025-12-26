@@ -3,28 +3,38 @@ const Order = require("../models/Order");
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price, stock, description, category, mainSubcategory, subCategory } = req.body;
+    const { name, price, description, category, mainSubcategory, subCategory } = req.body;
+    const colorVariants = req.body.colorVariants || [];
+    
+    // Calculate total stock from variants
+    const totalStock = colorVariants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
+    
+    // Pick the first image of the first variant as the main image
+    let defaultImage = null;
+    if (colorVariants.length > 0 && colorVariants[0].images && colorVariants[0].images.length > 0) {
+      defaultImage = colorVariants[0].images[0];
+    }
 
     const product = await Product.create({
       name,
       price,
-      stock,
+      stock: totalStock,
       description,
       category,
       mainSubcategory,
       subCategory,
-      image: req.body.image || null,
+      image: defaultImage,
       discount: req.body.discount || 0,
       badge: req.body.badge || '',
       brand: req.body.brand || '',
       features: req.body.features || [],
       warranty: req.body.warranty || '',
       returnPolicy: req.body.returnPolicy || '',
-      freeShipping: req.body.freeShipping || false,
-      freeShippingThreshold: req.body.freeShippingThreshold || 0,
+      shippingFee: req.body.shippingFee || 0,
       bundleDeals: req.body.bundleDeals || '',
       isCertified: req.body.isCertified || false,
       isChoice: req.body.isChoice || false,
+      colorVariants,
       // Track seller if user is a seller
       seller: req.user && req.user.role === 'seller' ? req.user._id : null
     });
@@ -47,7 +57,21 @@ exports.getAllProducts = async (req, res) => {
 exports.getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate("category").populate("seller", "name businessName");
-    res.json(product);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    // Calculate accurate stock from colorVariants
+    let accurateStock = 0;
+    if (Array.isArray(product.colorVariants) && product.colorVariants.length > 0) {
+      accurateStock = product.colorVariants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
+    } else if (typeof product.stock === 'number') {
+      accurateStock = product.stock;
+    }
+
+    // Return product with accurate stock and sold count
+    const productObj = product.toObject();
+    productObj.stock = accurateStock;
+    productObj.sold = product.sold || 0;
+    res.json(productObj);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -66,7 +90,19 @@ exports.updateProduct = async (req, res) => {
       return res.status(403).json({ message: "You can only update your own products" });
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+
+    // If colorVariants are provided, recalculate stock and image
+    if (updateData.colorVariants) {
+      const colorVariants = updateData.colorVariants;
+      updateData.stock = colorVariants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
+      
+      if (colorVariants.length > 0 && colorVariants[0].images && colorVariants[0].images.length > 0) {
+        updateData.image = colorVariants[0].images[0];
+      }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
     });
     
@@ -127,8 +163,8 @@ exports.getSellerStats = async (req, res) => {
 
     orders.forEach(order => {
       order.items.forEach(item => {
-        if (productIds.some(id => id.toString() === item.product._id.toString())) {
-          totalRevenue += item.price * item.quantity;
+        if (item.product && productIds.some(id => id.toString() === item.product._id.toString())) {
+          totalRevenue += (item.price * item.quantity) + (item.shippingFee || 0);
           totalProductsSold += item.quantity;
         }
       });

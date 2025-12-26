@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FiSearch, FiEye, FiX, FiCheckCircle, FiTruck, FiClock, FiAlertCircle, FiSettings } from 'react-icons/fi';
 import { ShoppingBag } from 'lucide-react';
 import { api } from '../../api/api';
@@ -12,6 +13,7 @@ export default function SellerOrders() {
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [viewDialogOpen, setViewDialogOpen] = useState(false);
     const [updateLoading, setUpdateLoading] = useState(false);
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         fetchOrders();
@@ -28,6 +30,18 @@ export default function SellerOrders() {
             setLoading(false);
         }
     };
+
+    // Auto-select order if ID is in URL
+    useEffect(() => {
+        const orderId = searchParams.get('id');
+        if (orderId && orders.length > 0) {
+            const order = orders.find(o => o._id === orderId);
+            if (order) {
+                setSelectedOrder(order);
+                setViewDialogOpen(true);
+            }
+        }
+    }, [searchParams, orders]);
 
     const handleUpdateItemStatus = async (orderId: string, productId: string, newStatus: string) => {
         try {
@@ -94,7 +108,7 @@ export default function SellerOrders() {
         pending: orders.filter(o => o.items.some((it: any) => it.status === 'pending')).length,
         shipped: orders.filter(o => o.items.some((it: any) => it.status === 'shipped')).length,
         revenue: orders.reduce((acc, o) =>
-            acc + o.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0), 0
+            acc + o.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity) + (it.shippingFee || 0), 0), 0
         )
     };
 
@@ -248,7 +262,7 @@ export default function SellerOrders() {
                                     </td>
                                     <td className="px-8 py-6">
                                         <span className="font-semibold text-emerald-600 text-sm">
-                                            $ {order.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}
+                                            $ {order.items.reduce((s: number, it: any) => s + (it.price * it.quantity) + (it.shippingFee || 0), 0).toLocaleString()}
                                         </span>
                                     </td>
                                     <td className="px-8 py-6">
@@ -322,8 +336,22 @@ export default function SellerOrders() {
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <h5 className="font-semibold text-gray-900 text-sm truncate">{item.product?.name}</h5>
+                                                            {item.color && (
+                                                                <div className="flex items-center gap-1.5 mt-1">
+                                                                    <div
+                                                                        className="w-3 h-3 rounded-full border border-gray-300"
+                                                                        style={{ backgroundColor: item.colorCode || '#000' }}
+                                                                    />
+                                                                    <span className="text-xs text-gray-500">{item.color}</span>
+                                                                </div>
+                                                            )}
                                                             <p className="text-xs text-gray-500">
                                                                 Qty: {item.quantity} × $ {item.price.toLocaleString()}
+                                                                {item.shippingFee > 0 && (
+                                                                    <span className="ml-1 text-[#d97706] font-medium">
+                                                                        (+ $ {item.shippingFee.toLocaleString()} Shipping)
+                                                                    </span>
+                                                                )}
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
@@ -378,16 +406,19 @@ export default function SellerOrders() {
                                             <h5 className="text-sm font-semibold text-white mb-4">Earnings Summary</h5>
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-white">Items Subtotal</span>
-                                                    <span>$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</span>
+                                                    <span className="text-white font-medium">Items Subtotal</span>
+                                                    <span className="font-bold">$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</span>
                                                 </div>
-                                                <div className="flex justify-between items-center text-xs font-bold">
-                                                    <span className="text-white">Shipping Portion</span>
-                                                    <span className="text-white italic">Excluded</span>
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-white font-medium">Delivery Revenue</span>
+                                                    <span className="font-bold">$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.shippingFee || 0), 0).toLocaleString()}</span>
                                                 </div>
-                                                <div className="pt-4 border-t border-white flex justify-between items-end">
-                                                    <span className="text-sm font-medium uppercase  text-white">Your Income</span>
-                                                    <span className="text-3xl font-black">$ {selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</span>
+                                                <div className="pt-4 border-t border-white/20 flex justify-between items-end">
+                                                    <span className="text-xs font-bold uppercase text-white/80">Total Earnings</span>
+                                                    <span className="text-3xl font-black text-white">$ {(
+                                                        selectedOrder.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0) +
+                                                        selectedOrder.items.reduce((s: number, it: any) => s + (it.shippingFee || 0), 0)
+                                                    ).toLocaleString()}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -504,11 +535,12 @@ const handlePrintLabel = (order: any) => {
           <div class="section">
              <div class="section-title">CONTENT DESCRIPTION:</div>
              <div class="items-list">
-               ${order.items.map((item: any) => `
-                 <div class="item">
-                   <span>[Qty: ${item.quantity}] ${item.product?.name?.substring(0, 25) || 'Product'}</span>
-                 </div>
-               `).join('')}
+                ${order.items.map((item: any) => `
+                  <div class="item">
+                    <span>${item.product?.name.toUpperCase()} (x${item.quantity}) ${item.color ? `[${item.color.toUpperCase()}]` : ''}</span>
+                    <span>$ ${(item.price * item.quantity).toLocaleString()} ${item.shippingFee > 0 ? ` (+ $ ${item.shippingFee})` : ''}</span>
+                  </div>
+                `).join('')}
              </div>
           </div>
 

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/api';
-import { 
-    FaBell, 
-    FaCheckCircle, 
-    FaChevronRight, 
-    FaCog, 
-    FaTimes, 
-    FaExclamationCircle, 
-    FaSearch, 
-    FaChevronDown, 
+import {
+    FaBell,
+    FaCheckCircle,
+    FaChevronRight,
+    FaCog,
+    FaTimes,
+    FaExclamationCircle,
+    FaSearch,
+    FaChevronDown,
     FaChevronUp,
     FaRegBell,
     FaFilter
@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 export default function Notifications() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'unread' | 'orders' | 'system'>('all');
+    const [filter, setFilter] = useState<'all' | 'unread' | 'orders' | 'alerts' | 'system'>('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedNotification, setExpandedNotification] = useState<string | null>(null);
 
@@ -66,25 +66,28 @@ export default function Notifications() {
 
     // Filter notifications
     const filteredNotifications = notifications.filter(notification => {
-        const matchesFilter = filter === 'all' || 
+        const matchesFilter = filter === 'all' ||
             (filter === 'unread' && !notification.isRead) ||
-            (filter === 'orders' && notification.type === 'order') ||
+            (filter === 'orders' && (notification.type === 'order' || notification.type === 'order_status')) ||
+            (filter === 'alerts' && notification.type === 'stock_alert') ||
             (filter === 'system' && notification.type === 'system');
-        
-        const matchesSearch = !searchTerm || 
+
+        const matchesSearch = !searchTerm ||
             notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             notification.message.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         return matchesFilter && matchesSearch;
     });
 
     // Get notification priority
     const getNotificationPriority = (type: string) => {
-        switch(type) {
+        switch (type) {
+            case 'stock_alert':
             case 'alert':
             case 'security':
                 return 'high';
             case 'order':
+            case 'order_status':
             case 'payment':
                 return 'medium';
             default:
@@ -105,8 +108,8 @@ export default function Notifications() {
         if (diffMins < 60) return `${diffMins}m ago`;
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
-        return notificationDate.toLocaleDateString('en-US', { 
-            month: 'short', 
+        return notificationDate.toLocaleDateString('en-US', {
+            month: 'short',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -145,11 +148,10 @@ export default function Notifications() {
                             <button
                                 onClick={markAllRead}
                                 disabled={!notifications.some(n => !n.isRead)}
-                                className={`px-4 py-2.5 text-sm font-medium rounded-lg flex items-center gap-2 transition-all ${
-                                    notifications.some(n => !n.isRead)
+                                className={`px-4 py-2.5 text-sm font-medium rounded-lg flex items-center gap-2 transition-all ${notifications.some(n => !n.isRead)
                                         ? 'bg-[#d97706] text-white hover:bg-[#b45309] shadow-sm'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                }`}
+                                    }`}
                             >
                                 <FaCheckCircle />
                                 Mark All Read
@@ -208,7 +210,13 @@ export default function Notifications() {
                                         onClick={() => setFilter('orders')}
                                         className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${filter === 'orders' ? 'bg-white shadow-sm text-[#d97706]' : 'text-gray-600 hover:text-gray-900'}`}
                                     >
-                                        Orders ({notifications.filter(n => n.type === 'order').length})
+                                        Orders ({notifications.filter(n => n.type === 'order' || n.type === 'order_status').length})
+                                    </button>
+                                    <button
+                                        onClick={() => setFilter('alerts')}
+                                        className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${filter === 'alerts' ? 'bg-white shadow-sm text-[#d97706]' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        Alerts ({notifications.filter(n => n.type === 'stock_alert').length})
                                     </button>
                                 </div>
                             </div>
@@ -231,7 +239,7 @@ export default function Notifications() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -245,17 +253,17 @@ export default function Notifications() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <div className="text-2xl font-bold text-gray-900">
-                                            {filteredNotifications.filter(n => n.type === 'order').length}
+                                            {filteredNotifications.filter(n => n.type === 'stock_alert').length}
                                         </div>
-                                        <div className="text-sm text-gray-600 mt-1">Order Updates</div>
+                                        <div className="text-sm text-gray-600 mt-1">Stock Alerts</div>
                                     </div>
-                                    <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                                        <FaCheckCircle className="text-green-600" />
+                                    <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                                        <FaExclamationCircle className="text-orange-600" />
                                     </div>
                                 </div>
                             </div>
@@ -286,7 +294,7 @@ export default function Notifications() {
                             {searchTerm ? 'No notifications found' : 'No notifications yet'}
                         </h3>
                         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                            {searchTerm 
+                            {searchTerm
                                 ? 'Try searching with different keywords or clear your search.'
                                 : 'When you receive notifications, they\'ll appear here.'
                             }
@@ -300,8 +308,8 @@ export default function Notifications() {
                                     Clear Search
                                 </button>
                             ) : (
-                                <Link 
-                                    to="/products" 
+                                <Link
+                                    to="/products"
                                     className="px-5 py-2.5 bg-[#d97706] text-white rounded-lg font-medium hover:bg-[#b45309] transition-colors shadow-sm flex items-center justify-center gap-2"
                                 >
                                     Browse Products
@@ -326,33 +334,30 @@ export default function Notifications() {
                             return (
                                 <div
                                     key={notification._id}
-                                    className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${
-                                        !notification.isRead
+                                    className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${!notification.isRead
                                             ? 'border-[#d97706] shadow-sm'
                                             : 'border-gray-200 hover:border-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     {/* Notification Header */}
-                                    <div 
+                                    <div
                                         className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                                         onClick={() => toggleExpand(notification._id)}
                                     >
                                         <div className="flex items-start gap-4">
                                             {/* Status Indicator */}
-                                            <div className={`w-3 h-3 rounded-full flex-shrink-0 mt-2 ${
-                                                !notification.isRead
+                                            <div className={`w-3 h-3 rounded-full flex-shrink-0 mt-2 ${!notification.isRead
                                                     ? 'bg-[#d97706] animate-pulse'
                                                     : 'bg-gray-300'
-                                            }`} />
+                                                }`} />
 
                                             {/* Icon */}
-                                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                                isHighPriority
+                                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${isHighPriority
                                                     ? 'bg-red-50 text-red-600'
                                                     : !notification.isRead
-                                                    ? 'bg-[#d97706]/10 text-[#d97706]'
-                                                    : 'bg-gray-100 text-gray-400'
-                                            }`}>
+                                                        ? 'bg-[#d97706]/10 text-[#d97706]'
+                                                        : 'bg-gray-100 text-gray-400'
+                                                }`}>
                                                 {isHighPriority ? (
                                                     <FaExclamationCircle className="text-lg" />
                                                 ) : !notification.isRead ? (
@@ -365,11 +370,10 @@ export default function Notifications() {
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
-                                                    <h4 className={`font-semibold truncate ${
-                                                        !notification.isRead
+                                                    <h4 className={`font-semibold truncate ${!notification.isRead
                                                             ? 'text-gray-900'
                                                             : 'text-gray-700'
-                                                    }`}>
+                                                        }`}>
                                                         {notification.title}
                                                     </h4>
                                                     <div className="flex items-center gap-3">
@@ -381,7 +385,7 @@ export default function Notifications() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <p className="text-sm text-gray-600 line-clamp-1 mb-3">
                                                     {notification.message}
                                                 </p>
@@ -389,13 +393,12 @@ export default function Notifications() {
                                                 {/* Tags and Actions */}
                                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                                     <div className="flex items-center gap-2">
-                                                        <span className={`text-xs px-2.5 py-1 rounded-full ${
-                                                            notification.type === 'order'
+                                                        <span className={`text-xs px-2.5 py-1 rounded-full ${notification.type === 'order'
                                                                 ? 'bg-blue-50 text-blue-700'
                                                                 : notification.type === 'alert'
-                                                                ? 'bg-red-50 text-red-700'
-                                                                : 'bg-gray-100 text-gray-700'
-                                                        }`}>
+                                                                    ? 'bg-red-50 text-red-700'
+                                                                    : 'bg-gray-100 text-gray-700'
+                                                            }`}>
                                                             {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
                                                         </span>
                                                         {isHighPriority && (
@@ -404,7 +407,7 @@ export default function Notifications() {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    
+
                                                     <div className="flex items-center gap-2">
                                                         {!notification.isRead && (
                                                             <button
@@ -418,13 +421,13 @@ export default function Notifications() {
                                                                 Mark Read
                                                             </button>
                                                         )}
-                                                        {notification.orderId && (
+                                                        {(notification.orderId || notification.productId) && (
                                                             <Link
-                                                                to={`/orders/${notification.orderId}`}
+                                                                to={notification.orderId ? `/orders/${notification.orderId}` : `/products/${notification.productId}`}
                                                                 onClick={(e) => e.stopPropagation()}
                                                                 className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
                                                             >
-                                                                View Order
+                                                                {notification.orderId ? 'View Order' : 'View Product'}
                                                                 <FaChevronRight className="text-xs" />
                                                             </Link>
                                                         )}
@@ -441,7 +444,7 @@ export default function Notifications() {
                                                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                                                     {notification.message}
                                                 </p>
-                                                
+
                                                 {/* Additional Details */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                     <div className="bg-gray-50 p-3 rounded-lg">
@@ -514,11 +517,10 @@ export default function Notifications() {
                                     <button
                                         onClick={markAllRead}
                                         disabled={!filteredNotifications.some(n => !n.isRead)}
-                                        className={`px-4 py-2.5 text-sm font-medium rounded-lg flex items-center gap-2 ${
-                                            filteredNotifications.some(n => !n.isRead)
+                                        className={`px-4 py-2.5 text-sm font-medium rounded-lg flex items-center gap-2 ${filteredNotifications.some(n => !n.isRead)
                                                 ? 'bg-[#d97706] text-white hover:bg-[#b45309]'
                                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                        }`}
+                                            }`}
                                     >
                                         <FaCheckCircle />
                                         Mark All as Read

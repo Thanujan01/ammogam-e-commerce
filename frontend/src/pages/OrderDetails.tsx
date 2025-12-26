@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/api';
@@ -6,10 +7,10 @@ import {
     FaBox, FaChevronLeft, FaChevronRight,
     FaPhoneAlt, FaCreditCard,
     FaExclamationCircle, FaReceipt, FaTruck,
-    FaCheckCircle, FaClock,  FaShareAlt,
-     FaCopy, FaShoppingBag, FaCalendarAlt,
-    FaUser, FaHome, FaCreditCard as FaCard, FaTag,
-    FaWhatsapp, FaFacebook, FaLink
+    FaCheckCircle, FaClock, FaShareAlt,
+    FaCopy, FaShoppingBag, FaCalendarAlt,
+    FaUser, FaHome, FaCreditCard as FaCard,
+    FaWhatsapp, FaFacebook, FaLink, FaStar
 } from 'react-icons/fa';
 
 export default function OrderDetails() {
@@ -19,6 +20,10 @@ export default function OrderDetails() {
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [reviewingItem, setReviewingItem] = useState<any>(null);
+    const [rating, setRating] = useState(5);
+    const [comment, setComment] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -105,8 +110,8 @@ export default function OrderDetails() {
                 <p className="text-gray-500 mb-8 max-w-md text-center">
                     We couldn't find the order you're looking for. It may have been deleted or the link is incorrect.
                 </p>
-                <button 
-                    onClick={() => navigate('/dashboard')} 
+                <button
+                    onClick={() => navigate('/dashboard')}
                     className="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-8 py-3 rounded-xl font-medium hover:shadow-lg transition-all hover:-translate-y-0.5"
                 >
                     Back to Dashboard
@@ -125,14 +130,14 @@ export default function OrderDetails() {
                     <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-lg font-bold text-gray-900">Share Via:</h3>
-                            <button 
+                            <button
                                 onClick={() => setShowShareModal(false)}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                             >
                                 ✕
                             </button>
                         </div>
-                        
+
                         <div className="space-y-6">
                             {/* Blue Underlined Link */}
                             {/* <a 
@@ -148,23 +153,23 @@ export default function OrderDetails() {
                             <div>
                                 {/* <div className="text-sm font-medium text-gray-700 mb-4 text-center">Share via:</div> */}
                                 <div className="flex items-center justify-center gap-6">
-                                    <button 
+                                    <button
                                         onClick={shareOnWhatsApp}
                                         className="p-3 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors"
                                         title="Share on WhatsApp"
                                     >
                                         <FaWhatsapp className="text-2xl text-emerald-600" />
                                     </button>
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={shareOnFacebook}
                                         className="p-3 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
                                         title="Share on Facebook"
                                     >
                                         <FaFacebook className="text-2xl text-blue-600" />
                                     </button>
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={copyLink}
                                         className={`p-3 rounded-full transition-colors ${copied ? 'bg-emerald-100' : 'bg-gray-100 hover:bg-gray-200'}`}
                                         title={copied ? 'Link Copied!' : 'Copy URL'}
@@ -173,7 +178,7 @@ export default function OrderDetails() {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             {/* Order info */}
                             <div className="pt-4 border-t border-gray-200 text-center">
                                 <p className="text-sm text-gray-600 mb-1">
@@ -193,7 +198,7 @@ export default function OrderDetails() {
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-4">
-                            <button 
+                            <button
                                 onClick={() => navigate(-1)}
                                 className="p-3 hover:bg-amber-50 rounded-xl transition-all group"
                             >
@@ -210,14 +215,14 @@ export default function OrderDetails() {
                                 <div className="flex items-center gap-4 mt-2">
                                     <p className="text-sm text-gray-500 flex items-center gap-2">
                                         <FaCalendarAlt className="text-gray-400" />
-                                        {new Date(order.createdAt).toLocaleDateString('en-US', { 
-                                            weekday: 'long', 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
+                                        {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
                                         })}
                                     </p>
-                                    <button 
+                                    <button
                                         onClick={copyOrderId}
                                         className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-2 transition-colors"
                                     >
@@ -227,9 +232,9 @@ export default function OrderDetails() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
-                            <button 
+                            <button
                                 onClick={() => setShowShareModal(true)}
                                 className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                             >
@@ -253,29 +258,28 @@ export default function OrderDetails() {
                                 </div>
                                 Order Progress
                             </h2>
-                            
+
                             <div className="relative">
                                 {/* Progress Line */}
                                 <div className="absolute left-0 top-8 h-1 w-full bg-gray-200">
-                                    <div 
+                                    <div
                                         className="h-1 bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-500"
-                                        style={{ 
-                                            width: order.status === 'pending' ? '20%' : 
-                                                   order.status === 'processing' ? '40%' : 
-                                                   order.status === 'shipped' ? '80%' : '100%' 
+                                        style={{
+                                            width: order.status === 'pending' ? '20%' :
+                                                order.status === 'processing' ? '40%' :
+                                                    order.status === 'shipped' ? '80%' : '100%'
                                         }}
                                     ></div>
                                 </div>
-                                
+
                                 {/* Steps */}
                                 <div className="flex justify-between relative z-10">
                                     {getStatusSteps(order.status).map((step) => (
                                         <div key={step.id} className="flex flex-col items-center">
-                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 border-4 transition-all duration-300 ${
-                                                step.status === 'completed' 
-                                                    ? 'bg-emerald-100 border-emerald-300 text-emerald-600' 
-                                                    : 'bg-white border-gray-300 text-gray-400'
-                                            }`}>
+                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 border-4 transition-all duration-300 ${step.status === 'completed'
+                                                ? 'bg-emerald-100 border-emerald-300 text-emerald-600'
+                                                : 'bg-white border-gray-300 text-gray-400'
+                                                }`}>
                                                 {step.icon}
                                             </div>
                                             <div className="text-center">
@@ -306,10 +310,10 @@ export default function OrderDetails() {
                                     <div key={idx} className="p-6 hover:bg-gray-50 transition-colors">
                                         <div className="flex gap-6">
                                             <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border border-gray-200 p-3 flex-shrink-0">
-                                                <img 
-                                                    src={getImageUrl(item.product?.image)} 
-                                                    className="w-full h-full object-contain" 
-                                                    alt={item.product?.name} 
+                                                <img
+                                                    src={getImageUrl(item.product?.image)}
+                                                    className="w-full h-full object-contain"
+                                                    alt={item.product?.name}
                                                 />
                                             </div>
                                             <div className="flex-1">
@@ -318,14 +322,22 @@ export default function OrderDetails() {
                                                         <h3 className="font-bold text-gray-900 text-lg mb-2">
                                                             {item.product?.name || 'Unknown Product'}
                                                         </h3>
-                                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                            <span className="flex items-center gap-2">
-                                                                <FaTag className="text-gray-400" />
-                                                                SKU: {item.product?.sku || 'N/A'}
-                                                            </span>
-                                                            <span>•</span>
+                                                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                                                             <span>Quantity: {item.quantity}</span>
                                                         </div>
+                                                        {/* Display selected color if available */}
+                                                        {item.color && (
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <span className="text-xs text-gray-500">Color:</span>
+                                                                <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                                                    <div
+                                                                        className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                                                        style={{ backgroundColor: item.colorCode || '#000' }}
+                                                                    />
+                                                                    <span className="text-xs font-medium text-gray-700">{item.color}</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="text-right">
                                                         <div className="text-lg font-bold text-gray-900">
@@ -336,13 +348,23 @@ export default function OrderDetails() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {item.status && (
-                                                    <div className="mt-4">
+                                                    <div className="mt-4 flex items-center justify-between">
                                                         <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(item.status).bg} ${getStatusColor(item.status).text} ${getStatusColor(item.status).border}`}>
                                                             {getStatusColor(item.status).icon}
                                                             {item.status}
                                                         </span>
+
+                                                        {order.status === 'delivered' && (
+                                                            <button
+                                                                onClick={() => setReviewingItem(item)}
+                                                                className="flex items-center gap-2 px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition-all border border-amber-200"
+                                                            >
+                                                                <FaStar className="text-amber-500" />
+                                                                Write a Review
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -433,7 +455,7 @@ export default function OrderDetails() {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500 mb-1">Phone Number</p>
-                                        <p className="font-medium text-gray-900">+94 {order.shippingAddress.phone}</p>
+                                        <p className="font-medium text-gray-900">{order.shippingAddress.phone}</p>
                                     </div>
                                 </div>
                             </div>
@@ -455,11 +477,10 @@ export default function OrderDetails() {
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Payment Status</span>
-                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                        order.paymentStatus === 'paid' 
-                                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
-                                            : 'bg-amber-100 text-amber-700 border border-amber-200'
-                                    }`}>
+                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${order.paymentStatus === 'paid'
+                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                        }`}>
                                         {order.paymentStatus.toUpperCase()}
                                     </span>
                                 </div>
@@ -473,6 +494,88 @@ export default function OrderDetails() {
                 </div>
             </div>
 
+            {/* Review Modal */}
+            {reviewingItem && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 border border-white">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-gray-900">Write a Review</h3>
+                            <button
+                                onClick={() => setReviewingItem(null)}
+                                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                <img src={getImageUrl(reviewingItem.product?.image)} className="w-16 h-16 object-contain" alt="" />
+                                <div>
+                                    <p className="font-bold text-gray-900 text-sm line-clamp-1">{reviewingItem.product?.name}</p>
+                                    <p className="text-xs text-gray-500 mt-1">Order #{order._id.slice(-8).toUpperCase()}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-3 text-center">Your Rating</label>
+                                <div className="flex justify-center gap-3">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            onClick={() => setRating(star)}
+                                            className="transition-transform active:scale-90"
+                                        >
+                                            <FaStar className={`text-3xl ${star <= rating ? 'text-yellow-400' : 'text-gray-200'}`} />
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-center text-xs text-gray-400 mt-2">
+                                    {rating === 1 ? 'Poor' : rating === 2 ? 'Fair' : rating === 3 ? 'Good' : rating === 4 ? 'Very Good' : 'Excellent!'}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Detailed Feedback</label>
+                                <textarea
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder="Write your honest experience with this product..."
+                                    className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm resize-none"
+                                />
+                            </div>
+
+                            <button
+                                onClick={async () => {
+                                    if (!comment.trim()) return alert("Please write a comment");
+                                    setSubmittingReview(true);
+                                    try {
+                                        await api.post('/reviews', {
+                                            productId: reviewingItem.product?._id || reviewingItem.product?.id,
+                                            orderId: order._id,
+                                            rating,
+                                            comment
+                                        });
+                                        alert("Review submitted successfully!");
+                                        setReviewingItem(null);
+                                        setComment('');
+                                        setRating(5);
+                                    } catch (err: any) {
+                                        alert(err.response?.data?.message || "Failed to submit review");
+                                    } finally {
+                                        setSubmittingReview(false);
+                                    }
+                                }}
+                                disabled={submittingReview}
+                                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-4 rounded-2xl font-black shadow-lg shadow-amber-600/20 active:scale-95 transition-all text-lg disabled:opacity-50"
+                            >
+                                {submittingReview ? 'Submitting...' : 'Post Review'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Bottom Navigation */}
             <div className="bg-white border-t border-gray-200 py-6">
                 <div className="max-w-7xl mx-auto px-4">
@@ -481,14 +584,14 @@ export default function OrderDetails() {
                             Order ID: <span className="font-mono text-gray-900">{order._id}</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button 
+                            <button
                                 onClick={() => navigate('/orders')}
                                 className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
                             >
                                 View All Orders
                                 <FaChevronRight className="text-sm" />
                             </button>
-                            <button 
+                            <button
                                 onClick={() => navigate('/products')}
                                 className="px-6 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
                             >

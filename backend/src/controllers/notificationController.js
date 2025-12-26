@@ -38,3 +38,27 @@ exports.markAllAsRead = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.deleteNotification = async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndDelete({
+      _id: req.params.id,
+      recipient: req.user._id
+    });
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+    res.json({ message: "Notification deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.clearNotifications = async (req, res) => {
+  try {
+    await Notification.deleteMany({ recipient: req.user._id });
+    res.json({ message: "All notifications cleared" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
