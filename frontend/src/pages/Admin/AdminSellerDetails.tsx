@@ -61,7 +61,7 @@ export default function AdminSellerDetails() {
     }
 
     const totalRevenue = orders.reduce((acc, order) => {
-        return acc + order.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0);
+        return acc + order.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity) + (it.shippingFee || 0), 0);
     }, 0);
 
     return (
@@ -268,7 +268,7 @@ export default function AdminSellerDetails() {
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-xs font-semibold text-gray-600 mb-1">Seller Income</p>
-                                                        <p className="font-semibold text-emerald-600 text-sm">$ {order.items.reduce((s: number, it: any) => s + (it.price * it.quantity), 0).toLocaleString()}</p>
+                                                        <p className="font-semibold text-emerald-600 text-sm">$ {order.items.reduce((s: number, it: any) => s + (it.price * it.quantity) + (it.shippingFee || 0), 0).toLocaleString()}</p>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-3">

@@ -426,10 +426,10 @@ export default function ProductDetail() {
               <div className="flex items-center gap-2">
                 <div className="flex items-center text-yellow-400">
                   {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} className={i < Math.floor(product.rating || 4.5) ? 'fill-current' : 'text-gray-300'} />
+                    <FaStar key={i} className={i < Math.floor(product.rating || 0) ? 'fill-current' : 'text-gray-300'} />
                   ))}
                 </div>
-                <span className="text-gray-700 font-medium">{product.rating || 4.5}</span>
+                <span className="text-gray-700 font-medium">{product.rating || 0}</span>
               </div>
               <span className="text-gray-500 border-l border-gray-200 pl-6">
                 {product.sold || 0} Units Sold

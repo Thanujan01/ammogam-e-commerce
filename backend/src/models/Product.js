@@ -11,7 +11,7 @@ const ProductSchema = new mongoose.Schema(
     stock: Number,
     image: String, // URL
     discount: { type: Number, default: 0 },
-    rating: { type: Number, default: 4.5 },
+    rating: { type: Number, default: 0 },
     sold: { type: Number, default: 0 },
     badge: String,
     brand: String,

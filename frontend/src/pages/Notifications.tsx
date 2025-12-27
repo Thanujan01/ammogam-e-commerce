@@ -227,7 +227,7 @@ export default function Notifications() {
                 {/* Statistics Cards */}
                 {filteredNotifications.length > 0 && (
                     <div className="mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -254,19 +254,6 @@ export default function Notifications() {
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-2xl font-bold text-gray-900">
-                                            {filteredNotifications.filter(n => n.type === 'stock_alert').length}
-                                        </div>
-                                        <div className="text-sm text-gray-600 mt-1">Stock Alerts</div>
-                                    </div>
-                                    <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                                        <FaExclamationCircle className="text-orange-600" />
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 )}

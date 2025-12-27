@@ -141,7 +141,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Seller Revenue Breakdown */}
-      {stats?.sellerProductRevenue > 0 && (
+      {/* {stats?.sellerProductRevenue > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
           <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3">
             <TrendingUp className="w-6 h-6 text-blue-600" />
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Revenue & Category Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

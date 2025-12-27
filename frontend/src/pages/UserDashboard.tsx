@@ -218,14 +218,14 @@ export default function UserDashboard() {
               </Link>
               <button
                 onClick={() => handleTabChange('profile')}
-                className="px-4 py-2 bg-white text-[#d97706] hover:bg-[#d97706]/10 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-white text-[#d97706] hover:bg-[#d97706]/2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
               >
                 <FaEdit className="text-sm" />
                 Edit Profile
               </button>
               <Link 
                 to="/products" 
-                className="px-4 py-2 bg-white text-[#d97706] hover:bg-[#d97706]/10 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-white text-[#d97706] hover:bg-[#d97706]/2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
               >
                 <FaShoppingCart className="text-sm" />
                 Shop Now
@@ -304,14 +304,14 @@ export default function UserDashboard() {
                       <h2 className="text-2xl font-bold text-gray-900">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
                       <p className="text-gray-600 mt-1">Here's an overview of your account activity</p>
                     </div>
-                    <div className="text-sm text-[#d97706]">
+                    {/* <div className="text-sm text-[#d97706]">
                       <FaCalendarAlt className="inline mr-1" />
                       Updated just now
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-[#d97706]/10 rounded-lg">
@@ -323,7 +323,7 @@ export default function UserDashboard() {
                       <p className="text-sm text-[#d97706]">All time purchases</p>
                     </div>
                     
-                    <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
+                    {/* <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-[#d97706]/10 rounded-lg">
                           <FaWallet className="text-[#d97706]" />
@@ -332,7 +332,7 @@ export default function UserDashboard() {
                       </div>
                       <h3 className="font-semibold text-gray-700 mb-1">Total Spent</h3>
                       <p className="text-sm text-[#d97706]">Lifetime value</p>
-                    </div>
+                    </div> */}
                     
                     <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-4">

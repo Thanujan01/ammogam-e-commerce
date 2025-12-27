@@ -109,6 +109,14 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
         </h3>
 
         <div className="mb-1.5 sm:mb-2">
+          {/* Seller Name */}
+          <div className="text-[10px] sm:text-xs text-gray-500 mb-1 flex items-center gap-1">
+            <FaHome className="text-gray-400" />
+            <span className="truncate max-w-[150px]">
+              {product.seller?.businessName || "Ammogam Official"}
+            </span>
+          </div>
+
           <div className="flex items-baseline gap-1">
             <span className="text-sm sm:text-base font-bold text-gray-900">
               {product.currentPrice}
@@ -126,7 +134,7 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
             {[...Array(5)].map((_, i) => (
               <FaStar
                 key={i}
-                className={`text-[10px] sm:text-xs ${i < Math.floor(product.rating || 4.5) ? 'text-yellow-400' : 'text-gray-300'}`}
+                className={`text-[10px] sm:text-xs ${i < Math.floor(product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}
               />
             ))}
           </div>
@@ -524,7 +532,7 @@ export default function ProductList() {
           categoryName: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
           categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
           image: getImageUrl(p.image),
-          rating: p.rating || 4.5,
+          rating: p.rating || 0,
           sold: p.sold || 0,
           // Make sure subCategory field exists
           subCategory: p.subCategory || ''
