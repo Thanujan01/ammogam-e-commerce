@@ -80,13 +80,13 @@ exports.getAdminStats = async (req, res) => {
             // Calculate revenue for this order
             let orderRevenue = 0;
             order.items.forEach(item => {
-                const itemTotal = item.price * item.quantity;
+                const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
                 const isSellerProduct = item.product && item.product.seller;
 
                 if (!isSellerProduct) {
                     orderRevenue += itemTotal;
                 } else {
-                    orderRevenue += itemTotal * 0.05; // 5% commission
+                    orderRevenue += itemTotal * 0.05; // 5% commission on total (product + shipping)
                 }
             });
             revenueData[index] += orderRevenue;
@@ -111,11 +111,12 @@ exports.getAdminStats = async (req, res) => {
       let storeTotal = 0;
       order.items.forEach(item => {
         const isSellerProduct = item.product && item.product.seller;
-        
+        const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
+
         if (!isSellerProduct) {
-          storeTotal += item.price * item.quantity;
+          storeTotal += itemTotal;
         } else {
-          sellerProductRevenue += item.price * item.quantity;
+          sellerProductRevenue += itemTotal;
         }
       });
       adminProductRevenue += storeTotal;
@@ -141,7 +142,7 @@ exports.getAdminStats = async (req, res) => {
       order.items.forEach(item => {
         if (item.product && item.product.category) {
           const categoryName = item.product.category.name || 'Uncategorized';
-          const itemTotal = item.price * item.quantity;
+          const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
           categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + itemTotal);
         }
       });
@@ -158,7 +159,7 @@ exports.getAdminStats = async (req, res) => {
       order.items.forEach(item => {
         if (item.product) {
           const productId = item.product._id.toString();
-          const itemTotal = item.price * item.quantity;
+          const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
           
           if (!productRevenueMap.has(productId)) {
             productRevenueMap.set(productId, {

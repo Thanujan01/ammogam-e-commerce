@@ -51,7 +51,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 ...item.product,
                 price: fresh.price,
                 discount: fresh.discount,
-                stock: fresh.stock
+                stock: fresh.stock,
+                seller: fresh.seller // Sync seller information
+              }
+            };
+          }
+          // Also sync seller info even if price hasn't changed
+          if (fresh && fresh.seller && !item.product.seller) {
+            return {
+              ...item,
+              product: {
+                ...item.product,
+                seller: fresh.seller
               }
             };
           }

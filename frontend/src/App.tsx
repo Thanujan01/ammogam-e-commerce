@@ -46,6 +46,8 @@ import SellerOrders from './pages/Seller/SellerOrders';
 import SellerProfile from './pages/Seller/SellerProfile';
 import SellerNotifications from './pages/Seller/SellerNotifications';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
@@ -53,6 +55,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Toaster position="top-right" reverseOrder={false} />
       {(!isAdminRoute && !isSellerRoute) && <Header />}
       <main className="flex-1">
         <Routes>

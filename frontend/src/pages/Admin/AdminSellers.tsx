@@ -17,6 +17,8 @@ interface Seller {
     createdAt: string;
 }
 
+import toast from 'react-hot-toast';
+
 export default function AdminSellers() {
     const [pendingSellers, setPendingSellers] = useState<Seller[]>([]);
     const [approvedSellers, setApprovedSellers] = useState<Seller[]>([]);
@@ -27,6 +29,14 @@ export default function AdminSellers() {
     const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
+
+    // Confirmation Modal State
+    const [confirmation, setConfirmation] = useState<{
+        open: boolean;
+        message: string;
+        onConfirm: () => void;
+    }>({ open: false, message: '', onConfirm: () => { } });
+
     const [editFormData, setEditFormData] = useState({
         name: '',
         email: '',
@@ -55,43 +65,58 @@ export default function AdminSellers() {
         }
     };
 
-    const handleApprove = async (id: string) => {
-        if (confirm('Are you sure you want to approve this seller?')) {
-            try {
-                await api.post(`/sellers/approve/${id}`);
-                alert('Seller approved successfully. The seller can now login.');
-                await fetchSellers();
-            } catch (error: any) {
-                console.error("Failed to approve seller", error);
-                alert('Failed to approve seller: ' + (error?.response?.data?.message || error.message));
+    const handleApprove = (id: string) => {
+        setConfirmation({
+            open: true,
+            message: 'Are you sure you want to approve this seller?',
+            onConfirm: async () => {
+                const toastId = toast.loading('Approving seller...');
+                try {
+                    await api.post(`/sellers/approve/${id}`);
+                    toast.success('Seller approved successfully.', { id: toastId });
+                    await fetchSellers();
+                } catch (error: any) {
+                    console.error("Failed to approve seller", error);
+                    toast.error('Failed to approve seller: ' + (error?.response?.data?.message || error.message), { id: toastId });
+                }
             }
-        }
+        });
     };
 
-    const handleReject = async (id: string) => {
-        if (confirm('Are you sure you want to reject and remove this seller request?')) {
-            try {
-                await api.post(`/sellers/reject/${id}`);
-                alert('Seller request rejected');
-                await fetchSellers();
-            } catch (error: any) {
-                console.error("Failed to reject seller", error);
-                alert('Failed to reject seller: ' + (error?.response?.data?.message || error.message));
+    const handleReject = (id: string) => {
+        setConfirmation({
+            open: true,
+            message: 'Are you sure you want to reject and remove this seller request?',
+            onConfirm: async () => {
+                const toastId = toast.loading('Rejecting seller...');
+                try {
+                    await api.post(`/sellers/reject/${id}`);
+                    toast.success('Seller request rejected', { id: toastId });
+                    await fetchSellers();
+                } catch (error: any) {
+                    console.error("Failed to reject seller", error);
+                    toast.error('Failed to reject seller: ' + (error?.response?.data?.message || error.message), { id: toastId });
+                }
             }
-        }
+        });
     };
 
-    const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to permanently delete this seller? This action cannot be undone.')) {
-            try {
-                await api.delete(`/sellers/${id}`);
-                alert('Seller deleted successfully');
-                await fetchSellers();
-            } catch (error: any) {
-                console.error("Failed to delete seller", error);
-                alert('Failed to delete seller: ' + (error?.response?.data?.message || error.message));
+    const handleDelete = (id: string) => {
+        setConfirmation({
+            open: true,
+            message: 'Are you sure you want to permanently delete this seller? This action cannot be undone.',
+            onConfirm: async () => {
+                const toastId = toast.loading('Deleting seller...');
+                try {
+                    await api.delete(`/sellers/${id}`);
+                    toast.success('Seller deleted successfully', { id: toastId });
+                    await fetchSellers();
+                } catch (error: any) {
+                    console.error("Failed to delete seller", error);
+                    toast.error('Failed to delete seller: ' + (error?.response?.data?.message || error.message), { id: toastId });
+                }
             }
-        }
+        });
     };
 
     const handleEdit = (seller: Seller) => {
@@ -112,14 +137,15 @@ export default function AdminSellers() {
         e.preventDefault();
         if (!selectedSeller) return;
 
+        const toastId = toast.loading('Updating seller...');
         try {
             await api.put(`/sellers/${selectedSeller._id}`, editFormData);
-            alert('Seller updated successfully');
+            toast.success('Seller updated successfully', { id: toastId });
             setEditModalOpen(false);
             await fetchSellers();
         } catch (error: any) {
             console.error("Failed to update seller", error);
-            alert('Failed to update seller: ' + (error?.response?.data?.message || error.message));
+            toast.error('Failed to update seller: ' + (error?.response?.data?.message || error.message), { id: toastId });
         }
     };
 
@@ -348,6 +374,36 @@ export default function AdminSellers() {
                     )}
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {confirmation.open && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 text-center">
+                        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-3xl">⚠️</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Are you sure?</h3>
+                        <p className="text-gray-500 mb-6">{confirmation.message}</p>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setConfirmation({ ...confirmation, open: false })}
+                                className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    confirmation.onConfirm();
+                                    setConfirmation({ ...confirmation, open: false });
+                                }}
+                                className="px-5 py-2.5 bg-amber-600 text-white rounded-xl hover:bg-amber-700 font-medium shadow-md transition-colors"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Seller Details Modal */}
             {modalOpen && selectedSeller && (

@@ -399,12 +399,12 @@ export default function OrderDetails() {
                                         ${(order.shippingFee || 0).toLocaleString()}
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                {/* <div className="flex justify-between items-center py-2 border-b border-gray-100">
                                     <span className="text-gray-600">Tax</span>
                                     <span className="font-medium text-gray-900">
                                         $0.00
                                     </span>
-                                </div>
+                                </div> */}
                                 <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                                     <span className="text-lg font-bold text-gray-900">Total Amount</span>
                                     <span className="text-2xl font-bold text-amber-700">
