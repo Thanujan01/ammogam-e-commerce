@@ -533,7 +533,7 @@ export default function CartPage() {
               </div>
 
               {/* Support Info */}
-              <div className="mt-6 bg-white rounded-2xl border border-[#d97706]/20 p-6 hover:shadow-md transition-shadow">
+              {/* <div className="mt-6 bg-white rounded-2xl border border-[#d97706]/20 p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-[#d97706]/10 rounded-lg">
                     <FaTag className="text-[#d97706]" />
@@ -553,7 +553,7 @@ export default function CartPage() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
