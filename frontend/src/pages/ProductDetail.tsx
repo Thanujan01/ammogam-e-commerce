@@ -12,7 +12,8 @@ import {
   FaStar, FaPlus, FaMinus,
   FaCheckCircle, FaPalette,
   FaChevronRight, FaChevronLeft as FaChevronLeftIcon,
-  FaCheck, FaSyncAlt, FaWhatsapp, FaFacebook, FaLink
+  FaCheck, FaSyncAlt, FaWhatsapp, FaFacebook, FaLink,
+  FaTruck, FaBox // Added shipping icons
 } from 'react-icons/fa';
 
 interface ProductVariation {
@@ -31,6 +32,7 @@ interface EnhancedProduct extends IProduct {
   hasVariations: boolean;
   defaultColor?: string;
   categoryName?: string;
+  shippingFee?: number; // Added shippingFee to product interface
 }
 
 export default function ProductDetail() {
@@ -63,7 +65,7 @@ export default function ProductDetail() {
         const normalizedVariations = variations.map((v: any) => ({
           ...v,
           _id: v._id || Math.random().toString(36).substr(2, 9),
-          color: v.colorName || v.color, // Map colorName to color for compatibility
+          color: v.colorName || v.color,
           colorName: v.colorName || v.color,
           images: v.images || (v.image ? [v.image] : []),
         }));
@@ -73,7 +75,8 @@ export default function ProductDetail() {
           hasVariations: normalizedVariations.length > 0,
           variations: normalizedVariations,
           categoryName: res.data.category?.name ||
-            (typeof res.data.category === 'string' ? res.data.category : 'Category')
+            (typeof res.data.category === 'string' ? res.data.category : 'Category'),
+          shippingFee: res.data.shippingFee || 0 // Ensure shippingFee is included
         };
 
         setProduct(productData);
@@ -99,6 +102,24 @@ export default function ProductDetail() {
       .catch(err => console.error("Error fetching reviews:", err))
       .finally(() => setReviewsLoading(false));
   }, [id]);
+
+  // Calculate total price with shipping
+  const calculateTotalPrice = () => {
+    const basePrice = getCurrentPrice();
+    const discountPercent = product?.discount || 0;
+    const currentPrice = discountPercent > 0 ? (basePrice * (1 - discountPercent / 100)) : basePrice;
+    const subtotal = currentPrice * quantity;
+    const shippingFee = product?.shippingFee || 0;
+    
+    // Apply shipping fee logic: only charge shipping once per product (regardless of quantity)
+    const totalShipping = shippingFee > 0 ? shippingFee : 0;
+    
+    return {
+      subtotal,
+      shipping: totalShipping,
+      total: subtotal + totalShipping
+    };
+  };
 
   const handleAddToCart = () => {
     if (product && selectedVariation) {
@@ -215,6 +236,7 @@ export default function ProductDetail() {
   const currentPrice = discountPercent > 0 ? (basePrice * (1 - discountPercent / 100)) : basePrice;
   const originalPrice = discountPercent > 0 ? basePrice : null;
   const currentStock = getCurrentStock();
+  const { subtotal, shipping, total } = calculateTotalPrice();
 
   // Get category name safely
   const getCategoryName = () => {
@@ -241,19 +263,8 @@ export default function ProductDetail() {
             </div>
 
             <div className="space-y-6">
-              {/* Blue Underlined Link */}
-              {/* <a 
-                href={window.location.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block bg-blue-50 border border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded-lg px-4 py-3 text-sm transition-colors underline text-center"
-              >
-                Click to open product
-              </a>
-               */}
               {/* Share via: with only 3 icons */}
               <div>
-                {/* <div className="text-sm font-medium text-gray-700 mb-4 text-center">Share via:</div> */}
                 <div className="flex items-center justify-center gap-6">
                   <button
                     onClick={shareOnWhatsApp}
@@ -494,7 +505,6 @@ export default function ProductDetail() {
                         />
                         <div>
                           <div className="font-bold text-gray-900">Selected: {selectedVariation.colorName}</div>
-
                         </div>
                       </div>
                       <div className="text-sm font-medium text-gray-700">
@@ -533,6 +543,63 @@ export default function ProductDetail() {
                 )}
               </div>
             </div>
+
+            {/* Shipping Information Section */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <div className="flex items-start gap-3">
+                <FaTruck className="text-blue-600 text-lg mt-1 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-gray-900 text-sm">Shipping Information</span>
+                    <span className="text-sm font-medium text-blue-700">
+                      ${product.shippingFee ? product.shippingFee.toFixed(2) : '0.00'}
+                    </span>
+                  </div>
+                  {/* <p className="text-xs text-gray-600">
+                    {product.shippingFee ? (
+                      <>Shipping fee: <span className="font-medium text-blue-600">${product.shippingFee.toFixed(2)}</span> per order (charged only once regardless of quantity)</>
+                    ) : (
+                      <span className="text-green-600 font-medium">Free Shipping</span>
+                    )}
+                  </p> */}
+                </div>
+              </div>
+            </div>
+
+            {/* Price Breakdown */}
+            {/* <div className="mb-6 bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider">Price Breakdown</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Unit Price</span>
+                  <span className="font-medium">${currentPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Quantity</span>
+                  <span className="font-medium">{quantity} × ${currentPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-bold text-gray-900">${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 flex items-center gap-2">
+                    <FaTruck className="text-blue-500" />
+                    Shipping
+                  </span>
+                  <span className={`font-medium ${shipping > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                    {shipping > 0 ? `$${shipping.toFixed(2)}` : 'FREE'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                  <span className="text-lg font-bold text-gray-900">Estimated Total</span>
+                  <span className="text-2xl font-black text-amber-700">${total.toFixed(2)}</span>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  *Shipping charged once per product regardless of quantity
+                </div>
+              </div>
+            </div> */}
 
             {/* Description */}
             <div className="mb-8">
@@ -623,11 +690,9 @@ export default function ProductDetail() {
                   : 'bg-gray-900 text-white hover:bg-black shadow-gray-900/20'
                   }`}
               >
-                Buy Now
+                Buy Now (${total.toFixed(2)})
               </button>
             </div>
-
-
           </div>
         </div>
 
@@ -641,7 +706,6 @@ export default function ProductDetail() {
               </div>
               <div className="flex items-center gap-6 px-8 py-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <div className="text-center">
-                  {/* <div className="text-4xl font-black text-gray-900">{product.rating || 0}</div> */}
                   <div className="flex items-center text-yellow-400 mt-1 text-xs">
                     {[...Array(5)].map((_, i) => (
                       <FaStar key={i} className={i < Math.floor(product.rating || 0) ? 'fill-current' : 'text-gray-300'} />
@@ -650,7 +714,6 @@ export default function ProductDetail() {
                 </div>
                 <div className="h-12 w-px bg-gray-200"></div>
                 <div>
-                  {/* <div className="text-lg font-bold text-gray-900">{reviews.length} Reviews</div> */}
                   <div className="text-sm text-emerald-600 font-bold mt-1">100% Verified Purchases</div>
                 </div>
               </div>
