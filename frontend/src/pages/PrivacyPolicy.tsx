@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   FaShieldAlt, 
   FaLock, 
@@ -14,8 +14,35 @@ import {
   FaGlobe,
   FaUserCheck
 } from 'react-icons/fa';
+import { useEffect } from 'react';
 
 export default function PrivacyPolicy() {
+  const location = useLocation();
+
+  // INSTANTLY scroll to top when component mounts (no smooth animation)
+  useEffect(() => {
+    window.scrollTo(0, 0); // INSTANT scroll to top
+  }, [location]);
+
+  // Handle smooth scrolling to sections (only for navigation within page)
+  const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth' // Smooth only for section navigation
+      });
+
+      // Update URL hash
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -37,22 +64,46 @@ export default function PrivacyPolicy() {
             Quick Navigation
           </h3>
           <div className="flex flex-wrap gap-3">
-            <a href="#data-collection" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            <a 
+              href="#data-collection" 
+              onClick={(e) => handleSectionClick(e, 'data-collection')}
+              className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
               Data Collection
             </a>
-            <a href="#data-use" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            <a 
+              href="#data-use" 
+              onClick={(e) => handleSectionClick(e, 'data-use')}
+              className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
               Data Usage
             </a>
-            <a href="#data-protection" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            <a 
+              href="#data-protection" 
+              onClick={(e) => handleSectionClick(e, 'data-protection')}
+              className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
               Data Protection
             </a>
-            <a href="#cookies" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            <a 
+              href="#cookies" 
+              onClick={(e) => handleSectionClick(e, 'cookies')}
+              className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
               Cookies
             </a>
-            <a href="#your-rights" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            <a 
+              href="#your-rights" 
+              onClick={(e) => handleSectionClick(e, 'your-rights')}
+              className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
               Your Rights
             </a>
-            <a href="#contact" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            <a 
+              href="#contact" 
+              onClick={(e) => handleSectionClick(e, 'contact')}
+              className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
               Contact Us
             </a>
           </div>
@@ -325,6 +376,7 @@ export default function PrivacyPolicy() {
                   </p>
                   <Link 
                     to="/cookies" 
+                    onClick={() => window.scrollTo(0, 0)} // INSTANT scroll to top
                     className="inline-block mt-3 text-sm font-semibold text-amber-600 hover:text-amber-800 underline"
                   >
                     Learn more about our Cookie Policy →
@@ -519,6 +571,7 @@ export default function PrivacyPolicy() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/"
+                  onClick={() => window.scrollTo(0, 0)} // INSTANT scroll to top
                   className="px-8 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
                 >
                   Back to Home
@@ -547,6 +600,19 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* Back to Top Button - INSTANT scroll */}
+        <div className="fixed bottom-8 right-8 z-40">
+          <button
+            onClick={() => window.scrollTo(0, 0)} // INSTANT scroll to top
+            className="p-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+            aria-label="Scroll to top"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTrash, FaPlus, FaMinus, FaArrowLeft,
   FaShoppingCart, FaShieldAlt, FaCreditCard, FaBox,
-  FaLock, FaTag, FaUser, FaHome, FaChevronRight
+  FaLock,  FaUser, FaHome, FaChevronRight
 } from 'react-icons/fa';
 
 export default function CartPage() {

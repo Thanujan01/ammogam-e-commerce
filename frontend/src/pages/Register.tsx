@@ -10,7 +10,7 @@ export default function Register() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const nav = useNavigate();
 
-  const handleSuccess = (msg: string) => {
+  const handleSuccess = () => {
     // Show success modal
     setShowSuccessModal(true);
     
