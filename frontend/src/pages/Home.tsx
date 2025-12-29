@@ -16,7 +16,8 @@ import {
   FaChevronRight as FaChevronRightIcon, FaWallet,
   FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
   FaImages, FaCreditCard, FaClock, FaCloudSun,
-  FaPaw, FaBaby as FaBabyIcon, FaShoppingBag
+  FaPaw, FaBaby as FaBabyIcon, FaShoppingBag,
+  FaTimes
 } from 'react-icons/fa';
 
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -45,6 +46,61 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
   return <IconComponent className={className} />;
 };
 
+// Function to add product to recently viewed (available globally)
+export const addToRecentlyViewed = (product: any) => {
+  try {
+    const current = localStorage.getItem('recentlyViewed');
+    let recentlyViewedArray = current ? JSON.parse(current) : [];
+    
+    // Remove if already exists (to avoid duplicates)
+    recentlyViewedArray = recentlyViewedArray.filter((p: any) => p.id !== product.id);
+    
+    // Add to beginning of array (most recent first)
+    recentlyViewedArray.unshift({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      currentPrice: product.currentPrice || `$ ${(product.price || 0).toFixed(2)}`,
+      timestamp: Date.now()
+    });
+    
+    // Keep only last 12 items
+    if (recentlyViewedArray.length > 12) {
+      recentlyViewedArray = recentlyViewedArray.slice(0, 12);
+    }
+    
+    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewedArray));
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('recentlyViewedUpdated', { 
+      detail: { productId: product.id } 
+    }));
+    
+    console.log('Added to recently viewed:', product.name); // Debug log
+    return true;
+  } catch (error) {
+    console.error('Error saving to recently viewed:', error);
+    return false;
+  }
+};
+
+// Function to get recently viewed products
+export const getRecentlyViewed = () => {
+  try {
+    const stored = localStorage.getItem('recentlyViewed');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.slice(0, 6); // Get only last 6 items
+      }
+    }
+  } catch (error) {
+    console.error('Error loading recently viewed:', error);
+    localStorage.removeItem('recentlyViewed');
+  }
+  return [];
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -57,13 +113,14 @@ export default function Home() {
   const [showCartNotification, setShowCartNotification] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [hoveredRecentlyViewed, setHoveredRecentlyViewed] = useState<string | null>(null);
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
-    // Scroll to top on initial load
     window.scrollTo(0, 0);
     
-    // Also handle browser back/forward navigation
     const handlePopState = () => {
       window.scrollTo(0, 0);
     };
@@ -77,18 +134,58 @@ export default function Home() {
 
   // ✅ FIX: Also scroll to top when the page refreshes or when navigating to this page
   useEffect(() => {
-    // This ensures scroll position is reset when the component mounts
-    // or when navigating from another page
     const timer = setTimeout(() => {
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth' // Optional: adds smooth scrolling
+        behavior: 'smooth'
       });
     }, 100);
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Load recently viewed products from localStorage
+  useEffect(() => {
+    const loadRecentlyViewed = () => {
+      const viewed = getRecentlyViewed();
+      console.log('Loading recently viewed:', viewed); // Debug log
+      setRecentlyViewed(viewed);
+    };
+    
+    loadRecentlyViewed();
+    
+    // Listen for updates from ProductList page or ProductDetail page
+    const handleRecentlyViewedUpdate = () => {
+      console.log('Recently viewed updated event received'); // Debug log
+      loadRecentlyViewed();
+    };
+    
+    window.addEventListener('recentlyViewedUpdated', handleRecentlyViewedUpdate);
+    
+    // Also check when the page becomes visible again (user comes back from another tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadRecentlyViewed();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('recentlyViewedUpdated', handleRecentlyViewedUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Function to add a product to recently viewed (Home page specific)
+  const addToRecentlyViewedLocal = (product: any) => {
+    console.log('Adding to recently viewed from Home:', product.name); // Debug log
+    const success = addToRecentlyViewed(product);
+    if (success) {
+      setRecentlyViewed(getRecentlyViewed());
+    }
+  };
 
   // Check for mobile device
   useEffect(() => {
@@ -191,23 +288,44 @@ export default function Home() {
 
   // Handle View All button click - Navigate to products page
   const handleViewAllProducts = () => {
-    // ✅ FIX: Scroll to top before navigating (optional)
     window.scrollTo(0, 0);
     navigate('/products');
   };
 
   // Handle category click to navigate to products page
   const handleCategorySelect = (categoryId: string) => {
-    // ✅ FIX: Scroll to top before navigating
     window.scrollTo(0, 0);
     navigate(`/products?category=${categoryId}`);
   };
 
   // Handle product click - Navigate to product detail page
   const handleProductClick = (productId: string) => {
-    // ✅ FIX: Scroll to top before navigating
+    // Add to recently viewed
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      addToRecentlyViewedLocal(product);
+    }
+    
     window.scrollTo(0, 0);
     navigate(`/products/${productId}`);
+  };
+
+  // Handle click on recently viewed product
+  const handleRecentlyViewedClick = (item: any) => {
+    // Find the full product details
+    const product = products.find(p => p.id === item.id);
+    if (product) {
+      // Add to recently viewed again (so it becomes most recent)
+      addToRecentlyViewedLocal(product);
+      
+      // Navigate to product detail page
+      window.scrollTo(0, 0);
+      navigate(`/products/${item.id}`);
+    } else {
+      // If product not found in current products list, still navigate
+      window.scrollTo(0, 0);
+      navigate(`/products/${item.id}`);
+    }
   };
 
   // Professional categories display component from ProductList.tsx
@@ -337,7 +455,46 @@ export default function Home() {
         .animate-fade-in {
           animation: fade-in 0.3s ease-out;
         }
+
+        /* Zoom animation */
+        @keyframes zoomInOut {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+        }
+
+        .zoom-animation {
+          animation: zoomInOut 2s ease-in-out infinite;
+        }
+
+        /* Image hover zoom effect */
+        .image-zoom-container {
+          transition: transform 0.5s ease;
+        }
+
+        .image-zoom-container:hover {
+          transform: scale(1.05);
+        }
       `}</style>
+
+      {/* Image Zoom Modal */}
+      {zoomedImage && (
+        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
+          <div className="relative max-w-4xl w-full max-h-[90vh]">
+            <button
+              onClick={() => setZoomedImage(null)}
+              className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors"
+            >
+              <FaTimes className="text-xl" />
+            </button>
+            <img
+              src={zoomedImage}
+              alt="Zoomed"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Cart Notification */}
       {showCartNotification && recentlyAdded && (
@@ -356,7 +513,6 @@ export default function Home() {
       <div className={`fixed ${isMobile ? 'bottom-6 right-6' : 'bottom-8 right-8'} z-40`}>
         <div className="relative">
           <div className="bg-amber-600 text-white p-3 sm:p-4 rounded-full shadow-2xl cursor-pointer hover:bg-amber-700 transition-colors" onClick={() => {
-            // ✅ FIX: Scroll to top before navigating to cart
             window.scrollTo(0, 0);
             navigate('/cart');
           }}>
@@ -376,41 +532,41 @@ export default function Home() {
         <ProfessionalCategories />
 
         {/* Hero Banner */}
-       <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
-  <div className="relative h-64 sm:h-80 md:h-96">
-    <div className="flex flex-col md:flex-row h-full">
-      {/* Left side - Text Content (50%) */}
-      <div className="w-full md:w-1/2 relative bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 sm:mb-4">
-              Ammogam 
-            </h1>
-            <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
-              Discover amazing deals on electronics, fashion, and more
-            </p>
-            <button
-              onClick={handleViewAllProducts}
-              className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
-            >
-              Shop Now
-            </button>
+        <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
+          <div className="relative h-64 sm:h-80 md:h-96">
+            <div className="flex flex-col md:flex-row h-full">
+              {/* Left side - Text Content (50%) */}
+              <div className="w-full md:w-1/2 relative bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
+                    <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 sm:mb-4">
+                      Ammogam 
+                    </h1>
+                    <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
+                      Discover amazing deals on electronics, fashion, and more
+                    </p>
+                    <button
+                      onClick={handleViewAllProducts}
+                      className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
+                    >
+                      Shop Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side - Image (50%) */}
+              <div className="w-full md:w-1/2 relative">
+                <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
+                <img
+                  src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
+                  alt="Summer Sale"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Right side - Image (50%) */}
-      <div className="w-full md:w-1/2 relative">
-        <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
-        <img
-          src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
-          alt="Summer Sale"
-          className="w-full h-full object-cover"
-        />
-      </div>
-    </div>
-  </div>
-</div>
 
         {/* Featured Products */}
         <div className="mb-10 sm:mb-12">
@@ -617,39 +773,102 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Recently Viewed */}
+              {/* Recently Viewed - Shows products viewed from ANY page */}
               <div className="mb-8 sm:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
-                    <p className="text-gray-600 text-sm mt-1">Based on your browsing history</p>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                      Recently Viewed
+                      {recentlyViewed.length > 0 && (
+                        <span className="ml-2 text-sm font-normal text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                          {recentlyViewed.length} items
+                        </span>
+                      )}
+                    </h2>
+                    <p className="text-gray-600 text-sm mt-1">
+                      {recentlyViewed.length > 0 
+                        ? 'Continue exploring products you recently viewed' 
+                        : 'Products you view will appear here'
+                      }
+                    </p>
                   </div>
-                  <button
-                    onClick={handleViewAllProducts}
-                    className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
-                  >
-                    See all <FaChevronRight className="ml-1" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-                  {featuredProducts.slice(0, 6).map((product) => (
-                    <div key={product.id} className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-shadow hover:border-amber-200">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-24 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3 cursor-pointer"
-                        onClick={() => handleProductClick(product.id)}
-                      />
-                      <div
-                        className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 cursor-pointer hover:text-amber-700"
-                        onClick={() => handleProductClick(product.id)}
+                  {recentlyViewed.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleViewAllProducts}
+                        className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
                       >
-                        {product.name}
-                      </div>
-                      <div className="text-sm font-bold text-amber-700">{product.currentPrice}</div>
+                        Shop More <FaChevronRight className="ml-1" />
+                      </button>
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {recentlyViewed.length > 0 ? (
+                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+                    {recentlyViewed.map((item, index) => {
+                      // Try to find full product details from products array
+                      const fullProduct = products.find(p => p.id === item.id);
+                      return (
+                        <div 
+                          key={item.id} 
+                          className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-all duration-300 hover:border-amber-200 group cursor-pointer"
+                          onClick={() => handleRecentlyViewedClick(item)}
+                        >
+                          {/* Position indicator for most recent item */}
+                          {index === 0 && (
+                            <div className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
+                              Latest
+                            </div>
+                          )}
+                          
+                          <div 
+                            className="relative overflow-hidden rounded-lg mb-2 sm:mb-3"
+                            onMouseEnter={() => setHoveredRecentlyViewed(item.id)}
+                            onMouseLeave={() => setHoveredRecentlyViewed(null)}
+                          >
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className={`w-full h-24 sm:h-32 object-cover rounded-lg transition-transform duration-500 ${hoveredRecentlyViewed === item.id ? 'transform scale-110' : ''}`}
+                            />
+                            <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+                              <div className="bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                                Viewed
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 group-hover:text-amber-700">
+                            {item.name}
+                          </div>
+                          <div className="text-sm font-bold text-amber-700">
+                            {fullProduct?.currentPrice || item.currentPrice || '$ 0.00'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  // Empty state when no recently viewed
+                  <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="max-w-md mx-auto">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FaClock className="text-gray-400 text-2xl" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Recently Viewed Items</h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Products you view on Home page, Product List page, or Product Detail page will appear here to help you find them later
+                      </p>
+                      <button
+                        onClick={handleViewAllProducts}
+                        className="text-amber-700 hover:text-amber-800 font-medium text-sm bg-amber-50 hover:bg-amber-100 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 mx-auto"
+                      >
+                        <FaShoppingBag className="text-sm" />
+                        Start Browsing Products →
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

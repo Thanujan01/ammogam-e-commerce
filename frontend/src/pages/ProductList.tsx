@@ -17,6 +17,9 @@ import {
   FaBox, FaLayerGroup
 } from 'react-icons/fa';
 
+// Import the addToRecentlyViewed function from Home.tsx
+import { addToRecentlyViewed } from './Home';
+
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
   const icons: any = {
     FaMobileAlt: FaMobileAlt,
@@ -47,8 +50,6 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
 const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isFav, showCategoryBadge = false }: any) => {
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
-      {/* Category Badge */}
-
       {/* Brand Badge */}
       {product.badge && !showCategoryBadge && (
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
@@ -61,7 +62,10 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
 
       {/* Quick Add Icon */}
       <button
-        onClick={() => addToCart(product)}
+        onClick={(e) => {
+          e.stopPropagation();
+          addToCart(product);
+        }}
         className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 bg-white/90 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110"
         title="Add to cart"
       >
@@ -90,7 +94,10 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
 
         {/* Wishlist Button */}
         <button
-          onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            toggleWishlist(product.id); 
+          }}
           className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110"
           title="Add to wishlist"
         >
@@ -736,6 +743,11 @@ export default function ProductList() {
   const openProductModal = (product: any) => {
     // ✅ FIX: Scroll to top before navigating to product detail
     window.scrollTo(0, 0);
+    
+    // ✅ IMPORTANT: Add product to recently viewed
+    addToRecentlyViewed(product);
+    
+    // Navigate to product detail page
     navigate(`/products/${product.id}`);
   };
 
