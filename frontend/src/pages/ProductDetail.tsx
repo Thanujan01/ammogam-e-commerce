@@ -575,7 +575,7 @@ export default function ProductDetail() {
                 <div className="flex items-center gap-2 text-gray-700">
                   <FaTruck className="text-gray-500" />
                   <span>${product.shippingFee ? product.shippingFee.toFixed(2) : '0.00'}</span>
-                  <span className="text-sm text-gray-500">• 2-5 business days</span>
+                  <span className="text-sm text-gray-500">• 3-5 business days</span>
                 </div>
               </div>
             </div>

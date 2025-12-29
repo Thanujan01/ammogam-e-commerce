@@ -1,12 +1,13 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react'; // Added useEffect
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTrash, FaPlus, FaMinus, FaArrowLeft,
-  FaShoppingCart, FaShieldAlt, FaCreditCard, FaBox,
-  FaLock,  FaUser, FaHome, FaChevronRight
+  FaShoppingCart,  FaCreditCard, 
+  FaLock, FaUser, FaHome, FaChevronRight,
+  FaTimes, FaExclamationTriangle, 
 } from 'react-icons/fa';
 
 export default function CartPage() {
@@ -16,6 +17,47 @@ export default function CartPage() {
 
   // Selection state for checkboxes
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<{
+    type: 'selected' | 'item' | 'clear';
+    item?: any;
+    selectedCount?: number;
+  } | null>(null);
+
+  // ✅ FIX: Scroll to top when component mounts or updates
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    
+    // Also handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []); // Empty dependency array means this runs once on mount
+
+  // ✅ FIX: Additional scroll for cart updates
+  useEffect(() => {
+    // When cart items change, scroll to top smoothly
+    if (cart.items.length > 0) {
+      const timer = setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [cart.items]); // Runs when cart items change
 
   // Helper functions for checkbox selection
   const getItemKey = (item: any) => `${item.product._id}-${item.variationId || 'default'}`;
@@ -60,8 +102,6 @@ export default function CartPage() {
     return groups;
   }, {});
 
-
-
   const toggleSelectAll = () => {
     if (selectedItems.size === cart.items.length) {
       setSelectedItems(new Set());
@@ -95,17 +135,80 @@ export default function CartPage() {
     setSelectedItems(newSelected);
   };
 
-  const deleteSelected = () => {
-    if (selectedItems.size === 0) return;
-    if (window.confirm(`Are you sure you want to delete ${selectedItems.size} selected item(s)?`)) {
-      selectedItems.forEach((key) => {
-        const item = cart.items.find((i: any) => getItemKey(i) === key);
-        if (item) {
-          cart.removeFromCart(item.product._id, item.variationId);
+  // Show delete confirmation modal
+  const confirmDelete = (type: 'selected' | 'item' | 'clear', item?: any) => {
+    if (type === 'selected' && selectedItems.size === 0) return;
+    
+    setDeleteAction({
+      type,
+      item,
+      selectedCount: selectedItems.size
+    });
+    setShowDeleteModal(true);
+  };
+
+  // Execute delete after confirmation
+  const executeDelete = () => {
+    if (!deleteAction) return;
+
+    switch (deleteAction.type) {
+      case 'selected':
+        selectedItems.forEach((key) => {
+          const item = cart.items.find((i: any) => getItemKey(i) === key);
+          if (item) {
+            cart.removeFromCart(item.product._id, item.variationId);
+          }
+        });
+        setSelectedItems(new Set());
+        break;
+      
+      case 'item':
+        if (deleteAction.item) {
+          cart.removeFromCart(deleteAction.item.product._id, deleteAction.item.variationId);
         }
-      });
-      setSelectedItems(new Set());
+        break;
+      
+      case 'clear':
+        cart.clearCart();
+        setSelectedItems(new Set());
+        break;
     }
+    
+    setShowDeleteModal(false);
+    setDeleteAction(null);
+    
+    // ✅ FIX: Scroll to top after delete action
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    }, 300);
+  };
+
+  // Close modal without action
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteAction(null);
+  };
+
+  // ✅ FIX: Handle navigation with scroll to top
+  const handleNavigate = (path: string) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setTimeout(() => navigate(path), 100);
+  };
+
+  // ✅ FIX: Handle continue shopping with scroll
+  const handleContinueShopping = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setTimeout(() => navigate('/products'), 100);
+  };
+
+  // ✅ FIX: Handle product navigation with scroll
+  const handleProductNavigation = (productId: string) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setTimeout(() => navigate(`/products/${productId}`), 100);
   };
 
   return (
@@ -128,17 +231,121 @@ export default function CartPage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                to="/products"
+              <button
+                onClick={handleContinueShopping}
                 className="px-6 py-2.5 border border-[#d97706]/30 text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2 shadow-sm"
               >
                 <FaArrowLeft className="text-sm" />
                 Continue Shopping
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && deleteAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform animate-scaleIn overflow-hidden">
+            <div className="p-6">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+                    <FaExclamationTriangle className="text-red-500 text-xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Confirm Delete</h3>
+                    <p className="text-sm text-gray-500">This action cannot be undone</p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeDeleteModal}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Close modal"
+                >
+                  <FaTimes className="text-gray-500" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="mb-6">
+                {deleteAction.type === 'selected' && (
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
+                      <FaTrash className="text-red-500 text-2xl" />
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-2">
+                      Delete {deleteAction.selectedCount} item{deleteAction.selectedCount !== 1 ? 's' : ''}?
+                    </h4>
+                    <p className="text-gray-600">
+                      Are you sure you want to delete {deleteAction.selectedCount} selected item{deleteAction.selectedCount !== 1 ? 's' : ''} from your cart?
+                    </p>
+                  </div>
+                )}
+
+                {deleteAction.type === 'item' && deleteAction.item && (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mb-4">
+                      <img
+                        src={getImageUrl(deleteAction.item.product.image)}
+                        alt={deleteAction.item.product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-1">
+                      Remove "{deleteAction.item.product.name}"?
+                    </h4>
+                    <p className="text-gray-600">
+                      This item will be removed from your shopping cart.
+                    </p>
+                    {deleteAction.item.selectedColor && (
+                      <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-300"
+                          style={{ backgroundColor: deleteAction.item.selectedColorCode || '#000' }}
+                        />
+                        <span>Color: {deleteAction.item.selectedColor}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {deleteAction.type === 'clear' && (
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
+                      <FaShoppingCart className="text-red-500 text-2xl" />
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-2">
+                      Clear Entire Cart?
+                    </h4>
+                    <p className="text-gray-600">
+                      This will remove all items from your shopping cart. This action cannot be undone.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex gap-3">
+                <button
+                  onClick={closeDeleteModal}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeDelete}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <FaTrash />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
         {cart.items.length === 0 ? (
@@ -153,7 +360,7 @@ export default function CartPage() {
                 Browse our premium selection and add items to your cart to get started with your order.
               </p>
               <button
-                onClick={() => navigate('/products')}
+                onClick={handleContinueShopping}
                 className="px-8 py-3.5 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-3 mx-auto shadow-md"
               >
                 <FaShoppingCart />
@@ -179,10 +386,10 @@ export default function CartPage() {
                   </span>
                 </div>
                 <button
-                  onClick={deleteSelected}
+                  onClick={() => confirmDelete('selected')}
                   disabled={selectedItems.size === 0}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${selectedItems.size > 0
-                    ? 'text-red-600 hover:bg-red-50 border border-red-200'
+                    ? 'text-red-600 hover:bg-red-50 border border-red-200 hover:shadow-sm'
                     : 'text-gray-400 cursor-not-allowed border border-gray-200'
                     }`}
                 >
@@ -243,7 +450,7 @@ export default function CartPage() {
                           {/* Product Info */}
                           <div className="col-span-5 flex items-center gap-6">
                             <div
-                              onClick={() => navigate(`/products/${it.product._id}`)}
+                              onClick={() => handleProductNavigation(it.product._id)}
                               className="w-24 h-24 bg-[#d97706]/5 rounded-xl border border-[#d97706]/20 overflow-hidden flex items-center justify-center p-3 cursor-pointer hover:shadow-md transition-shadow"
                             >
                               <img
@@ -254,7 +461,7 @@ export default function CartPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <h3
-                                onClick={() => navigate(`/products/${it.product._id}`)}
+                                onClick={() => handleProductNavigation(it.product._id)}
                                 className="font-bold text-gray-900 mb-2 hover:text-[#d97706] cursor-pointer transition-colors"
                               >
                                 {it.product.name}
@@ -274,7 +481,7 @@ export default function CartPage() {
                                 </div>
                               )}
                               <button
-                                onClick={() => cart.removeFromCart(it.product._id, it.variationId)}
+                                onClick={() => confirmDelete('item', it)}
                                 className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-2 transition-colors"
                               >
                                 <FaTrash className="text-xs" />
@@ -334,33 +541,6 @@ export default function CartPage() {
                   </div>
                 </div>
               ))}
-
-
-
-              {/* Security & Features */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl border border-[#d97706]/20 p-4 text-center hover:shadow-md transition-shadow">
-                  <div className="w-12 h-12 bg-[#d97706]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FaLock className="text-[#d97706]" />
-                  </div>
-                  <h4 className="font-medium text-gray-900 mb-1">Secure Payment</h4>
-                  <p className="text-xs text-[#d97706]">256-bit SSL encryption</p>
-                </div>
-                <div className="bg-white rounded-xl border border-[#d97706]/20 p-4 text-center hover:shadow-md transition-shadow">
-                  <div className="w-12 h-12 bg-[#d97706]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FaBox className="text-[#d97706]" />
-                  </div>
-                  <h4 className="font-medium text-gray-900 mb-1">Easy Returns</h4>
-                  <p className="text-xs text-[#d97706]">30-day return policy</p>
-                </div>
-                <div className="bg-white rounded-xl border border-[#d97706]/20 p-4 text-center hover:shadow-md transition-shadow">
-                  <div className="w-12 h-12 bg-[#d97706]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FaShieldAlt className="text-[#d97706]" />
-                  </div>
-                  <h4 className="font-medium text-gray-900 mb-1">Quality Guarantee</h4>
-                  <p className="text-xs text-[#d97706]">Premium products only</p>
-                </div>
-              </div>
             </div>
 
             {/* Right Column - Order Summary */}
@@ -470,7 +650,7 @@ export default function CartPage() {
                   <div className="space-y-4">
                     {!auth.user ? (
                       <button
-                        onClick={() => navigate('/login?redirect=/cart')}
+                        onClick={() => handleNavigate('/login?redirect=/cart')}
                         disabled={selectedCartItems.length === 0}
                         className={`w-full py-3.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-md ${selectedCartItems.length === 0
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -482,7 +662,7 @@ export default function CartPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => navigate('/checkout')}
+                        onClick={() => handleNavigate('/checkout')}
                         disabled={selectedCartItems.length === 0}
                         className={`w-full py-3.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-md ${selectedCartItems.length === 0
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -493,13 +673,13 @@ export default function CartPage() {
                         Proceed to Checkout {selectedCartItems.length > 0 && `(${selectedCartItems.length})`}
                       </button>
                     )}
-                    <Link
-                      to="/products"
+                    <button
+                      onClick={handleContinueShopping}
                       className="w-full border border-[#d97706] text-[#d97706] py-3.5 rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
                     >
                       <FaShoppingCart />
                       Continue Shopping
-                    </Link>
+                    </button>
                   </div>
 
                   {/* Security Badge */}
@@ -518,11 +698,7 @@ export default function CartPage() {
                   {/* Clear Cart Button */}
                   <div className="text-center pt-4">
                     <button
-                      onClick={() => {
-                        if (window.confirm('Are you sure you want to clear your cart?')) {
-                          cart.clearCart();
-                        }
-                      }}
+                      onClick={() => confirmDelete('clear')}
                       className="text-sm text-gray-500 hover:text-red-600 font-medium transition-colors flex items-center gap-2 mx-auto"
                     >
                       <FaTrash />
@@ -531,33 +707,35 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Support Info */}
-              {/* <div className="mt-6 bg-white rounded-2xl border border-[#d97706]/20 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-[#d97706]/10 rounded-lg">
-                    <FaTag className="text-[#d97706]" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Have a Promo Code?</h4>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Enter your promo code at checkout to save on your order.
-                    </p>
-                    <input
-                      type="text"
-                      placeholder="Enter promo code"
-                      className="w-full px-4 py-2.5 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]"
-                    />
-                    <button className="w-full mt-3 bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706] text-[#d97706] py-2.5 rounded-lg font-medium hover:bg-[#d97706]/20 transition-colors">
-                      Apply Code
-                    </button>
-                  </div>
-                </div>
-              </div> */}
             </div>
           </div>
         )}
       </div>
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        .animate-scaleIn {
+          animation: scaleIn 0.2s ease-out;
+        }
+        
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
     </div>
   );
 }
