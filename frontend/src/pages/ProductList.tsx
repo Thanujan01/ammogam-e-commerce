@@ -49,7 +49,6 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
       {/* Category Badge */}
 
-
       {/* Brand Badge */}
       {product.badge && !showCategoryBadge && (
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
@@ -498,6 +497,36 @@ export default function ProductList() {
   const { user } = useContext(AuthContext)!;
   const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
 
+  // ✅ FIX: Scroll to top when component mounts
+  useEffect(() => {
+    // Scroll to top on initial load
+    window.scrollTo(0, 0);
+    
+    // Also handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo(0, 0);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // ✅ FIX: Also scroll to top when the page refreshes or when navigating to this page
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -600,6 +629,9 @@ export default function ProductList() {
   }, [selectedCategory, selectedSubcategory, allProducts, categories]);
 
   const handleCategorySelect = (categoryId: string) => {
+    // ✅ FIX: Scroll to top when category changes
+    window.scrollTo(0, 0);
+    
     const params = new URLSearchParams(searchParams);
 
     if (categoryId && selectedCategory !== categoryId) {
@@ -620,6 +652,9 @@ export default function ProductList() {
   };
 
   const handleSubcategorySelect = (subcategoryId: string) => {
+    // ✅ FIX: Scroll to top when subcategory changes
+    window.scrollTo(0, 0);
+    
     const params = new URLSearchParams(searchParams);
 
     if (selectedCategory) {
@@ -640,6 +675,9 @@ export default function ProductList() {
   };
 
   const handleClearFilters = (type: 'category' | 'subcategory' | 'all') => {
+    // ✅ FIX: Scroll to top when clearing filters
+    window.scrollTo(0, 0);
+    
     const params = new URLSearchParams();
 
     if (type === 'all' || type === 'category') {
@@ -696,11 +734,15 @@ export default function ProductList() {
   };
 
   const openProductModal = (product: any) => {
+    // ✅ FIX: Scroll to top before navigating to product detail
+    window.scrollTo(0, 0);
     navigate(`/products/${product.id}`);
   };
 
   const handleToggleWishlist = async (productId: string) => {
     if (!user) {
+      // ✅ FIX: Scroll to top before navigating to login
+      window.scrollTo(0, 0);
       navigate('/login');
       return;
     }

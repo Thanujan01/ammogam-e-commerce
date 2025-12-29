@@ -1,7 +1,34 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaFileContract, FaShieldAlt, FaLock, FaCreditCard, FaTruck, FaHeadset, FaExclamationTriangle } from 'react-icons/fa';
+import { useEffect } from 'react';
 
 export default function TermsAndConditions() {
+  const location = useLocation();
+
+  // INSTANTLY scroll to top when component mounts (no smooth animation)
+  useEffect(() => {
+    window.scrollTo(0, 0); // INSTANT scroll to top
+  }, [location]);
+
+  // Handle smooth scrolling to sections (only for navigation within page)
+  const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth' // Smooth only for section navigation
+      });
+
+      // Update URL hash
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -11,13 +38,6 @@ export default function TermsAndConditions() {
             <FaFileContract className="text-3xl text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Terms & Conditions</h1>
-          {/* <p className="text-gray-600 text-lg">
-            Last Updated: {new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </p> */}
         </div>
 
         {/* Disclaimer Alert */}
@@ -36,25 +56,53 @@ export default function TermsAndConditions() {
 
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-8">
-          <a href="#acceptance" className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg font-medium hover:bg-amber-200 transition-colors">
+          <a 
+            href="#acceptance" 
+            onClick={(e) => handleSectionClick(e, 'acceptance')}
+            className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg font-medium hover:bg-amber-200 transition-colors"
+          >
             1. Acceptance
           </a>
-          <a href="#accounts" className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <a 
+            href="#accounts" 
+            onClick={(e) => handleSectionClick(e, 'accounts')}
+            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
             2. User Accounts
           </a>
-          <a href="#purchases" className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <a 
+            href="#purchases" 
+            onClick={(e) => handleSectionClick(e, 'purchases')}
+            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
             3. Purchases
           </a>
-          <a href="#admin" className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <a 
+            href="#admin" 
+            onClick={(e) => handleSectionClick(e, 'admin')}
+            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
             4. Admin Access
           </a>
-          <a href="#liability" className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <a 
+            href="#liability" 
+            onClick={(e) => handleSectionClick(e, 'liability')}
+            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
             5. Liability
           </a>
-          <a href="#payment" className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <a 
+            href="#payment" 
+            onClick={(e) => handleSectionClick(e, 'payment')}
+            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
             6. Payment
           </a>
-          <a href="#contact" className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <a 
+            href="#contact" 
+            onClick={(e) => handleSectionClick(e, 'contact')}
+            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
             7. Contact
           </a>
         </div>
@@ -134,7 +182,7 @@ export default function TermsAndConditions() {
               <h3 className="text-xl font-semibold text-gray-900">Delivery</h3>
               <p>
                 You are responsible for providing accurate delivery details. Delivery timelines are estimates and not guaranteed. 
-                Please refer to our <Link to="/shipping" className="text-amber-600 hover:text-amber-800 font-medium">Shipping Policy</Link> for detailed information.
+                Please refer to our <Link to="/shipping" onClick={() => window.scrollTo(0, 0)} className="text-amber-600 hover:text-amber-800 font-medium">Shipping Policy</Link> for detailed information.
               </p>
             </div>
           </section>
@@ -240,6 +288,7 @@ export default function TermsAndConditions() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/"
+                  onClick={() => window.scrollTo(0, 0)} // INSTANT scroll to top
                   className="px-8 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
                 >
                   Back to Home
@@ -259,6 +308,19 @@ export default function TermsAndConditions() {
             AMMOGAM reserves the right to modify these Terms at any time. Continued use of the 
             Platform constitutes acceptance of any changes.
           </p>
+        </div>
+
+        {/* Back to Top Button - INSTANT scroll */}
+        <div className="fixed bottom-8 right-8 z-40">
+          <button
+            onClick={() => window.scrollTo(0, 0)} // INSTANT scroll to top
+            className="p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors"
+            aria-label="Scroll to top"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>

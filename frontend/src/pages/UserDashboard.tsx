@@ -9,7 +9,7 @@ import {
   FaShoppingCart, FaCog, FaChartLine,
   FaLock, FaEdit, FaPhone, FaHome, FaEnvelope,
   FaCalendarAlt, FaUser, FaArrowRight,
-  FaTruck, FaWallet, FaHeart, FaFilter
+  FaTruck,  FaHeart, FaFilter
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
