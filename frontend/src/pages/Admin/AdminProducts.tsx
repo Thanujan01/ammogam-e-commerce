@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiPlus, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { Package } from 'lucide-react';
 import { api } from '../../api/api';
 import type { IProduct, ICategory } from '../../types';
@@ -9,11 +9,20 @@ import ProductFilters from '../../components/AdminProducts/ProductFilters';
 import ProductCard from '../../components/AdminProducts/ProductCard';
 import ProductDialog, { type ColorVariant } from '../../components/AdminProducts/ProductDialog';
 
+type ToastType = 'success' | 'error';
+
+interface Toast {
+  message: string;
+  type: ToastType;
+}
+
 export default function AdminProducts() {
   const [productList, setProductList] = useState<IProduct[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; productId: string; productName: string }>({ open: false, productId: '', productName: '' });
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -46,6 +55,11 @@ export default function AdminProducts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<string>('all');
+
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const location = useLocation();
 
@@ -130,7 +144,7 @@ export default function AdminProducts() {
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.price || !formData.category) {
-      alert('Please fill all required fields.');
+      showToast('Please fill all required fields.', 'error');
       return;
     }
 
@@ -145,27 +159,35 @@ export default function AdminProducts() {
 
       if (editingProduct) {
         await api.put(`/products/${editingProduct.id}`, payload);
-        alert(`${formData.name} updated successfully.`);
+        showToast(`${formData.name} updated successfully.`, 'success');
       } else {
         await api.post('/products', payload);
-        alert(`${formData.name} added successfully.`);
+        showToast(`${formData.name} added successfully.`, 'success');
       }
       fetchData();
       setDialogOpen(false);
     } catch (error) {
       console.error("Operation failed", error);
-      alert("Operation failed");
+      showToast("Operation failed", 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this product?")) return;
+    const product = productList.find(p => p.id === id);
+    setConfirmDialog({ open: true, productId: id, productName: product?.name || 'this product' });
+  };
+
+  const confirmDelete = async () => {
+    const { productId, productName } = confirmDialog;
+    setConfirmDialog({ open: false, productId: '', productName: '' });
+    
     try {
-      await api.delete(`/products/${id}`);
-      setProductList(prev => prev.filter(p => p.id !== id));
-      alert(`Product deleted.`);
+      await api.delete(`/products/${productId}`);
+      setProductList(prev => prev.filter(p => p.id !== productId));
+      showToast(`${productName} deleted successfully.`, 'success');
     } catch (error) {
       console.error("Delete failed", error);
+      showToast('Failed to delete product. Please try again.', 'error');
     }
   };
 
@@ -204,6 +226,24 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+          <div className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
+            toast.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            {toast.type === 'success' ? (
+              <FiCheckCircle className="w-5 h-5" />
+            ) : (
+              <FiAlertCircle className="w-5 h-5" />
+            )}
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="bg-white rounded-xl  p-6 ">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -278,7 +318,39 @@ export default function AdminProducts() {
         onClose={() => setDialogOpen(false)}
         onSubmit={handleSubmit}
         onChange={handleFormChange}
+        showToast={showToast}
       />
+
+      {/* Confirmation Dialog */}
+      {confirmDialog.open && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiAlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Confirm Deletion</h3>
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to delete <span className="font-semibold text-gray-900">{confirmDialog.productName}</span>? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmDialog({ open: false, productId: '', productName: '' })}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

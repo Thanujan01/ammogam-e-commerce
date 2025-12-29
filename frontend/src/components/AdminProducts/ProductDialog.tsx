@@ -33,6 +33,7 @@ interface ProductDialogProps {
   onClose: () => void;
   onSubmit: () => void;
   onChange: (field: string, value: any) => void;
+  showToast: (message: string, type: 'success' | 'error') => void;
 }
 
 export default function ProductDialog({
@@ -43,6 +44,7 @@ export default function ProductDialog({
   onClose,
   onSubmit,
   onChange,
+  showToast,
 }: ProductDialogProps) {
   const [colorVariants, setColorVariants] = useState<ColorVariant[]>(
     formData.colorVariants || []
@@ -50,6 +52,12 @@ export default function ProductDialog({
   const [showColorSection, setShowColorSection] = useState(
     (formData.colorVariants?.length || 0) > 0
   );
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [sectionSearch, setSectionSearch] = useState('');
+  const [showSectionDropdown, setShowSectionDropdown] = useState(false);
+  const [subCategorySearch, setSubCategorySearch] = useState('');
+  const [showSubCategoryDropdown, setShowSubCategoryDropdown] = useState(false);
 
   // Maintain local references for file inputs to reset them
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -63,7 +71,43 @@ export default function ProductDialog({
       setColorVariants([]);
       setShowColorSection(false);
     }
-  }, [formData.colorVariants, isOpen]);
+    // Reset category search when dialog opens
+    if (isOpen) {
+      const selectedCat = categories.find(c => c.id === formData.category);
+      setCategorySearch(selectedCat?.name || '');
+      
+      // Reset section search
+      setSectionSearch((formData as any).mainSubcategory || '');
+      
+      // Reset subcategory search
+      setSubCategorySearch(formData.subCategory || '');
+    } else {
+      setCategorySearch('');
+      setSectionSearch('');
+      setSubCategorySearch('');
+    }
+  }, [formData.colorVariants, isOpen, formData.category, formData.subCategory, categories]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.category-dropdown-container')) {
+        setShowCategoryDropdown(false);
+      }
+      if (!target.closest('.section-dropdown-container')) {
+        setShowSectionDropdown(false);
+      }
+      if (!target.closest('.subcategory-dropdown-container')) {
+        setShowSubCategoryDropdown(false);
+      }
+    };
+
+    if (showCategoryDropdown || showSectionDropdown || showSubCategoryDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showCategoryDropdown, showSectionDropdown, showSubCategoryDropdown]);
 
   if (!isOpen) return null;
 
@@ -97,7 +141,7 @@ export default function ProductDialog({
 
   const handleColorImageUpload = async (index: number, file: File) => {
     if (colorVariants[index].images.length >= 5) {
-      alert("Maximum 5 images allowed per color variant.");
+      showToast("Maximum 5 images allowed per color variant.", 'error');
       return;
     }
 
@@ -113,7 +157,7 @@ export default function ProductDialog({
       }
     } catch (error) {
       console.error('Image upload failed', error);
-      alert('Failed to upload image. Please check your connection and try again.');
+      showToast('Failed to upload image. Please check your connection and try again.', 'error');
     }
   };
 
@@ -125,13 +169,22 @@ export default function ProductDialog({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-primary1 px-6 py-4 rounded-t-2xl z-10 w-full">
-          <h2 className="text-xl font-bold text-white">
-            {isEditing ? 'Edit Product' : 'Add New Product'}
-          </h2>
-          <p className="text-white/80 text-sm mt-1">
-            {isEditing ? 'Update product details' : 'Fill in details to add a new product'}
-          </p>
+        <div className="sticky top-0 bg-primary1 px-6 py-4 rounded-t-2xl z-10 w-full flex justify-between items-start">
+          <div>
+            <h2 className="text-xl font-bold text-white">
+              {isEditing ? 'Edit Product' : 'Add New Product'}
+            </h2>
+            <p className="text-white/80 text-sm mt-1">
+              {isEditing ? 'Update product details' : 'Fill in details to add a new product'}
+            </p>
+          </div>
+          <button 
+            onClick={onClose}
+            className="text-white hover:bg-white/20 rounded-lg p-2 transition-all"
+            title="Close"
+          >
+            <FiX size={24} />
+          </button>
         </div>
         <div className="p-6">
           <div className="space-y-5">
@@ -195,24 +248,65 @@ export default function ProductDialog({
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
               />
             </div>
-            <div>
+            <div className="relative category-dropdown-container">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
-              <select
-                value={formData.category}
-                onChange={e => {
-                  onChange('category', e.target.value);
-                  onChange('mainSubcategory', '');
-                  onChange('subCategory', '');
-                }}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all bg-white"
-              >
-                <option value="">Select a category</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={categorySearch || categories.find(c => c.id === formData.category)?.name || ''}
+                  onChange={(e) => {
+                    setCategorySearch(e.target.value);
+                    setShowCategoryDropdown(true);
+                  }}
+                  onFocus={() => setShowCategoryDropdown(true)}
+                  placeholder="Search or select a category"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
+                />
+                {showCategoryDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {categories
+                      .filter(cat => 
+                        cat.name.toLowerCase().startsWith(categorySearch.toLowerCase())
+                      )
+                      .map(cat => (
+                        <div
+                          key={cat.id}
+                          onClick={() => {
+                            onChange('category', cat.id);
+                            onChange('mainSubcategory', '');
+                            onChange('subCategory', '');
+                            setCategorySearch(cat.name);
+                            setShowCategoryDropdown(false);
+                          }}
+                          className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${
+                            formData.category === cat.id ? 'bg-primary1/20 font-semibold' : ''
+                          }`}
+                        >
+                          {cat.name}
+                        </div>
+                      ))}
+                    {categories.filter(cat => cat.name.toLowerCase().startsWith(categorySearch.toLowerCase())).length === 0 && (
+                      <div className="px-4 py-2.5 text-gray-500 text-sm text-center">
+                        No categories found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {formData.category && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange('category', '');
+                    onChange('mainSubcategory', '');
+                    onChange('subCategory', '');
+                    setCategorySearch('');
+                  }}
+                  className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+                >
+                  <FiX className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* Hierarchical Selection: Section (Main Subcategory) and Item (Sub Category) */}
@@ -223,40 +317,123 @@ export default function ProductDialog({
 
                 return (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
+                    <div className="relative section-dropdown-container">
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Section (Title) *</label>
-                      <select
-                        value={(formData as any).mainSubcategory || ''}
-                        onChange={e => {
-                          onChange('mainSubcategory', e.target.value);
-                          onChange('subCategory', '');
-                        }}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all bg-white"
-                      >
-                        <option value="">Select a section</option>
-                        {selectedCat.mainSubcategories.map((sub, idx) => (
-                          <option key={idx} value={sub.title}>
-                            {sub.title}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={sectionSearch}
+                          onChange={(e) => {
+                            setSectionSearch(e.target.value);
+                            setShowSectionDropdown(true);
+                          }}
+                          onFocus={() => setShowSectionDropdown(true)}
+                          placeholder="Search or select a section"
+                          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
+                        />
+                        {showSectionDropdown && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {selectedCat.mainSubcategories
+                              .filter(sub => 
+                                sub.title.toLowerCase().startsWith(sectionSearch.toLowerCase())
+                              )
+                              .map((sub, idx) => (
+                                <div
+                                  key={idx}
+                                  onClick={() => {
+                                    onChange('mainSubcategory', sub.title);
+                                    onChange('subCategory', '');
+                                    setSectionSearch(sub.title);
+                                    setSubCategorySearch('');
+                                    setShowSectionDropdown(false);
+                                  }}
+                                  className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${
+                                    (formData as any).mainSubcategory === sub.title ? 'bg-primary1/20 font-semibold' : ''
+                                  }`}
+                                >
+                                  {sub.title}
+                                </div>
+                              ))}
+                            {selectedCat.mainSubcategories.filter(sub => sub.title.toLowerCase().startsWith(sectionSearch.toLowerCase())).length === 0 && (
+                              <div className="px-4 py-2.5 text-gray-500 text-sm text-center">
+                                No sections found
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {(formData as any).mainSubcategory && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onChange('mainSubcategory', '');
+                            onChange('subCategory', '');
+                            setSectionSearch('');
+                            setSubCategorySearch('');
+                          }}
+                          className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+                        >
+                          <FiX className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
 
-                    <div>
+                    <div className="relative subcategory-dropdown-container">
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Sub Category (Item) *</label>
-                      <select
-                        value={formData.subCategory || ''}
-                        disabled={!(formData as any).mainSubcategory}
-                        onChange={e => onChange('subCategory', e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all bg-white disabled:bg-gray-50 disabled:cursor-not-allowed"
-                      >
-                        <option value="">Select an item</option>
-                        {selectedSection?.items.map((item, idx) => (
-                          <option key={idx} value={item}>
-                            {item}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={subCategorySearch}
+                          onChange={(e) => {
+                            setSubCategorySearch(e.target.value);
+                            setShowSubCategoryDropdown(true);
+                          }}
+                          onFocus={() => setShowSubCategoryDropdown(true)}
+                          disabled={!(formData as any).mainSubcategory}
+                          placeholder="Search or select an item"
+                          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                        />
+                        {showSubCategoryDropdown && selectedSection && !(formData as any).mainSubcategory === false && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {selectedSection.items
+                              .filter(item => 
+                                item.toLowerCase().startsWith(subCategorySearch.toLowerCase())
+                              )
+                              .map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  onClick={() => {
+                                    onChange('subCategory', item);
+                                    setSubCategorySearch(item);
+                                    setShowSubCategoryDropdown(false);
+                                  }}
+                                  className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${
+                                    formData.subCategory === item ? 'bg-primary1/20 font-semibold' : ''
+                                  }`}
+                                >
+                                  {item}
+                                </div>
+                              ))}
+                            {selectedSection.items.filter(item => item.toLowerCase().startsWith(subCategorySearch.toLowerCase())).length === 0 && (
+                              <div className="px-4 py-2.5 text-gray-500 text-sm text-center">
+                                No items found
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {formData.subCategory && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onChange('subCategory', '');
+                            setSubCategorySearch('');
+                          }}
+                          className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+                        >
+                          <FiX className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -283,7 +460,7 @@ export default function ProductDialog({
               return null;
             })()}
             {/* Brand, Discount, Badge */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
                 <input
@@ -304,7 +481,7 @@ export default function ProductDialog({
                   placeholder="0"
                 />
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Badge</label>
                 <select
                   value={formData.badge || ''}
@@ -316,7 +493,7 @@ export default function ProductDialog({
                   <option value="Sale">Sale</option>
                   <option value="Bestseller">Bestseller</option>
                 </select>
-              </div>
+              </div> */}
             </div>
 
 

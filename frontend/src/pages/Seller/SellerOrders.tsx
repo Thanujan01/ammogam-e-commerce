@@ -279,7 +279,7 @@ export default function SellerOrders() {
                                     <td className="px-8 py-6 text-center">
                                         <button
                                             onClick={() => { setSelectedOrder(order); setViewDialogOpen(true); }}
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-semibold hover:bg-black transition-all shadow-md active:scale-95"
+                                            className="inline-flex items-center gap-2 px-4 py-2 bg-primary1 text-white rounded-xl text-xs font-semibold hover:bg-orange-500 transition-all shadow-md active:scale-95"
                                         >
                                             <FiEye />
                                             Details
@@ -315,9 +315,9 @@ export default function SellerOrders() {
                             </div>
                             <button
                                 onClick={() => setViewDialogOpen(false)}
-                                className="w-12 h-12 flex items-center justify-center bg-white hover:bg-gray-700 rounded-2xl transition-all"
+                                className="w-12 h-12 flex items-center justify-center bg-white hover:bg-orange-500 rounded-2xl transition-all"
                             >
-                                <FiX className="text-xl text-gray-900" />
+                                <FiX className="text-xl text-gray-900 hover:text-white" />
                             </button>
                         </div>
 

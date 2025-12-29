@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
-import { Users as UsersIcon, UserCheck, UserX, DollarSign } from 'lucide-react';
+import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiUserCheck, FiUserX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { Users as UsersIcon, UserCheck, UserX } from 'lucide-react';
 import { api } from '../../api/api';
 
 interface User {
@@ -16,6 +16,13 @@ interface User {
   role: string;
 }
 
+type ToastType = 'success' | 'error';
+
+interface Toast {
+  message: string;
+  type: ToastType;
+}
+
 export default function Users() {
   const [userList, setUserList] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,12 +30,19 @@ export default function Users() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; userId: string; userName: string }>({ open: false, userId: '', userName: '' });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     status: 'active' as 'active' | 'inactive',
   });
+
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -71,17 +85,17 @@ export default function Users() {
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.email) {
-      alert('Please fill all required fields.');
+      showToast('Please fill all required fields.', 'error');
       return;
     }
 
     try {
       if (editingUser) {
         await api.put(`/users/${editingUser._id}`, formData);
-        alert(`${formData.name} updated successfully.`);
+        showToast(`${formData.name} updated successfully.`, 'success');
       } else {
         // Note: User creation should typically go through registration
-        alert('User creation should be done through the registration process.');
+        showToast('User creation should be done through the registration process.', 'error');
         setDialogOpen(false);
         return;
       }
@@ -89,21 +103,26 @@ export default function Users() {
       setDialogOpen(false);
     } catch (error) {
       console.error("Failed to save user", error);
-      alert('Failed to save user. Please try again.');
+      showToast('Failed to save user. Please try again.', 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
     const user = userList.find(u => u._id === id || u.id === id);
-    if (confirm(`Are you sure you want to delete ${user?.name}?`)) {
-      try {
-        await api.delete(`/users/${id}`);
-        alert(`${user?.name} deleted.`);
-        await fetchUsers();
-      } catch (error) {
-        console.error("Failed to delete user", error);
-        alert('Failed to delete user. Please try again.');
-      }
+    setConfirmDialog({ open: true, userId: id, userName: user?.name || 'this user' });
+  };
+
+  const confirmDelete = async () => {
+    const { userId, userName } = confirmDialog;
+    setConfirmDialog({ open: false, userId: '', userName: '' });
+    
+    try {
+      await api.delete(`/users/${userId}`);
+      showToast(`${userName} deleted successfully.`, 'success');
+      await fetchUsers();
+    } catch (error) {
+      console.error("Failed to delete user", error);
+      showToast('Failed to delete user. Please try again.', 'error');
     }
   };
 
@@ -133,12 +152,30 @@ export default function Users() {
 
   const activeCount = userList.filter(u => u.status === 'active').length;
   const inactiveCount = userList.filter(u => u.status === 'inactive').length;
-  const totalRevenue = userList.reduce((sum, u) => sum + u.totalSpent, 0);
+  // const totalRevenue = userList.reduce((sum, u) => sum + u.totalSpent, 0);
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+          <div className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
+            toast.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            {toast.type === 'success' ? (
+              <FiCheckCircle className="w-5 h-5" />
+            ) : (
+              <FiAlertCircle className="w-5 h-5" />
+            )}
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        </div>
+      )}
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
         {/* Total Users */}
         <div className="bg-white rounded-xl shadow-lg p-6 text-black">
           <div className="flex items-center justify-between">
@@ -186,7 +223,7 @@ export default function Users() {
         </div>
 
         {/* Total Revenue */}
-        <div className="bg-white rounded-xl shadow-lg p-6 text-black">
+        {/* <div className="bg-white rounded-xl shadow-lg p-6 text-black">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 text-sm font-medium mb-1">Total Revenue</p>
@@ -197,7 +234,7 @@ export default function Users() {
               <DollarSign className="w-6 h-6 text-white" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Main Content */}
@@ -271,12 +308,12 @@ export default function Users() {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Orders
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  </th> */}
+                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Total Spent
-                  </th>
+                  </th> */}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Joined Date
                   </th>
@@ -314,14 +351,14 @@ export default function Users() {
                         {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <span className="text-sm font-medium text-gray-900">{user.orders}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm font-semibold text-gray-900">
                         ${user.totalSpent.toFixed(2)}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4">
                       <span className="text-sm text-gray-600">
                         {new Date(user.joinedDate).toLocaleDateString('en-US', {
@@ -402,6 +439,7 @@ export default function Users() {
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Enter full name"
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    disabled
                   />
                 </div>
                 <div>
@@ -414,6 +452,7 @@ export default function Users() {
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                     placeholder="user@example.com"
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    disabled
                   />
                 </div>
                 <div>
@@ -426,6 +465,7 @@ export default function Users() {
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+1 234-567-8900"
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    disabled
                   />
                 </div>
                 <div>
@@ -456,6 +496,37 @@ export default function Users() {
                   onClick={handleSubmit}
                 >
                   {editingUser ? 'Update User' : 'Add User'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {confirmDialog.open && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiAlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Confirm Deletion</h3>
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to delete <span className="font-semibold text-gray-900">{confirmDialog.userName}</span>? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmDialog({ open: false, userId: '', userName: '' })}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all"
+                >
+                  Delete
                 </button>
               </div>
             </div>

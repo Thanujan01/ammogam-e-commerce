@@ -87,19 +87,19 @@ export default function AdminSellerDetails() {
                     </div>
 
                     <div className="flex flex-wrap gap-4">
-                        <div className="bg-gray-50 border border-gray-100 px-6 py-4 rounded-2xl text-center min-w-[140px]">
+                        <div className="bg-white shadow-md border border-orange-100 px-6 py-4 rounded-2xl text-center min-w-[140px]">
                             <p className="text-xs font-semibold text-black mb-1">Total Revenue</p>
                             <p className="text-2xl font-bold text-emerald-600">$ {totalRevenue.toLocaleString()}</p>
                         </div>
-                        <div className="bg-blue-50 border border-blue-200 px-6 py-4 rounded-2xl text-center min-w-[140px]">
+                        <div className="bg-white shadow-md border border-blue-200 px-6 py-4 rounded-2xl text-center min-w-[140px]">
                             <p className="text-xs font-semibold text-black mb-1">Admin Commission (5%)</p>
                             <p className="text-2xl font-bold text-blue-600">$ {(totalRevenue * 0.05).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="bg-green-50 border border-green-200 px-6 py-4 rounded-2xl text-center min-w-[140px]">
+                        <div className="bg-white shadow-md border border-green-200 px-6 py-4 rounded-2xl text-center min-w-[140px]">
                             <p className="text-xs font-semibold text-black mb-1">Seller Payout (95%)</p>
                             <p className="text-2xl font-bold text-green-600">$ {(totalRevenue * 0.95).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="bg-gray-50 border border-gray-100 px-6 py-4 rounded-2xl text-center min-w-[140px]">
+                        <div className="bg-white shadow-md border border-gray-100 px-6 py-4 rounded-2xl text-center min-w-[140px]">
                             <p className="text-xs font-semibold text-black mb-1">Total Products</p>
                             <p className="text-2xl font-bold text-blue-600">{products.length}</p>
                         </div>
@@ -165,33 +165,33 @@ export default function AdminSellerDetails() {
                 {/* Main: Products & Orders Tabs */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Bank Details Section - Moved to top of main column */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-sm p-8">
-                        <h3 className="text-sm font-semibold text-green-700 mb-6">Bank Account Details</h3>
+                    <div className="bg-white border-2 border-gray-100 rounded-2xl shadow-sm p-8">
+                        <h3 className="text-md font-semibold text-gray-700 mb-6">Bank Account Details</h3>
                         {seller.bankName || seller.accountNumber ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="bg-white p-4 rounded-2xl border border-green-100">
+                                <div className="bg-white p-4 rounded-2xl border border-gray-200">
                                     <p className="text-xs font-semibold text-gray-600 mb-1">Bank Name</p>
                                     <p className="text-gray-900">{seller.bankName || 'Not provided'}</p>
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl border border-green-100">
+                                <div className="bg-white p-4 rounded-2xl border border-gray-200">
                                     <p className="text-xs font-semibold text-gray-600 mb-1">Account Holder Name</p>
                                     <p className="text-gray-900">{seller.accountHolderName || 'Not provided'}</p>
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl border border-green-100">
+                                <div className="bg-white p-4 rounded-2xl border border-gray-200">
                                     <p className="text-xs font-semibold text-gray-600 mb-1">Account Number</p>
                                     <p className="font-mono font-semibold text-gray-900">{seller.accountNumber || 'Not provided'}</p>
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl border border-green-100">
+                                <div className="bg-white p-4 rounded-2xl border border-gray-200">
                                     <p className="text-xs font-semibold text-gray-600 mb-1">IFSC Code</p>
                                     <p className="font-mono font-semibold text-gray-900">{seller.ifscCode || 'Not provided'}</p>
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl border border-green-100 md:col-span-2">
+                                <div className="bg-white p-4 rounded-2xl border border-gray-200 md:col-span-2">
                                     <p className="text-xs font-semibold text-gray-600 mb-1">Branch Name</p>
                                     <p className="text-gray-900">{seller.branchName || 'Not provided'}</p>
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-white p-6 rounded-2xl border border-green-100 text-center">
+                            <div className="bg-gray-50 p-6 rounded-2xl border border-white-200 text-center">
                                 <FiCreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                                 <p className="text-sm text-gray-500">No bank details provided yet</p>
                                 <p className="text-xs text-gray-400 mt-1">Seller needs to update their profile</p>

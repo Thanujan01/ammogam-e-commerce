@@ -132,7 +132,7 @@ export default function AdminNotification() {
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all shadow-md"
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary1 text-white rounded-lg font-semibold hover:bg-orange-500 transition-all shadow-md"
               >
                 <FiCheck className="w-4 h-4" />
                 Mark All as Read ({unreadCount})

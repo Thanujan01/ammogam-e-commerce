@@ -177,7 +177,7 @@ export default function SellerNotifications() {
                                             <h3 className={`font-bold text-gray-900 text-sm mb-1 ${!notification.isRead ? 'text-indigo-900' : ''}`}>
                                                 {notification.title}
                                             </h3>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                                            <span className="text-[10px] font-medium text-gray-400 ">
                                                 {formatTime(notification.createdAt)}
                                             </span>
                                         </div>
@@ -197,7 +197,7 @@ export default function SellerNotifications() {
                                                     <Link
                                                         to={notification.orderId ? `/seller/orders?id=${notification.orderId}` : `/seller/products?id=${notification.productId}`}
                                                         onClick={() => !notification.isRead && handleMarkAsRead(notification._id)}
-                                                        className="text-xs font-black text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-all shadow-sm"
+                                                        className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-all shadow-sm"
                                                     >
                                                         {notification.orderId ? 'View Order' : 'View Product'}
                                                     </Link>
