@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/api';
-import { DollarSign, Package, ShoppingCart, Users, TrendingUp, Store} from 'lucide-react';
+import { DollarSign, Package, ShoppingCart, Users,Store} from 'lucide-react';
 import RevenueChart from '../../components/AdminDash/RevenueChart';
 import CategoryPieChart from '../../components/AdminDash/CategoryPieChart';
 import TopProductsChart from '../../components/AdminDash/TopProductsChart';
