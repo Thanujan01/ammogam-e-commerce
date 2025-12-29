@@ -1,13 +1,21 @@
 import { useState, useContext } from 'react';
-import { FiEdit, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiLock } from 'react-icons/fi';
+import { FiEdit, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiLock, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { User, Shield } from 'lucide-react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { api } from '../../api/api';
+
+type ToastType = 'success' | 'error';
+
+interface Toast {
+  message: string;
+  type: ToastType;
+}
 
 export default function AdminProfile() {
   const auth = useContext(AuthContext);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
 
   const [profileData, setProfileData] = useState({
     name: auth?.user?.name || 'Admin User',
@@ -23,6 +31,11 @@ export default function AdminProfile() {
     confirmPassword: '',
   });
 
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleSaveProfile = async () => {
     try {
       const { data } = await api.put('/auth/profile', profileData);
@@ -30,20 +43,20 @@ export default function AdminProfile() {
         auth.updateUser(data);
       }
       setIsEditing(false);
-      alert('Profile updated successfully!');
+      showToast('Profile updated successfully!', 'success');
     } catch (error: any) {
       console.error('Failed to update profile:', error);
-      alert(error.response?.data?.message || 'Failed to update profile');
+      showToast(error.response?.data?.message || 'Failed to update profile', 'error');
     }
   };
 
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match!');
+      showToast('New passwords do not match!', 'error');
       return;
     }
     if (passwordData.newPassword.length < 6) {
-      alert('Password must be at least 6 characters long!');
+      showToast('Password must be at least 6 characters long!', 'error');
       return;
     }
 
@@ -54,15 +67,33 @@ export default function AdminProfile() {
       });
       setIsChangingPassword(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      alert('Password changed successfully!');
+      showToast('Password changed successfully!', 'success');
     } catch (error: any) {
       console.error('Failed to change password:', error);
-      alert(error.response?.data?.message || 'Failed to change password');
+      showToast(error.response?.data?.message || 'Failed to change password', 'error');
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+          <div className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
+            toast.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            {toast.type === 'success' ? (
+              <FiCheckCircle className="w-5 h-5" />
+            ) : (
+              <FiAlertCircle className="w-5 h-5" />
+            )}
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className=" bg-white rounded-xl shadow-lg p-6 text-">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">

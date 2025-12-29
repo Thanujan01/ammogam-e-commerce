@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiMapPin, FiCreditCard } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiLock, FiSave, FiMapPin, FiCreditCard, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { Building, UserCircle } from 'lucide-react';
 import { api } from '../../api/api';
+
+type ToastType = 'success' | 'error';
+
+interface Toast {
+    message: string;
+    type: ToastType;
+}
 
 export default function SellerProfile() {
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [toast, setToast] = useState<Toast | null>(null);
 
     // Contact Info State
     const [email, setEmail] = useState('');
@@ -23,6 +31,11 @@ export default function SellerProfile() {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    const showToast = (message: string, type: ToastType) => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         fetchProfile();
@@ -59,10 +72,10 @@ export default function SellerProfile() {
                 ifscCode,
                 branchName
             });
-            alert('Profile updated successfully!');
+            showToast('Profile updated successfully!', 'success');
             await fetchProfile();
         } catch (error: any) {
-            alert(error?.response?.data?.message || 'Failed to update profile');
+            showToast(error?.response?.data?.message || 'Failed to update profile', 'error');
         } finally {
             setSaving(false);
         }
@@ -70,15 +83,15 @@ export default function SellerProfile() {
 
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || !confirmPassword) {
-            alert('Please fill all password fields');
+            showToast('Please fill all password fields', 'error');
             return;
         }
         if (newPassword !== confirmPassword) {
-            alert('New passwords do not match');
+            showToast('New passwords do not match', 'error');
             return;
         }
         if (newPassword.length < 6) {
-            alert('New password must be at least 6 characters');
+            showToast('New password must be at least 6 characters', 'error');
             return;
         }
 
@@ -88,12 +101,12 @@ export default function SellerProfile() {
                 oldPassword,
                 newPassword
             });
-            alert('Password changed successfully!');
+            showToast('Password changed successfully!', 'success');
             setOldPassword('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (error: any) {
-            alert(error?.response?.data?.message || 'Failed to change password');
+            showToast(error?.response?.data?.message || 'Failed to change password', 'error');
         } finally {
             setSaving(false);
         }
@@ -109,6 +122,24 @@ export default function SellerProfile() {
 
     return (
         <div className="space-y-6 pb-20">
+            {/* Toast Notification */}
+            {toast && (
+                <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+                    <div className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
+                        toast.type === 'success' 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-red-500 text-white'
+                    }`}>
+                        {toast.type === 'success' ? (
+                            <FiCheckCircle className="w-5 h-5" />
+                        ) : (
+                            <FiAlertCircle className="w-5 h-5" />
+                        )}
+                        <span className="font-medium">{toast.message}</span>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

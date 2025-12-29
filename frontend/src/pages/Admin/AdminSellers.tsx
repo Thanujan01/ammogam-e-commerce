@@ -409,7 +409,7 @@ export default function AdminSellers() {
             {modalOpen && selectedSeller && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
-                        <div className="bg-primary1 to-indigo-700 p-6 text-white flex justify-between items-center">
+                        <div className="bg-primary1 p-6 text-white flex justify-between items-center">
                             <h3 className="text-xl font-bold">Seller Application Details</h3>
                             <button
                                 onClick={() => setModalOpen(false)}
@@ -421,45 +421,44 @@ export default function AdminSellers() {
                         <div className="p-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <section>
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Personal Information</h4>
+                                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-4">Personal Information</h4>
                                     <div className="space-y-4">
                                         <div>
-                                            <p className="text-sm font-medium text-gray-500">Full Name</p>
-                                            <p className="text-gray-900 font-semibold">{selectedSeller.name}</p>
+                                            <p className="text-sm font-medium text-gray-700">Full Name</p>
+                                            <p className="text-gray-400 font-semibold">{selectedSeller.name}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-gray-500">Email Address</p>
-                                            <p className="text-gray-900 font-semibold">{selectedSeller.email}</p>
+                                            <p className="text-sm font-medium text-gray-700">Email Address</p>
+                                            <p className="text-gray-400 font-semibold">{selectedSeller.email}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-gray-500">Phone Number</p>
-                                            <p className="text-gray-900 font-semibold">{selectedSeller.phone}</p>
+                                            <p className="text-sm font-medium text-gray-700">Phone Number</p>
+                                            <p className="text-gray-400 font-semibold">{selectedSeller.phone}</p>
                                         </div>
                                     </div>
                                 </section>
                                 <section>
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Business Information</h4>
+                                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-4">Business Information</h4>
                                     <div className="space-y-4">
                                         <div>
-                                            <p className="text-sm font-medium text-gray-500">Business Name</p>
-                                            <p className="text-blue-600 font-bold">{selectedSeller.businessName}</p>
+                                            <p className="text-sm font-medium text-gray-700">Business Name</p>
+                                            <p className="text-orange-600 font-bold">{selectedSeller.businessName}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-gray-500">Tax ID / Reg Number</p>
-                                            <p className="font-mono text-gray-900 font-semibold">{selectedSeller.taxId}</p>
+                                            <p className="text-sm font-medium text-gray-700">Tax ID / Reg Number</p>
+                                            <p className="font-mono text-gray-400 font-semibold">{selectedSeller.taxId}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-gray-500">Business Phone</p>
-                                            <p className="text-gray-900 font-semibold">{selectedSeller.businessPhone}</p>
+                                            <p className="text-sm font-medium text-gray-700">Business Phone</p>
+                                            <p className="text-gray-400 font-semibold">{selectedSeller.businessPhone}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-700">Business Address</p>
+                                            <p className="text-gray-400 font-semibold">{selectedSeller.businessAddress}</p>
                                         </div>
                                     </div>
                                 </section>
-                                <section className="md:col-span-2">
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Business Address</h4>
-                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                        <p className="text-gray-700 leading-relaxed">{selectedSeller.businessAddress}</p>
-                                    </div>
-                                </section>
+                                
                             </div>
 
                             <div className="flex justify-end gap-3 mt-10 pt-6 border-t border-gray-100">
@@ -522,6 +521,7 @@ export default function AdminSellers() {
                                             onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
                                             required
+                                            disabled
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -532,6 +532,7 @@ export default function AdminSellers() {
                                             onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
                                             required
+                                            disabled
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -542,6 +543,7 @@ export default function AdminSellers() {
                                             onChange={e => setEditFormData({ ...editFormData, phone: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
                                             required
+                                            disabled
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -552,6 +554,7 @@ export default function AdminSellers() {
                                             onChange={e => setEditFormData({ ...editFormData, businessName: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
                                             required
+                                            disabled
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -561,6 +564,7 @@ export default function AdminSellers() {
                                             value={editFormData.businessPhone}
                                             onChange={e => setEditFormData({ ...editFormData, businessPhone: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            disabled
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -570,6 +574,7 @@ export default function AdminSellers() {
                                             value={editFormData.taxId}
                                             onChange={e => setEditFormData({ ...editFormData, taxId: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            disabled
                                         />
                                     </div>
                                 </div>
@@ -579,6 +584,7 @@ export default function AdminSellers() {
                                         value={editFormData.businessAddress}
                                         onChange={e => setEditFormData({ ...editFormData, businessAddress: e.target.value })}
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-amber-500 outline-none min-h-[100px]"
+                                        disabled
                                     />
                                 </div>
                             </div>
