@@ -33,12 +33,56 @@ export default function Checkout() {
     countryCode: '94' // Default country code
   });
 
+  // ✅ FIX: Scroll to top when component mounts
+  useEffect(() => {
+    // Scroll to top on initial load
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    
+    // Also handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // ✅ FIX: Additional scroll for smoother experience on step changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [step]); // Runs when step changes
+
   // Redirect if cart is empty
   useEffect(() => {
     if (cart.items.length === 0 && !loading) {
-      navigate('/cart');
+      // Scroll to top before navigating
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      setTimeout(() => navigate('/cart'), 150);
     }
   }, [cart.items, navigate]);
+
+  // ✅ FIX: Handle back to cart with scroll
+  const handleBackToCart = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setTimeout(() => navigate('/cart'), 150);
+  };
+
+  // ✅ FIX: Handle step navigation with scroll
+  const handleStepChange = (newStep: number) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setTimeout(() => setStep(newStep), 150);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -139,7 +183,11 @@ export default function Checkout() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to="/" className="flex items-center gap-3">
+              <Link to="/" className="flex items-center gap-3" onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                setTimeout(() => navigate('/'), 150);
+              }}>
                 <div className="p-2 bg-gradient-to-r from-[#d97706] to-[#b45309] rounded-lg shadow-md">
                   <FaShoppingBag className="text-white text-lg" />
                 </div>
@@ -213,7 +261,7 @@ export default function Checkout() {
                   </div>
                   {step > 1 && (
                     <button
-                      onClick={() => setStep(1)}
+                      onClick={() => handleStepChange(1)}
                       className="text-[#d97706] hover:text-[#b45309] font-medium text-sm px-4 py-2 hover:bg-[#d97706]/10 rounded-lg transition-colors"
                     >
                       Edit
@@ -333,20 +381,20 @@ export default function Checkout() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <Link
-                      to="/cart"
+                    <button
+                      onClick={handleBackToCart}
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
                     >
                       <FaArrowLeft className="text-sm" />
                       Back to Cart
-                    </Link>
+                    </button>
                     <button
                       onClick={() => {
                         if (!formData.name || !formData.address || !formData.city || !formData.phone) {
                           alert('Please fill in all required shipping information');
                           return;
                         }
-                        setStep(2);
+                        handleStepChange(2);
                       }}
                       className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
                     >
@@ -444,14 +492,14 @@ export default function Checkout() {
 
                   <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
                     <button
-                      onClick={() => setStep(1)}
+                      onClick={() => handleStepChange(1)}
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
                     >
                       <FaArrowLeft className="text-sm" />
                       Back to Shipping
                     </button>
                     <button
-                      onClick={() => setStep(3)}
+                      onClick={() => handleStepChange(3)}
                       className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
                     >
                       Proceed to Payment
@@ -481,14 +529,11 @@ export default function Checkout() {
                   {/* Online Payment Option - Only Option */}
                   <div className="border border-[#d97706] bg-[#d97706]/10 rounded-xl p-6 ring-2 ring-[#d97706] ring-offset-2">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-[#FFFEFDFF]/20 text-[#d97706] rounded-lg">
+                      <div className="p-3 bg-white text-[#d97706] rounded-lg">
                         <FaCreditCard className="text-xl" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-900 mb-2">Secure Online Payment</h4>
-                        {/* <p className="text-sm text-gray-600 mb-3">
-                          Complete your payment securely to process your order. We accept all major credit and debit cards.
-                        </p> */}
                         <div className="flex items-center flex-wrap gap-3 mt-2">
                           <div className="flex items-center gap-1 bg-white p-1.5 rounded shadow-sm border border-gray-200">
                             <SiVisa className="text-blue-800 text-base" />
@@ -511,48 +556,6 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  {/* Payment Methods Description */}
-                  {/* <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <FaShieldAlt className="text-[#d97706] text-lg" />
-                      </div>
-                      <div>
-                        <h5 className="font-medium text-gray-900 mb-2">Accepted Payment Methods</h5>
-                        <p className="text-sm text-gray-600 mb-3">
-                          We accept all major credit and debit cards. Your payment is processed securely through Stripe, 
-                          a PCI-compliant payment processor. Payment must be completed before we ship your order.
-                        </p>
-                        <div className="flex items-center flex-wrap gap-2">
-                          <div className="flex items-center gap-1">
-                            <SiVisa className="text-blue-800 text-sm" />
-                            <span className="text-xs text-gray-600">Visa</span>
-                          </div>
-                          <span className="text-gray-400">•</span>
-                          <div className="flex items-center gap-1">
-                            <SiMastercard className="text-red-600 text-sm" />
-                            <span className="text-xs text-gray-600">Mastercard</span>
-                          </div>
-                          <span className="text-gray-400">•</span>
-                          <div className="flex items-center gap-1">
-                            <SiAmericanexpress className="text-blue-600 text-sm" />
-                            <span className="text-xs text-gray-600">American Express</span>
-                          </div>
-                          <span className="text-gray-400">•</span>
-                          <div className="flex items-center gap-1">
-                            <SiDiscover className="text-orange-500 text-sm" />
-                            <span className="text-xs text-gray-600">Discover</span>
-                          </div>
-                          <span className="text-gray-400">•</span>
-                          <div className="flex items-center gap-1">
-                            <RiSecurePaymentLine className="text-[#d97706] text-sm" />
-                            <span className="text-xs text-[#d97706]">SafeKey ProtectBuy</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div> */}
-
                   {/* Security Notice */}
                   <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
                     <div className="flex items-start gap-4">
@@ -572,7 +575,7 @@ export default function Checkout() {
 
                   <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
                     <button
-                      onClick={() => setStep(2)}
+                      onClick={() => handleStepChange(2)}
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
                     >
                       <FaArrowLeft className="text-sm" />
