@@ -421,7 +421,7 @@ export default function UserDashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <Link 
                     to="/products" 
                     className="bg-white rounded-xl shadow-lg border border-[#d97706]/20 p-6 hover:border-[#d97706] hover:shadow-xl transition-all group"
@@ -481,7 +481,7 @@ export default function UserDashboard() {
                       </div>
                     </div>
                   </Link>
-                </div>
+                </div> */}
               </div>
             )}
 

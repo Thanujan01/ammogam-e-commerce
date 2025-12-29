@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaArrowLeft, FaLock, FaEnvelope, } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaArrowLeft, FaLock, FaEnvelope, FaExclamationTriangle } from 'react-icons/fa';
 
 export default function Login() {
   const auth = useContext(AuthContext)!;
@@ -11,14 +11,72 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockTimeRemaining, setLockTimeRemaining] = useState(0);
   const nav = useNavigate();
+
+  // Load failed attempts from localStorage on component mount
+  useEffect(() => {
+    const savedAttempts = localStorage.getItem(`failedAttempts_${email}`);
+    const lockTime = localStorage.getItem(`lockTime_${email}`);
+    
+    if (savedAttempts) {
+      setFailedAttempts(parseInt(savedAttempts));
+    }
+    
+    if (lockTime) {
+      const lockExpiry = parseInt(lockTime);
+      const now = Date.now();
+      
+      if (now < lockExpiry) {
+        setIsLocked(true);
+        const remaining = Math.ceil((lockExpiry - now) / 1000 / 60); // in minutes
+        setLockTimeRemaining(remaining);
+        
+        // Update countdown every minute
+        const interval = setInterval(() => {
+          const newRemaining = Math.ceil((lockExpiry - Date.now()) / 1000 / 60);
+          if (newRemaining <= 0) {
+            setIsLocked(false);
+            setLockTimeRemaining(0);
+            localStorage.removeItem(`lockTime_${email}`);
+            localStorage.removeItem(`failedAttempts_${email}`);
+            clearInterval(interval);
+          } else {
+            setLockTimeRemaining(newRemaining);
+          }
+        }, 60000);
+        
+        return () => clearInterval(interval);
+      } else {
+        // Lock has expired
+        localStorage.removeItem(`lockTime_${email}`);
+        localStorage.removeItem(`failedAttempts_${email}`);
+      }
+    }
+  }, [email]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    
+    // Check if account is locked
+    if (isLocked) {
+      setError(`Account locked. Too many failed attempts. Please try again in ${lockTimeRemaining} minutes.`);
+      return;
+    }
+    
     setError('');
     setLoading(true);
+    
     try {
       const user = await auth.login(email, password);
+      
+      // Reset failed attempts on successful login
+      localStorage.removeItem(`failedAttempts_${email}`);
+      localStorage.removeItem(`lockTime_${email}`);
+      setFailedAttempts(0);
+      
       // redirect based on role
       console.log('Logged in user:', user);
       console.log('Role:', user?.role);
@@ -28,11 +86,38 @@ export default function Login() {
       else nav('/'); // CHANGED: Customer goes to home page instead of dashboard
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || err.message || 'Login failed';
-      setError(errorMessage);
+      
+      // Increment failed attempts
+      const newFailedAttempts = failedAttempts + 1;
+      setFailedAttempts(newFailedAttempts);
+      localStorage.setItem(`failedAttempts_${email}`, newFailedAttempts.toString());
+      
+      // Check if account should be locked
+      if (newFailedAttempts >= 3) {
+        const lockExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours from now
+        localStorage.setItem(`lockTime_${email}`, lockExpiry.toString());
+        setIsLocked(true);
+        setLockTimeRemaining(1440); // 24 hours in minutes
+        
+        setError('Too many failed attempts. Account locked for 24 hours.');
+      } else {
+        const attemptsLeft = 3 - newFailedAttempts;
+        setError(`${errorMessage} (${attemptsLeft} attempt${attemptsLeft !== 1 ? 's' : ''} remaining)`);
+      }
     } finally {
       setLoading(false);
     }
   }
+
+  // Format time remaining display
+  const formatTimeRemaining = () => {
+    if (lockTimeRemaining >= 60) {
+      const hours = Math.floor(lockTimeRemaining / 60);
+      const minutes = lockTimeRemaining % 60;
+      return `${hours}h ${minutes}m`;
+    }
+    return `${lockTimeRemaining}m`;
+  };
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center ">
@@ -58,8 +143,20 @@ export default function Login() {
 
           {/* Card Content */}
           <div className="p-6 sm:p-8 md:p-10">
+            {/* Account Locked Warning */}
+            {isLocked && (
+              <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 flex items-start gap-3 animate-[shake_0.5s_ease]">
+                <FaExclamationTriangle className="text-red-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold">Account Locked</p>
+                  <p className="text-sm mt-1">Too many failed attempts. Account locked for 24 hours.</p>
+                  <p className="text-sm mt-1 font-medium">Try again in: {formatTimeRemaining()}</p>
+                </div>
+              </div>
+            )}
+
             {/* Error Message */}
-            {error && (
+            {error && !isLocked && (
               <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 flex items-start gap-3 animate-[shake_0.5s_ease]">
                 <span className="text-red-500 mt-0.5">⚠️</span>
                 <span className="text-sm">{error}</span>
@@ -82,7 +179,7 @@ export default function Login() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || isLocked}
                   />
                 </div>
               </div>
@@ -101,19 +198,29 @@ export default function Login() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || isLocked}
                   />
                   <button
                     type="button"
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-indigo-600 p-1.5 rounded-md hover:bg-gray-100 transition-colors duration-200 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-200"
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={loading}
+                    disabled={loading || isLocked}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
               </div>
+
+              {/* Failed Attempts Counter */}
+              {failedAttempts > 0 && !isLocked && (
+                <div className="text-sm text-amber-600 font-medium bg-amber-50 p-3 rounded-lg border border-amber-200">
+                  <p>Failed attempts: {failedAttempts}/3</p>
+                  <p className="text-xs mt-1 text-amber-500">
+                    {3 - failedAttempts} attempt{3 - failedAttempts !== 1 ? 's' : ''} remaining before account lock
+                  </p>
+                </div>
+              )}
 
               {/* Form Options */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -124,7 +231,7 @@ export default function Login() {
                       className="w-5 h-5 border-2 border-gray-300 rounded accent-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-colors duration-200"
                       checked={rememberMe}
                       onChange={() => setRememberMe(!rememberMe)}
-                      disabled={loading}
+                      disabled={loading || isLocked}
                     />
                   </div>
                   <span className="text-sm text-gray-600 font-medium">Remember me</span>
@@ -138,13 +245,10 @@ export default function Login() {
                 </Link>
               </div>
 
-              {/* Terms Acceptance - ADDED SECTION */}
-              
-
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isLocked}
                 className="w-full py-4 px-6 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white font-semibold rounded-xl hover:from-[#7a3a0f] hover:to-[#904823] transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:transform-none shadow-lg hover:shadow-xl active:translate-y-0 relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-amber-200"
               >
                 {/* Shimmer effect on button */}
@@ -156,47 +260,14 @@ export default function Login() {
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       <span>Logging in...</span>
                     </>
+                  ) : isLocked ? (
+                    'Account Locked'
                   ) : (
                     'Sign In'
                   )}
                 </div>
               </button>
             </form>
-
-            {/* Divider */}
-            {/* <div className="my-8 flex items-center">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-              <span className="px-4 text-xs text-gray-500 font-medium uppercase tracking-wider">or continue with</span>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-            </div> */}
-
-            {/* Social Login
-            <div className="space-y-3 mb-6">
-              <button
-                type="button"
-                className="w-full py-3.5 px-6 border-2 border-gray-300 rounded-xl bg-white text-gray-800 font-medium hover:bg-gray-50 hover:border-gray-400 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-200"
-                disabled={loading}
-              >
-                <FaGoogle className="text-gray-600 text-lg" />
-                Continue with Google
-              </button>
-              <button
-                type="button"
-                className="w-full py-3.5 px-6 border-2 border-blue-600 rounded-xl bg-white text-blue-600 font-medium hover:bg-blue-50 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-200"
-                disabled={loading}
-              >
-                <FaFacebook className="text-blue-600 text-lg" />
-                Continue with Facebook
-              </button>
-              <button
-                type="button"
-                className="w-full py-3.5 px-6 border-2 border-black rounded-xl bg-white text-black font-medium hover:bg-gray-50 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-200"
-                disabled={loading}
-              >
-                <FaApple className="text-black text-lg" />
-                Continue with Apple
-              </button>
-            </div> */}
 
             {/* Register Link */}
             <div className="pt-6 border-t border-gray-200 text-center">
@@ -212,15 +283,33 @@ export default function Login() {
               </p>
             </div>
 
-            {/* Admin Note */}
-            {/* <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
-              <div className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">💡</span>
-                <p className="text-sm text-amber-800">
-                  Use same login for both admin & customer. Admins must be created in DB or seeded.
-                </p>
+            {/* Reset Account Lock */}
+            {/* {isLocked && (
+              <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <span className="text-gray-500 text-lg">🔓</span>
+                  <div>
+                    <p className="text-sm text-gray-700 mb-2">
+                      If you believe this is an error or need immediate access, please contact support.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Reset for demo purposes - in production, this would be handled by admin/support
+                        localStorage.removeItem(`lockTime_${email}`);
+                        localStorage.removeItem(`failedAttempts_${email}`);
+                        setIsLocked(false);
+                        setFailedAttempts(0);
+                        setError('');
+                      }}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium underline"
+                    >
+                      Reset lock (for demo only)
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div> */}
+            )} */}
           </div>
         </div>
       </div>
