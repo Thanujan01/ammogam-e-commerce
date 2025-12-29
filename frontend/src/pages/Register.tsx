@@ -1,38 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft, FaStore, FaShoppingBag, FaTimes, FaCheckCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaStore, FaShoppingBag,  } from 'react-icons/fa';
 import CustomerRegisterForm from '../components/Auth/CustomerRegisterForm';
 import SellerRegisterForm from '../components/Auth/SellerRegisterForm';
 
 export default function Register() {
   const [accountType, setAccountType] = useState<'customer' | 'seller'>('customer');
   const [error, setError] = useState('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [success, setSuccess] = useState('');
   const nav = useNavigate();
-
-  const handleSuccess = () => {
-    // Show success modal
-    setShowSuccessModal(true);
-    
-    // Auto-redirect to login page after 3 seconds
-    setTimeout(() => {
-      nav('/login');
-    }, 3000);
-  };
-
-  const handleError = (msg: string) => {
-    setError(msg);
-    // Clear error after 5 seconds
-    setTimeout(() => {
-      setError('');
-    }, 5000);
-  };
-
-  const closeSuccessModal = () => {
-    setShowSuccessModal(false);
-    // Redirect immediately when user closes modal
-    nav('/login');
-  };
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center py-10 px-4">
@@ -101,18 +77,117 @@ export default function Register() {
               </div>
             )}
 
+            {/* Success Message */}
+            {success && (
+              <div className="mb-5 bg-green-50 border border-green-200 rounded-xl p-4 text-green-700 flex items-start gap-3">
+                <span className="text-green-500 mt-0.5">✓</span>
+                <span className="text-sm">{success}</span>
+              </div>
+            )}
+
             {/* Register Form */}
             {accountType === 'customer' ? (
               <CustomerRegisterForm
-                onSuccess={handleSuccess}
-                onError={handleError}
+                onSuccess={(msg) => setSuccess(msg)}
+                onError={(msg) => setError(msg)}
               />
             ) : (
               <SellerRegisterForm
-                onSuccess={handleSuccess}
-                onError={handleError}
+                onSuccess={(msg) => setSuccess(msg)}
+                onError={(msg) => setError(msg)}
               />
             )}
+
+            {/* Terms and Privacy Information Section */}
+            <div className="mt-8 space-y-6">
+              {/* Security Information */}
+              {/* <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-blue-100 rounded-lg">
+                    <FaLock className="text-blue-600 text-lg" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Secure Registration</h4>
+                    <p className="text-sm text-blue-700">
+                      Your information is protected with industry-standard encryption. 
+                      We never share your personal data with third parties without your consent.
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+
+              {/* Terms and Conditions Section */}
+              {/* <div className="p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-2.5 bg-amber-100 rounded-lg">
+                    <FaFileContract className="text-amber-600 text-lg" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-amber-800 mb-1">Terms & Conditions</h4>
+                    <p className="text-sm text-amber-700">
+                      By creating an account, you agree to our platform policies and guidelines.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 ml-12">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <p className="text-sm text-amber-800">
+                      Read our full{' '}
+                      <Link 
+                        to="/terms" 
+                        className="font-semibold text-amber-700 hover:text-amber-900 underline hover:no-underline transition-colors duration-200"
+                        target="_blank"
+                      >
+                        Terms & Conditions
+                      </Link>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <p className="text-sm text-amber-800">
+                      Review our{' '}
+                      <Link 
+                        to="/privacy" 
+                        className="font-semibold text-amber-700 hover:text-amber-900 underline hover:no-underline transition-colors duration-200"
+                        target="_blank"
+                      >
+                        Privacy Policy
+                      </Link>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <p className="text-sm text-amber-800">
+                      {accountType === 'seller' 
+                        ? 'Understand seller responsibilities and commission structure'
+                        : 'Learn about buyer rights and purchase protections'}
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+
+              {/* Account Responsibilities */}
+              {/* <div className="p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-emerald-100 rounded-lg">
+                    <FaShieldAlt className="text-emerald-600 text-lg" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-emerald-800 mb-1">Account Responsibilities</h4>
+                    <p className="text-sm text-emerald-700">
+                      {accountType === 'seller' 
+                        ? 'As a seller, you are responsible for accurate product listings, timely order fulfillment, and customer support.'
+                        : 'As a customer, you are responsible for providing accurate information and maintaining account security.'}
+                    </p>
+                    <p className="text-xs text-emerald-600 mt-2">
+                      Violation of platform policies may result in account suspension or termination.
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+            </div>
 
             {/* Login Link */}
             <div className="pt-6 border-t border-gray-200 text-center mt-6">
@@ -148,82 +223,6 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Success Modal Popup */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform animate-slideUp overflow-hidden">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center relative">
-              <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <FaCheckCircle className="text-white text-4xl" />
-                </div>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
-              <p className="text-green-100">Welcome to AMMOGAM</p>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <p className="text-gray-700 mb-4">Your account has been created successfully!</p>
-                <div className="flex items-center justify-center gap-2 text-green-600 mb-6">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <p className="font-medium">Redirecting to login page in 3 seconds...</p>
-                </div>
-                
-                {/* Countdown Timer */}
-                <div className="relative w-20 h-20 mx-auto mb-4">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="#e5e7eb"
-                      strokeWidth="8"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                      strokeDasharray="283"
-                      strokeDashoffset="283"
-                      className="animate-countdown"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl font-bold text-green-600">3</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-center">
-                <button
-                  onClick={closeSuccessModal}
-                  className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-3 focus:ring-green-300"
-                >
-                  Go to Login Now
-                </button>
-              </div>
-            </div>
-
-            {/* Close Button */}
-            <button
-              onClick={closeSuccessModal}
-              className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40"
-              aria-label="Close modal"
-            >
-              <FaTimes className="text-lg" />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Animations */}
       <style>{`
         @keyframes shimmer {
@@ -235,52 +234,6 @@ export default function Register() {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-5px); }
           75% { transform: translateX(5px); }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes countdown {
-          from {
-            stroke-dashoffset: 283;
-          }
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-slideUp {
-          animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .animate-countdown {
-          animation: countdown 3s linear forwards;
-        }
-        
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
         }
       `}</style>
     </div>
