@@ -287,7 +287,7 @@ export default function Header() {
     } else if (suggestion.type === 'subcategory') {
       navigate(`/products?category=${suggestion.id}&subcategory=${encodeURIComponent(suggestion.name)}`);
     } else if (suggestion.type === 'product') {
-      navigate(`/product/${suggestion.id}`);
+      navigate(`/products/${suggestion.id}`);
     }
     setSearchQuery('');
     setShowSuggestions(false);
