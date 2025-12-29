@@ -12,7 +12,7 @@ import {
   FaStar, FaPlus, FaMinus,
   FaCheckCircle, FaPalette,
   FaChevronRight, FaChevronLeft as FaChevronLeftIcon,
-  FaCheck, FaWhatsapp, FaFacebook, FaLink,
+   FaWhatsapp, FaFacebook, FaLink,
   FaTruck, FaArrowRight
 } from 'react-icons/fa';
 
@@ -33,6 +33,7 @@ interface EnhancedProduct extends IProduct {
   defaultColor?: string;
   categoryName?: string;
   shippingFee?: number;
+  reviewCount?: number; // ✅ Added missing property
 }
 
 export default function ProductDetail() {
@@ -45,7 +46,6 @@ export default function ProductDetail() {
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
-  const [showAllColors, setShowAllColors] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -54,6 +54,36 @@ export default function ProductDetail() {
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
   const { isInWishlist, toggleWishlist: contextToggle } = useContext(WishlistContext)!;
+
+  // ✅ FIX: Scroll to top when component mounts
+  useEffect(() => {
+    // Scroll to top on initial load
+    window.scrollTo(0, 0);
+    
+    // Also handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo(0, 0);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // ✅ FIX: Additional scroll for smoother experience
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -76,7 +106,8 @@ export default function ProductDetail() {
           variations: normalizedVariations,
           categoryName: res.data.category?.name ||
             (typeof res.data.category === 'string' ? res.data.category : 'Category'),
-          shippingFee: res.data.shippingFee || 0
+          shippingFee: res.data.shippingFee || 0,
+          reviewCount: res.data.reviewCount || 0 // ✅ Ensure reviewCount is included
         };
 
         setProduct(productData);
@@ -205,7 +236,7 @@ export default function ProductDetail() {
     }));
   }, [product]);
 
-  const displayedColors = showAllColors ? availableColors : availableColors.slice(0, 8);
+  // ✅ FIX: Removed unused displayedColors variable
 
   if (loading) {
     return (
@@ -405,9 +436,9 @@ export default function ProductDetail() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {/* Bestseller Badge */}
-                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                    {/* <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
                       Bestseller
-                    </span>
+                    </span> */}
                     <span className="text-sm text-gray-500">Ammogam Official</span>
                   </div>
                   <div className="flex gap-2">
@@ -702,7 +733,11 @@ export default function ProductDetail() {
         <div className="mt-12 p-8 bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
           <div className="text-center">
             <button
-              onClick={() => navigate('/products')}
+              onClick={() => {
+                // ✅ FIX: Scroll to top before navigating
+                window.scrollTo(0, 0);
+                navigate('/products');
+              }}
               className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-600 to-orange-500 text-white rounded-2xl hover:from-amber-700 hover:to-orange-600 transition-all duration-300 font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               View All Products

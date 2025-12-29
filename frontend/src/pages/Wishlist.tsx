@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react'; // Added useEffect
 import { api } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { CartContext } from '../contexts/CartContext';
@@ -15,8 +15,7 @@ import {
     FaPlus, 
     FaFilter,
     FaChartLine, 
-    FaBox,
-    FaPercentage,
+    
     FaBusinessTime,
     FaClipboardCheck, 
     FaFileInvoiceDollar, 
@@ -30,6 +29,36 @@ export default function Wishlist() {
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [sortBy, setSortBy] = useState<'date' | 'price-high-low' | 'price-low-high' | 'name-a-z' | 'name-z-a'>('date');
+
+    // ✅ FIX: Scroll to top when component mounts
+    useEffect(() => {
+        // Scroll to top on initial load
+        window.scrollTo(0, 0);
+        
+        // Also handle browser back/forward navigation
+        const handlePopState = () => {
+            window.scrollTo(0, 0);
+        };
+        
+        window.addEventListener('popstate', handlePopState);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
+    // ✅ FIX: Additional scroll for smoother experience
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const removeItem = async (productId: string) => {
         await toggleWishlist(productId);
@@ -167,45 +196,6 @@ export default function Wishlist() {
                     </div>
                 </div>
             </div>
-
-            {/* Executive Dashboard */}
-            {/* <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-6 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="text-gray-500 text-sm font-medium">Total Items</div>
-                            <FaBox className="text-[#e67e00]" />
-                        </div>
-                        <div className="text-3xl font-bold text-gray-900">{products.length}</div>
-                        <div className="text-xs text-gray-500 mt-2">Saved for procurement</div>
-                    </div>
-                    
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="text-gray-500 text-sm font-medium">Total Value</div>
-                            <FaChartLine className="text-green-500" />
-                        </div>
-                        <div className="text-3xl font-bold text-gray-900">
-                            ${products.reduce((sum, p) => sum + (p?.price || 0), 0).toLocaleString()}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-2">Current market price</div>
-                    </div>
-                    
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="text-gray-500 text-sm font-medium">Potential Savings</div>
-                            <FaPercentage className="text-red-500" />
-                        </div>
-                        <div className="text-3xl font-bold text-gray-900">
-                            ${products.reduce((sum, p) => {
-                                const discount = p?.discount || 0;
-                                return sum + (p?.price * discount / 100 || 0);
-                            }, 0).toLocaleString()}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-2">With current discounts</div>
-                    </div>
-                </div>
-            </div> */}
 
             {/* Control Panel */}
             {products.length > 0 && (
@@ -371,7 +361,7 @@ export default function Wishlist() {
 
                                     {/* Specifications */}
                                     <div className="space-y-3 mb-5">
-                                        <div className="flex items-center justify-between">
+                                        {/* <div className="flex items-center justify-between">
                                             <div className="text-sm text-gray-500">Weight</div>
                                             <div className="text-sm font-medium text-gray-900">2.5 kg</div>
                                         </div>
@@ -382,7 +372,7 @@ export default function Wishlist() {
                                         <div className="flex items-center justify-between">
                                             <div className="text-sm text-gray-500">Dimensions</div>
                                             <div className="text-sm font-medium text-gray-900">30×20×15 cm</div>
-                                        </div>
+                                        </div> */}
                                         <div className="flex items-center justify-between">
                                             <div className="text-sm text-gray-500">Stock</div>
                                             <div className="text-sm font-medium text-green-600">In Stock</div>
@@ -547,13 +537,6 @@ export default function Wishlist() {
                                         <FaTrash className="text-sm" />
                                         Clear Entire Wishlist
                                     </button>
-                                    {/* <Link
-                                        to="/cart"
-                                        className="px-5 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                                    >
-                                        Proceed to Checkout
-                                        <FaChevronRight className="text-xs" />
-                                    </Link> */}
                                 </div>
                                 
                                 {/* Divider Line */}

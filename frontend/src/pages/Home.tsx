@@ -58,6 +58,38 @@ export default function Home() {
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  // ✅ FIX: Scroll to top when component mounts
+  useEffect(() => {
+    // Scroll to top on initial load
+    window.scrollTo(0, 0);
+    
+    // Also handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo(0, 0);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // ✅ FIX: Also scroll to top when the page refreshes or when navigating to this page
+  useEffect(() => {
+    // This ensures scroll position is reset when the component mounts
+    // or when navigating from another page
+    const timer = setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth' // Optional: adds smooth scrolling
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Check for mobile device
   useEffect(() => {
     const checkMobile = () => {
@@ -159,16 +191,22 @@ export default function Home() {
 
   // Handle View All button click - Navigate to products page
   const handleViewAllProducts = () => {
+    // ✅ FIX: Scroll to top before navigating (optional)
+    window.scrollTo(0, 0);
     navigate('/products');
   };
 
   // Handle category click to navigate to products page
   const handleCategorySelect = (categoryId: string) => {
+    // ✅ FIX: Scroll to top before navigating
+    window.scrollTo(0, 0);
     navigate(`/products?category=${categoryId}`);
   };
 
   // Handle product click - Navigate to product detail page
   const handleProductClick = (productId: string) => {
+    // ✅ FIX: Scroll to top before navigating
+    window.scrollTo(0, 0);
     navigate(`/products/${productId}`);
   };
 
@@ -317,7 +355,11 @@ export default function Home() {
       {/* Floating Cart Icon */}
       <div className={`fixed ${isMobile ? 'bottom-6 right-6' : 'bottom-8 right-8'} z-40`}>
         <div className="relative">
-          <div className="bg-amber-600 text-white p-3 sm:p-4 rounded-full shadow-2xl cursor-pointer hover:bg-amber-700 transition-colors" onClick={() => navigate('/cart')}>
+          <div className="bg-amber-600 text-white p-3 sm:p-4 rounded-full shadow-2xl cursor-pointer hover:bg-amber-700 transition-colors" onClick={() => {
+            // ✅ FIX: Scroll to top before navigating to cart
+            window.scrollTo(0, 0);
+            navigate('/cart');
+          }}>
             <FaShoppingCart className="text-xl sm:text-2xl" />
           </div>
           {cart.items.length > 0 && (
@@ -334,40 +376,41 @@ export default function Home() {
         <ProfessionalCategories />
 
         {/* Hero Banner */}
-        <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
-          <div className="relative h-64 sm:h-80 md:h-96 bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
-                <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm sm:text-base font-medium mb-3 sm:mb-4">
-                  Limited Time Offer
-                </span>
-                <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 sm:mb-4">
-                  Summer Sale
-                </h1>
-                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
-                  Up to 70% Off
-                </h2>
-                <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
-                  Discover amazing deals on electronics, fashion, and more
-                </p>
-                <button
-                  onClick={handleViewAllProducts}
-                  className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
-                >
-                  Shop Now
-                </button>
-              </div>
-            </div>
-            <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block">
-              <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
-              <img
-                src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
-                alt="Summer Sale"
-                className="w-full h-full object-cover opacity-70"
-              />
-            </div>
+       <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
+  <div className="relative h-64 sm:h-80 md:h-96">
+    <div className="flex flex-col md:flex-row h-full">
+      {/* Left side - Text Content (50%) */}
+      <div className="w-full md:w-1/2 relative bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 sm:mb-4">
+              Ammogam 
+            </h1>
+            <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
+              Discover amazing deals on electronics, fashion, and more
+            </p>
+            <button
+              onClick={handleViewAllProducts}
+              className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
+            >
+              Shop Now
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* Right side - Image (50%) */}
+      <div className="w-full md:w-1/2 relative">
+        <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
+        <img
+          src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
+          alt="Summer Sale"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Featured Products */}
         <div className="mb-10 sm:mb-12">
@@ -375,7 +418,7 @@ export default function Home() {
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
               <p className="text-gray-600 text-sm mt-1">
-                Showing {filteredFeaturedProducts.length} of {products.length}+ premium products
+                Showing {filteredFeaturedProducts.length} of {products.length}+  products
               </p>
             </div>
             <button
@@ -573,48 +616,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-
-              {/* Promotional Banner
-              <div className="mb-8 sm:mb-12 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl sm:rounded-2xl p-4 sm:p-8 md:p-12 text-white overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-white/10 rounded-full -translate-y-16 sm:-translate-y-32 translate-x-16 sm:translate-x-32"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-48 sm:h-48 bg-white/10 rounded-full -translate-x-12 sm:-translate-x-24 translate-y-12 sm:translate-y-24"></div>
-
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between">
-                  <div className="mb-6 md:mb-0 md:max-w-lg text-center md:text-left">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Flash Sale Ends Soon!</h2>
-                    <p className="text-sm sm:text-lg mb-4 sm:mb-6 text-white/90">Limited time offers on selected items. Don't miss out!</p>
-                    <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 justify-center md:justify-start">
-                      <div className="text-center bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3">
-                        <div className="text-lg sm:text-2xl font-bold">02</div>
-                        <div className="text-xs sm:text-sm mt-1">Hours</div>
-                      </div>
-                      <div className="text-center bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3">
-                        <div className="text-lg sm:text-2xl font-bold">45</div>
-                        <div className="text-xs sm:text-sm mt-1">Minutes</div>
-                      </div>
-                      <div className="text-center bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3">
-                        <div className="text-lg sm:text-2xl font-bold">18</div>
-                        <div className="text-xs sm:text-sm mt-1">Seconds</div>
-                      </div>
-                    </div>
-                    <div className="flex justify-center md:justify-start">
-                      <button 
-                        onClick={handleViewAllProducts}
-                        className="bg-white text-amber-600 px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
-                      >
-                        Shop Flash Sale
-                      </button>
-                    </div>
-                  </div>
-                  <div className="w-48 sm:w-64 md:w-80 mt-6 md:mt-0">
-                    <img
-                      src="https://images.unsplash.com/photo-1606788075767-20b25ec7eac5?w=400"
-                      alt="Flash Sale"
-                      className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl"
-                    />
-                  </div>
-                </div>
-              </div> */}
 
               {/* Recently Viewed */}
               <div className="mb-8 sm:mb-12">
