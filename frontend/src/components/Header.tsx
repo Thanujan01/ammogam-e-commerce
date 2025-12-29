@@ -10,7 +10,7 @@ import {
   FaTruck, FaClock, FaChartLine, FaLaptop, FaTshirt,
   FaUsers, FaShieldAlt, FaCreditCard, FaFire,
   FaRegHeart, FaHeart, FaBell, FaAngleRight,
-  FaChevronRight, FaArrowRight, FaCheck, FaShippingFast,
+  FaChevronRight, FaArrowRight,
   FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,
   FaTools, FaPrint, FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet
 } from 'react-icons/fa';
@@ -43,7 +43,7 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
   return <IconComponent className={className} />;
 };
 
-import logoImage from '../assets/logo.jpg';
+import logoImage from '../assets/logo.jpeg';
 
 export default function Header() {
   const auth = useContext(AuthContext)!;
@@ -274,6 +274,8 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      // Scroll to top before navigation
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
       setIsMenuOpen(false);
       setSearchActive(false);
@@ -282,6 +284,9 @@ export default function Header() {
   };
 
   const handleSuggestionClick = (suggestion: any) => {
+    // Scroll to top before navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     if (suggestion.type === 'category') {
       navigate(`/products?category=${suggestion.id}`);
     } else if (suggestion.type === 'subcategory') {
@@ -289,10 +294,13 @@ export default function Header() {
     } else if (suggestion.type === 'product') {
       navigate(`/products/${suggestion.id}`);
     }
+    
+    // Clean up UI states
     setSearchQuery('');
     setShowSuggestions(false);
     setIsMenuOpen(false);
     setSearchActive(false);
+    setShowCategoryMenu(false);
   };
 
   const handleLogout = () => {
@@ -306,23 +314,54 @@ export default function Header() {
 
   // 1. Main Category Click - Goes to products page with category parameter
   const handleMainCategoryClick = (category: any) => {
+    // Scroll to top before navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}`);
+    
+    // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
+    setSearchActive(false);
+    setShowSuggestions(false);
+    setSearchQuery('');
   };
 
   // 2. Subcategory Click - Goes to products page with BOTH category and subcategory parameters
   const handleSubcategoryClick = (category: any, subcategory: string) => {
+    // Scroll to top before navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}&subcategory=${encodeURIComponent(subcategory)}`);
+    
+    // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
+    setSearchActive(false);
+    setShowSuggestions(false);
+    setSearchQuery('');
   };
 
   // 3. View All Category - Goes to products page with category parameter
   const handleViewAllCategory = (category: any) => {
+    // Scroll to top before navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}`);
+    
+    // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
+    setSearchActive(false);
+    setShowSuggestions(false);
+    setSearchQuery('');
+  };
+
+  // 4. Quick links navigation function
+  const handleQuickLinkClick = () => {
+    // Scroll to top before navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMenuOpen(false);
+    setSearchActive(false);
+    setShowCategoryMenu(false);
+    setShowSuggestions(false);
   };
 
   const quickLinks = [
@@ -419,7 +458,7 @@ export default function Header() {
                 {isMenuOpen ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
               </button>
 
-              <Link to="/" className="flex items-center gap-3 w-164">
+              <Link to="/" className="flex items-center gap-3 w-164" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <img
                   src={logoImage}
                   alt="AMMOGAM Logo"
@@ -429,7 +468,7 @@ export default function Header() {
             </div>
 
             {/* Desktop Logo */}
-            <Link to="/" className="hidden lg:flex items-center gap-4 group">
+            <Link to="/" className="hidden lg:flex items-center gap-4 group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <img
                 src={logoImage}
                 alt="AMMOGAM Logo"
@@ -542,6 +581,7 @@ export default function Header() {
               <Link
                 to="/cart"
                 className="lg:hidden relative p-2 hover:bg-amber-50 rounded-lg transition-colors"
+                onClick={handleQuickLinkClick}
               >
                 <FaShoppingCart className="text-lg text-gray-600" />
                 {cartItemCount > 0 && (
@@ -556,6 +596,7 @@ export default function Header() {
                 <Link
                   to="/dashboard"
                   className="lg:hidden p-2 hover:bg-amber-50 rounded-lg transition-colors"
+                  onClick={handleQuickLinkClick}
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-[#8B4513] to-[#A0522D] rounded-full flex items-center justify-center text-white text-sm font-bold">
                     {auth.user.name.charAt(0).toUpperCase()}
@@ -567,6 +608,7 @@ export default function Header() {
               <Link
                 to="/wishlist"
                 className="hidden md:flex flex-col items-center p-2 hover:bg-amber-50 rounded-lg transition-colors group"
+                onClick={handleQuickLinkClick}
               >
                 <div className="relative">
                   <FaRegHeart className={`text-xl ${isActivePath('/wishlist') ? 'text-red-500' : 'text-gray-600'} group-hover:text-red-500`} />
@@ -584,6 +626,7 @@ export default function Header() {
                 <Link
                   to="/notifications"
                   className="hidden md:flex flex-col items-center p-2 hover:bg-amber-50 rounded-lg transition-colors group relative"
+                  onClick={handleQuickLinkClick}
                 >
                   <div className="relative">
                     <FaBell className="text-xl text-gray-600 group-hover:text-amber-600" />
@@ -601,6 +644,7 @@ export default function Header() {
               <Link
                 to="/cart"
                 className="hidden md:flex flex-col items-center p-2 hover:bg-amber-50 rounded-lg transition-colors group relative"
+                onClick={handleQuickLinkClick}
               >
                 <div className="relative">
                   <FaShoppingCart className="text-xl text-gray-600 group-hover:text-amber-600" />
@@ -657,23 +701,21 @@ export default function Header() {
                         <Link
                           to="/dashboard"
                           className="dropdown-item"
-                          onClick={() => setShowUserMenu(false)}
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            handleQuickLinkClick();
+                          }}
                         >
                           <FaHome className="text-amber-500" />
                           My Dashboard
                         </Link>
-                        {/* <Link
-                          to="/orders"
-                          className="dropdown-item"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <FaShoppingBag className="text-amber-500" />
-                          My Orders
-                        </Link> */}
                         <Link
                           to="/wishlist"
                           className="dropdown-item"
-                          onClick={() => setShowUserMenu(false)}
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            handleQuickLinkClick();
+                          }}
                         >
                           <FaRegHeart className="text-amber-500" />
                           Wishlist
@@ -684,7 +726,10 @@ export default function Header() {
                         <Link
                           to="/notifications"
                           className="dropdown-item"
-                          onClick={() => setShowUserMenu(false)}
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            handleQuickLinkClick();
+                          }}
                         >
                           <FaBell className="text-amber-500" />
                           Notifications
@@ -702,7 +747,10 @@ export default function Header() {
                                   key={feature.name}
                                   to={feature.path}
                                   className="dropdown-item bg-gradient-to-r from-amber-50 to-yellow-50"
-                                  onClick={() => setShowUserMenu(false)}
+                                  onClick={() => {
+                                    setShowUserMenu(false);
+                                    handleQuickLinkClick();
+                                  }}
                                 >
                                   {feature.icon}
                                   {feature.name}
@@ -728,12 +776,14 @@ export default function Header() {
                   <Link
                     to="/login"
                     className="px-3 xl:px-4 py-2 border border-[#8B4513] text-[#8B4513] rounded-lg hover:bg-amber-50 transition-colors font-medium text-sm xl:text-base"
+                    onClick={handleQuickLinkClick}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
                     className="px-3 xl:px-4 py-2 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg hover:opacity-90 transition-opacity font-medium shadow-lg text-sm xl:text-base"
+                    onClick={handleQuickLinkClick}
                   >
                     Register
                   </Link>
@@ -746,6 +796,7 @@ export default function Header() {
                   <Link
                     to="/login"
                     className="px-3 py-1.5 border border-[#8B4513] text-[#8B4513] rounded-lg text-xs font-medium"
+                    onClick={handleQuickLinkClick}
                   >
                     Sign In
                   </Link>
@@ -774,6 +825,7 @@ export default function Header() {
                   key={link.name}
                   to={link.path}
                   className={`flex items-center gap-2 transition-colors font-medium text-sm xl:text-base relative pb-1 ${isActivePath(link.path) ? 'text-[#8B4513]' : 'text-gray-700 hover:text-[#8B4513]'}`}
+                  onClick={handleQuickLinkClick}
                 >
                   {link.icon}
                   {link.name}
@@ -856,13 +908,13 @@ export default function Header() {
                   <div className="flex items-start justify-between mb-8">
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900">{activeCategoryData?.name}</h2>
-                      <p className="text-gray-600 mt-1">Explore thousands of products with premium quality</p>
+                      {/* <p className="text-gray-600 mt-1">Explore thousands of products with premium quality</p> */}
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-medium rounded-full flex items-center gap-2">
+                      {/* <div className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-medium rounded-full flex items-center gap-2">
                         <FaCheck className="text-xs" />
                         Up to 50% OFF on {activeCategoryData?.name.toLowerCase()}
-                      </div>
+                      </div> */}
                       <button
                         onClick={() => handleViewAllCategory(activeCategoryData)}
                         className="px-5 py-2.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg hover:opacity-90 font-medium text-sm flex items-center gap-2 shadow-lg"
@@ -903,7 +955,7 @@ export default function Header() {
                       </div>
 
                       {/* Quick Links Section */}
-                      <div className="mt-8 pt-6 border-t border-gray-200">
+                      {/* <div className="mt-8 pt-6 border-t border-gray-200">
                         <h4 className="font-bold text-gray-900 text-lg mb-4">More Available</h4>
                         <div className="flex gap-4">
                           <button
@@ -925,7 +977,7 @@ export default function Header() {
                             New Arrivals
                           </button>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
 
                     {/* Category Image and Promotions */}
@@ -947,7 +999,7 @@ export default function Header() {
                       )}
 
                       {/* Quick Links */}
-                      <div className="p-4 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl">
+                      {/* <div className="p-4 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl">
                         <h5 className="font-bold text-gray-900 mb-3">Quick Links</h5>
                         <div className="space-y-2">
                           <button
@@ -972,10 +1024,10 @@ export default function Header() {
                             <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
                           </button>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Service Badges */}
-                      <div className="grid grid-cols-2 gap-3">
+                      {/* <div className="grid grid-cols-2 gap-3">
                         <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
                           <FaShippingFast className="text-green-600 text-lg mx-auto mb-1" />
                           <div className="text-xs font-medium text-gray-800">Safe Delivery</div>
@@ -984,7 +1036,7 @@ export default function Header() {
                           <FaShieldAlt className="text-blue-600 text-lg mx-auto mb-1" />
                           <div className="text-xs font-medium text-gray-800">1 Year Warranty</div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -1072,7 +1124,10 @@ export default function Header() {
               <Link
                 to="/dashboard"
                 className="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border hover:bg-amber-50 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setIsMenuOpen(false);
+                }}
               >
                 <div className="w-10 h-10 bg-gradient-to-r from-[#8B4513] to-[#A0522D] rounded-full flex items-center justify-center text-white font-bold">
                   {auth.user.name.charAt(0).toUpperCase()}
@@ -1088,14 +1143,20 @@ export default function Header() {
                 <Link
                   to="/login"
                   className="flex-1 text-center py-2.5 border border-[#8B4513] text-[#8B4513] rounded-lg font-medium text-sm"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setIsMenuOpen(false);
+                  }}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
                   className="flex-1 text-center py-2.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg font-medium text-sm"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setIsMenuOpen(false);
+                  }}
                 >
                   Register
                 </Link>
@@ -1112,7 +1173,10 @@ export default function Header() {
                     key={link.name}
                     to={link.path}
                     className={`flex items-center gap-3 px-3 py-3.5 rounded-lg transition-colors text-sm font-medium ${isActivePath(link.path) ? 'bg-gradient-to-r from-amber-50 to-yellow-50 text-[#8B4513] border-l-4 border-[#8B4513]' : 'text-gray-700 hover:text-[#8B4513] hover:bg-amber-50'}`}
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setIsMenuOpen(false);
+                    }}
                   >
                     <div className={`${isActivePath(link.path) ? 'text-[#8B4513]' : 'text-amber-500'}`}>{link.icon}</div>
                     {link.name}
@@ -1127,7 +1191,10 @@ export default function Header() {
                   <Link
                     to="/notifications"
                     className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setIsMenuOpen(false);
+                    }}
                   >
                     <FaBell className="text-amber-500" />
                     Notifications
@@ -1140,7 +1207,10 @@ export default function Header() {
                 <Link
                   to="/cart"
                   className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setIsMenuOpen(false);
+                  }}
                 >
                   <FaShoppingCart className="text-amber-500" />
                   Shopping Cart
@@ -1154,7 +1224,10 @@ export default function Header() {
                 <Link
                   to="/wishlist"
                   className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setIsMenuOpen(false);
+                  }}
                 >
                   <FaRegHeart className="text-amber-500" />
                   Wishlist
@@ -1163,7 +1236,10 @@ export default function Header() {
                 <Link
                   to="/download"
                   className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setIsMenuOpen(false);
+                  }}
                 >
                   <FaMobileAlt className="text-amber-500" />
                   Download App
@@ -1180,7 +1256,6 @@ export default function Header() {
                       key={category.id}
                       onClick={() => {
                         handleMainCategoryClick(category);
-                        setIsMenuOpen(false);
                       }}
                       className="p-3 border rounded-lg hover:bg-amber-50 transition-colors text-center group"
                     >
@@ -1198,16 +1273,34 @@ export default function Header() {
                 <div className="mt-6 pt-4 border-t">
                   <div className="text-xs font-bold text-gray-500 uppercase mb-3 px-3">My Account</div>
                   <div className="space-y-0">
-                    <Link to="/dashboard" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
+                    <Link 
+                      to="/dashboard" 
+                      className="mobile-nav-link" 
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setIsMenuOpen(false);
+                      }}
+                    >
                       Dashboard
                     </Link>
-                    {/* <Link to="/orders" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
-                      My Orders
-                    </Link> */}
-                    <Link to="/wishlist" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
+                    <Link 
+                      to="/wishlist" 
+                      className="mobile-nav-link" 
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setIsMenuOpen(false);
+                      }}
+                    >
                       Wishlist
                     </Link>
-                    <Link to="/notifications" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>
+                    <Link 
+                      to="/notifications" 
+                      className="mobile-nav-link" 
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setIsMenuOpen(false);
+                      }}
+                    >
                       Notifications
                       <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
                     </Link>
@@ -1221,7 +1314,10 @@ export default function Header() {
                               key={feature.name}
                               to={feature.path}
                               className="mobile-nav-link bg-gradient-to-r from-amber-50/50 to-yellow-50/50"
-                              onClick={() => setIsMenuOpen(false)}
+                              onClick={() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                setIsMenuOpen(false);
+                              }}
                             >
                               {feature.icon}
                               {feature.name}

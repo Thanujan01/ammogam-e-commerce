@@ -62,7 +62,7 @@ export default function Footer() {
                 <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
                   AMMOGAM
                 </h3>
-                <p className="text-sm text-gray-400">Premium E-Commerce</p>
+               
               </div>
             </div>
             <p className="text-gray-300 text-sm">
