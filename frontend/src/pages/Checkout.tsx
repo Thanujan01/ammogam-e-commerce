@@ -1,3 +1,4 @@
+// pages/Checkout.tsx
 import { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
@@ -93,6 +94,63 @@ export default function Checkout() {
   const shipping = cart.shippingFee;
   const total = subtotal + shipping;
 
+  // ✅ FIX: Get variation image for cart items
+  const getItemImage = (item: any) => {
+    // If product has variations and we have a variation ID
+    if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+      if (variation && variation.images && variation.images.length > 0) {
+        return variation.images[0];
+      }
+      if (variation && variation.image) {
+        return variation.image;
+      }
+    }
+    
+    // If product has variations but no specific variation selected
+    if (item.product.variations && item.product.variations.length > 0) {
+      // Try to get the first variation's image
+      const firstVariation = item.product.variations[0];
+      if (firstVariation.images && firstVariation.images.length > 0) {
+        return firstVariation.images[0];
+      }
+      if (firstVariation.image) {
+        return firstVariation.image;
+      }
+    }
+    
+    // Fall back to main product image
+    return item.product.image;
+  };
+
+  // ✅ FIX: Get variation color name
+  const getItemColorName = (item: any) => {
+    if (item.selectedColor) return item.selectedColor;
+    
+    if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+      if (variation) {
+        return variation.colorName || variation.color;
+      }
+    }
+    
+    return '';
+  };
+
+  // ✅ FIX: Get variation color code
+  const getItemColorCode = (item: any) => {
+    if (item.selectedColorCode) return item.selectedColorCode;
+    
+    if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+      if (variation) {
+        return variation.colorCode;
+      }
+    }
+    
+    return '#000000';
+  };
+
   async function handlePlaceOrder() {
     setIsProcessing(true);
     setLoading(true);
@@ -103,12 +161,15 @@ export default function Checkout() {
           ? Math.round(it.product.price * (1 - it.product.discount / 100))
           : it.product.price;
 
+        const itemColorName = getItemColorName(it);
+        const itemColorCode = getItemColorCode(it);
+
         return {
           product: it.product._id,
           quantity: it.quantity,
           price: itemPrice || 0,
-          color: it.selectedColor || undefined,
-          colorCode: it.selectedColorCode || undefined,
+          color: itemColorName || undefined,
+          colorCode: itemColorCode || undefined,
           variationId: it.variationId || undefined,
           shippingFee: it.product.shippingFee || 0
         };
@@ -423,41 +484,47 @@ export default function Checkout() {
               {step === 2 && (
                 <div className="p-8 space-y-8">
                   <div className="space-y-4">
-                    {cart.items.map(it => (
-                      <div key={it.product._id} className="flex items-center gap-4 p-4 border border-[#d97706]/20 rounded-lg hover:bg-[#d97706]/5 transition-colors">
-                        <div className="w-20 h-20 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-2 flex-shrink-0">
-                          <img
-                            src={getImageUrl(it.product.image)}
-                            className="w-full h-full object-contain"
-                            alt={it.product.name}
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 mb-1">{it.product.name}</h4>
-                          {it.selectedColor && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs text-gray-500">Color:</span>
-                              <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
-                                <div
-                                  className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
-                                  style={{ backgroundColor: it.selectedColorCode || '#000' }}
-                                />
-                                <span className="text-xs font-medium text-gray-700">{it.selectedColor}</span>
+                    {cart.items.map(it => {
+                      const itemImage = getItemImage(it);
+                      const itemColorName = getItemColorName(it);
+                      const itemColorCode = getItemColorCode(it);
+                      
+                      return (
+                        <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-4 p-4 border border-[#d97706]/20 rounded-lg hover:bg-[#d97706]/5 transition-colors">
+                          <div className="w-20 h-20 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-2 flex-shrink-0">
+                            <img
+                              src={getImageUrl(itemImage)}
+                              className="w-full h-full object-contain"
+                              alt={it.product.name}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900 mb-1">{it.product.name}</h4>
+                            {itemColorName && (
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs text-gray-500">Color:</span>
+                                <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                  <div
+                                    className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                    style={{ backgroundColor: itemColorCode }}
+                                  />
+                                  <span className="text-xs font-medium text-gray-700">{itemColorName}</span>
+                                </div>
                               </div>
+                            )}
+                            <p className="text-sm text-[#d97706]">Quantity: {it.quantity}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-gray-900">
+                              ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
                             </div>
-                          )}
-                          <p className="text-sm text-[#d97706]">Quantity: {it.quantity}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-gray-900">
-                            ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
-                          </div>
-                          <div className="text-sm text-[#d97706]">
-                            ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} each
+                            <div className="text-sm text-[#d97706]">
+                              ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} each
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Shipping Details Review */}
@@ -618,33 +685,39 @@ export default function Checkout() {
               {/* Order Items Preview */}
               <div className="px-6 py-4 border-b border-[#d97706]/20">
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {cart.items.map(it => (
-                    <div key={it.product._id} className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-1 flex-shrink-0">
-                        <img
-                          src={getImageUrl(it.product.image)}
-                          className="w-full h-full object-contain"
-                          alt={it.product.name}
-                        />
+                  {cart.items.map(it => {
+                    const itemImage = getItemImage(it);
+                    const itemColorName = getItemColorName(it);
+                    const itemColorCode = getItemColorCode(it);
+                    
+                    return (
+                      <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-1 flex-shrink-0">
+                          <img
+                            src={getImageUrl(itemImage)}
+                            className="w-full h-full object-contain"
+                            alt={it.product.name}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">{it.product.name}</h4>
+                          {itemColorName && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <div
+                                className="w-3 h-3 rounded-full border border-gray-300"
+                                style={{ backgroundColor: itemColorCode }}
+                              />
+                              <span className="text-xs text-gray-500">{itemColorName}</span>
+                            </div>
+                          )}
+                          <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
+                        </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-gray-900 truncate">{it.product.name}</h4>
-                        {it.selectedColor && (
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <div
-                              className="w-3 h-3 rounded-full border border-gray-300"
-                              style={{ backgroundColor: it.selectedColorCode || '#000' }}
-                            />
-                            <span className="text-xs text-gray-500">{it.selectedColor}</span>
-                          </div>
-                        )}
-                        <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">
-                        ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

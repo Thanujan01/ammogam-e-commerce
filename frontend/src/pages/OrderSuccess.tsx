@@ -12,7 +12,7 @@ export default function OrderSuccess() {
     const [verifying, setVerifying] = useState(!!sessionId);
     const [error, setError] = useState<string | null>(null);
     const [order, setOrder] = useState<any>(null);
-    const [redirectCountdown, setRedirectCountdown] = useState(30); // Changed to 30 seconds
+    const [redirectCountdown, setRedirectCountdown] = useState(15); // Changed to 30 seconds
     const cart = useContext(CartContext)!;
 
     useEffect(() => {
