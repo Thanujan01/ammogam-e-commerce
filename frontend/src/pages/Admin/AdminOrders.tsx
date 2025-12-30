@@ -212,8 +212,9 @@ export default function AdminOrders() {
 
     const matchesSearch = orderId.includes(query) || customerName.includes(query) || customerEmail.includes(query);
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const isPaid = order.paymentStatus === 'paid';
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && isPaid;
   });
 
   const getStatusBadge = (status: string) => {
