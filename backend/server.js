@@ -26,7 +26,13 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Health check route
 app.get("/", (req, res) => {
-  res.json({ status: "Backend is running", timestamp: new Date() });
+  const mongoose = require("mongoose");
+  const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+  res.json({ 
+    status: "Backend is running", 
+    database: dbStatus,
+    timestamp: new Date() 
+  });
 });
 
 // Simple request logger to help capture incoming requests during debugging
