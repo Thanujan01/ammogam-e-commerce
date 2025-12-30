@@ -51,7 +51,10 @@ app.use((req, res, next) => {
   next();
 });
 
-connectDB();
+// Connect to Database
+connectDB().catch(err => {
+  console.error("Delayed DB Connection Error:", err.message);
+});
 
 // Local uploads
 if (process.env.STORAGE_DRIVER === "local") {
