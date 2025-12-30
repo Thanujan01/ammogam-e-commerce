@@ -27,10 +27,18 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Health check route
 app.get("/", (req, res) => {
   const mongoose = require("mongoose");
-  const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+  const dbStatus = mongoose.connection.readyState;
+  const statusMap = {
+    0: "Disconnected",
+    1: "Connected",
+    2: "Connecting",
+    3: "Disconnecting"
+  };
+  
   res.json({ 
     status: "Backend is running", 
-    database: dbStatus,
+    database: statusMap[dbStatus] || "Unknown",
+    db_uri_present: !!process.env.MONGO_URI,
     timestamp: new Date() 
   });
 });
