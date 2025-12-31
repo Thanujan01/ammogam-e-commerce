@@ -14,6 +14,7 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; orderId: string; newStatus: string }>({ open: false, orderId: '', newStatus: '' });
 
   const location = useLocation();
 
@@ -189,8 +190,22 @@ export default function AdminOrders() {
   };
 
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    // Check if order is already delivered
+    const order = orders.find(o => o._id === orderId);
+    if (order?.status === 'delivered') {
+      alert('Cannot change status of delivered orders!');
+      return;
+    }
+
+    // Show confirmation dialog
+    setConfirmDialog({ open: true, orderId, newStatus });
+  };
+
+  const confirmStatusUpdate = async () => {
+    const { orderId, newStatus } = confirmDialog;
     try {
       setUpdateLoading(true);
+      setConfirmDialog({ open: false, orderId: '', newStatus: '' });
       await api.put(`/orders/${orderId}/status`, { status: newStatus });
       await fetchOrders(); // Refresh list
       if (selectedOrder && selectedOrder._id === orderId) {
@@ -447,14 +462,23 @@ export default function AdminOrders() {
                           {['pending', 'processed', 'shipped', 'delivered', 'cancelled'].map(s => (
                             <button
                               key={s}
-                              disabled={updateLoading}
+                              disabled={updateLoading || selectedOrder.status === 'delivered'}
                               onClick={() => handleUpdateStatus(selectedOrder._id, s)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${selectedOrder.status === s ? 'bg-orange-600 text-white shadow-lg' : 'bg-white border border-slate-200 text-slate-500 hover:border-orange-500 hover:text-orange-600'}`}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+                                selectedOrder.status === s 
+                                  ? 'bg-orange-600 text-white shadow-lg' 
+                                  : selectedOrder.status === 'delivered'
+                                  ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
+                                  : 'bg-white border border-slate-200 text-slate-500 hover:border-orange-500 hover:text-orange-600'
+                              }`}
                             >
                               {s}
                             </button>
                           ))}
                         </div>
+                        {selectedOrder.status === 'delivered' && (
+                          <p className="text-xs text-red-500 font-medium mt-2">⚠️ Cannot change status of delivered orders</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -532,6 +556,54 @@ export default function AdminOrders() {
               >
                 <FiDownload />
                 Download Invoice
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDialog.open && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-white">
+            <div className="bg-primary1 px-6 py-5">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <FiAlertCircle className="w-5 h-5" />
+                Confirm Status Change
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-gray-700">
+                Are you sure you want to change the order status to{' '}
+                <span className="font-bold text-primary1 capitalize">{confirmDialog.newStatus}</span>?
+              </p>
+              <p className="text-sm text-gray-500">
+                This action will update the order status and notify the customer.
+              </p>
+            </div>
+            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmDialog({ open: false, orderId: '', newStatus: '' })}
+                className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"
+                disabled={updateLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmStatusUpdate}
+                className="px-6 py-2.5 bg-primary1 text-white rounded-xl font-semibold text-sm hover:bg-orange-700 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                disabled={updateLoading}
+              >
+                {updateLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <FiCheckCircle className="w-4 h-4" />
+                    Confirm Change
+                  </>
+                )}
               </button>
             </div>
           </div>
