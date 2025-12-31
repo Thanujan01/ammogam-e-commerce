@@ -17,7 +17,7 @@ import {
   FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
   FaImages, FaCreditCard, FaClock, FaCloudSun,
   FaPaw, FaBaby as FaBabyIcon, FaShoppingBag,
-  FaTimes
+  FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid
 } from 'react-icons/fa';
 
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -116,6 +116,7 @@ export default function Home() {
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [hoveredRecentlyViewed, setHoveredRecentlyViewed] = useState<string | null>(null);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
@@ -199,6 +200,17 @@ export default function Home() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Auto slide banners on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % 3);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isMobile]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -223,7 +235,7 @@ export default function Home() {
         }));
         setCategories(mergedCategories);
 
-        // Process products
+        // Process products - IMPORTANT: Include stock information
         const dbProducts = productsRes.data.map((p: any) => ({
           ...p,
           id: p._id,
@@ -232,6 +244,7 @@ export default function Home() {
           originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
           rating: p.rating || 0,
           sold: p.sold || 0,
+          stock: p.stock || 0, // ✅ Add stock information
           badge: p.badge,
           badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
           tags: p.discount > 0 ? ['Choice', 'Sale'] : ['Choice'],
@@ -268,7 +281,15 @@ export default function Home() {
     fetchData();
   }, [user]);
 
+  // ✅ FIXED: Check stock before adding to cart
   const addToCart = (product: any) => {
+    // Check if product is in stock
+    if (product.stock <= 0) {
+      // Show out of stock message
+      alert('This product is currently out of stock.');
+      return;
+    }
+    
     cart.addToCart(product);
     setRecentlyAdded(product);
     setShowCartNotification(true);
@@ -283,6 +304,14 @@ export default function Home() {
       navigate('/login');
       return;
     }
+    
+    // Find the product to check stock
+    const product = products.find(p => p.id === productId);
+    if (product && product.stock <= 0) {
+      alert('This product is out of stock and cannot be added to wishlist.');
+      return;
+    }
+    
     await contextToggle(productId);
   };
 
@@ -328,7 +357,49 @@ export default function Home() {
     }
   };
 
-  // Professional categories display component from ProductList.tsx
+  // Mobile hero banners data - Updated: Only first banner has text, others are image-only
+  const mobileBanners = [
+    {
+      id: 1,
+      title: "Ammogam",
+      buttonText: "Shop Now",
+      image: "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800",
+      showText: true,
+       
+    },
+    {
+      id: 2,
+      title: "",
+      subtitle: "",
+      description: "",
+      buttonText: "",
+      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800",
+      bgGradient: "",
+      showText: false
+    },
+    {
+      id: 3,
+      title: "",
+      subtitle: "",
+      description: "",
+      buttonText: "",
+      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800",
+      bgGradient: "",
+      showText: false
+    }
+  ];
+
+  const nextBanner = () => {
+    setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % mobileBanners.length);
+  };
+
+  const prevBanner = () => {
+    setCurrentBannerIndex((prevIndex) => 
+      prevIndex === 0 ? mobileBanners.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Professional categories display component from ProductList.tsx - MODIFIED FOR MOBILE
   const ProfessionalCategories = () => {
     const uniqueColors = [
       ['from-blue-50 to-cyan-50', 'border-blue-200', 'from-blue-600 to-cyan-600'],
@@ -354,14 +425,14 @@ export default function Home() {
 
     return (
       <div className="mb-10">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Shop by Category</h2>
-          <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">Shop by Category</h2>
+          <span className="text-xs md:text-sm text-gray-500 bg-gray-100 px-2 md:px-3 py-1 rounded-full">
             {categories.length} Categories
           </span>
         </div>
         <div className="relative">
-          <div className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide px-1">
+          <div className="flex space-x-2 md:space-x-4 overflow-x-auto pb-4 md:pb-6 scrollbar-hide px-1">
             {categories.map((category: any, index: number) => {
               const colors = getCategoryColor(index, false);
 
@@ -369,23 +440,20 @@ export default function Home() {
                 <button
                   key={category.id}
                   onClick={() => handleCategorySelect(category.id)}
-                  className="group flex-shrink-0 w-40 transition-all duration-300 hover:transform hover:-translate-y-2"
+                  className="group flex-shrink-0 w-1/5 min-w-[80px] md:min-w-[160px] transition-all duration-300 hover:transform hover:-translate-y-1 md:hover:-translate-y-2"
                 >
-                  <div className={`flex flex-col items-center justify-center p-5 rounded-xl h-full w-full transition-all duration-300 ${colors.bg} hover:shadow-xl`}>
-                    <div className={`relative w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${colors.icon}`}>
-                      <div className="text-2xl text-white">
+                  <div className={`flex flex-col items-center justify-center p-3 md:p-5 rounded-lg md:rounded-xl h-full w-full transition-all duration-300 ${colors.bg} hover:shadow-lg md:hover:shadow-xl`}>
+                    <div className={`relative w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-2 md:mb-4 transition-all duration-300 ${colors.icon}`}>
+                      <div className="text-lg md:text-2xl text-white">
                         {category.icon}
                       </div>
-                      <div className="absolute -top-1 -right-1 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                        <FaChevronRight className="text-white text-xs" />
+                      <div className="absolute -top-1 -right-1 w-5 h-5 md:w-7 md:h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <FaChevronRight className="text-white text-[10px] md:text-xs" />
                       </div>
                     </div>
-                    <h3 className="text-sm font-bold text-center mb-2 line-clamp-2 text-gray-800 group-hover:text-blue-900">
+                    <h3 className="text-xs md:text-sm font-bold text-center mb-1 md:mb-2 line-clamp-2 text-gray-800 group-hover:text-blue-900">
                       {category.name}
                     </h3>
-                    <div className="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-800">
-                      {category.items}
-                    </div>
                   </div>
                 </button>
               );
@@ -475,6 +543,20 @@ export default function Home() {
         .image-zoom-container:hover {
           transform: scale(1.05);
         }
+
+        /* Banner animation */
+        .banner-slide {
+          transition: transform 0.5s ease-in-out;
+        }
+
+        /* Dot indicators */
+        .banner-dot {
+          transition: all 0.3s ease;
+        }
+
+        .banner-dot.active {
+          transform: scale(1.2);
+        }
       `}</style>
 
       {/* Image Zoom Modal */}
@@ -528,11 +610,91 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-        {/* Professional Categories Section - SAME AS PRODUCTLIST */}
-        <ProfessionalCategories />
+        
+        {/* Mobile Hero Banner Carousel - Only shown on mobile */}
+        <div className="md:hidden mb-6">
+          <div className="relative overflow-hidden rounded-xl shadow-lg">
+            {/* Banner Container */}
+            <div className="relative h-64">
+              <div 
+                className="flex banner-slide"
+                style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
+              >
+                {mobileBanners.map((banner) => (
+                  <div 
+                    key={banner.id}
+                    className="w-full flex-shrink-0 relative h-64"
+                  >
+                    {/* Background Image */}
+                    <div className="absolute inset-0">
+                      <img
+                        src={banner.image}
+                        alt={banner.title || "Promotional Banner"}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Only show gradient overlay for first banner */}
+                      {/* {banner.showText && (
+                        <div className={`absolute inset-0 bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600 opacity-80`}></div>
+                      )} */}
+                    </div>
+                    
+                    {/* Content - Only show for first banner */}
+                    {banner.showText && (
+                      <div className="relative h-full flex flex-col justify-center items-center text-center px-6">
+                        <div className="text-white mb-2">
+                          
+                        </div>
+                        <h1 className="text-3xl font-bold text-white mb-2">
+                          {banner.title}
+                        </h1>
+                        
+                        <button
+                          onClick={handleViewAllProducts}
+                          className="bg-white text-gray-800 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        >
+                          {banner.buttonText}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        {/* Hero Banner */}
-        <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevBanner}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
+            >
+              <FaChevronLeft className="text-lg" />
+            </button>
+            <button
+              onClick={nextBanner}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
+            >
+              <FaChevronRightSolid className="text-lg" />
+            </button>
+
+            {/* Dot Indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+              {mobileBanners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBannerIndex(index)}
+                  className={`w-2 h-2 rounded-full banner-dot ${index === currentBannerIndex ? 'bg-white active' : 'bg-white/50'}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Shop by Category - Hidden on mobile, shown first on desktop */}
+        <div className="hidden md:block">
+          <ProfessionalCategories />
+        </div>
+
+        {/* Desktop Hero Banner - Single banner for desktop */}
+        <div className="hidden md:block mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
           <div className="relative h-64 sm:h-80 md:h-96">
             <div className="flex flex-col md:flex-row h-full">
               {/* Left side - Text Content (50%) */}
@@ -560,7 +722,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
                 <img
                   src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
-                  alt="Summer Sale"
+                  alt="Ammogam"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -568,7 +730,12 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Featured Products */}
+        {/* Shop by Category for Mobile - Hidden on desktop, shown second on mobile */}
+        <div className="md:hidden">
+          <ProfessionalCategories />
+        </div>
+
+        {/* Featured Products (3rd on both desktop and mobile) */}
         <div className="mb-10 sm:mb-12">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
@@ -608,151 +775,182 @@ export default function Home() {
           ) : (
             <>
               {/* Products Grid - Only shows first 12 products */}
-              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
-                {filteredFeaturedProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
-                  >
-                    {/* Quick Add Icon */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-                      className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 bg-white/90 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110"
-                      title="Add to cart"
-                    >
-                      <FaCartPlus className="text-amber-600 text-base sm:text-lg" />
-                    </button>
-
-                    {/* Product Image */}
+              <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
+                {filteredFeaturedProducts.map((product) => {
+                  const isOutOfStock = product.stock <= 0;
+                  
+                  return (
                     <div
-                      className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
-                      onClick={() => handleProductClick(product.id)}
+                      key={product.id}
+                      className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
                     >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-
-                      {/* Brand Badge */}
-                      {product.badge && (
-                        <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2">
-                          <div className="bg-amber-600 text-white text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1">
-                            {product.badgeIcon}
-                            <span className="text-xs">{product.badge}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Discount Badge */}
-                      {product.discountPercent && (
-                        <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 mt-6 sm:mt-8">
-                          <div className="bg-red-500 text-white text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded">
-                            -{product.discountPercent}%
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Wishlist Button */}
+                      {/* Quick Add Icon - Gray for out of stock, amber for in stock */}
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleToggleWishlist(product.id); }}
-                        className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110"
-                        title="Add to wishlist"
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          if (!isOutOfStock) addToCart(product); 
+                        }}
+                        disabled={isOutOfStock}
+                        className={`absolute top-2 sm:top-3 right-2 sm:right-3 z-20 rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110 ${isOutOfStock 
+                          ? 'bg-gray-200 cursor-not-allowed' 
+                          : 'bg-white/90 hover:bg-white'}`}
+                        title={isOutOfStock ? "Out of stock" : "Add to cart"}
                       >
-                        <FaHeart className={`text-sm sm:text-base ${isInWishlist(product.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`} />
+                        <FaCartPlus className={`text-base sm:text-lg ${isOutOfStock ? 'text-gray-400' : 'text-amber-600'}`} />
                       </button>
-                    </div>
 
-                    {/* Product Info */}
-                    <div className="p-2 sm:p-3">
-                      {/* Product Name */}
-                      <h3
-                        className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
+                      {/* Product Image */}
+                      <div
+                        className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
                         onClick={() => handleProductClick(product.id)}
                       >
-                        {product.name}
-                      </h3>
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
 
-                      {/* Color and Size Options */}
-                      <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
-                        {product.colorOptions && (
-                          <div className="flex items-center gap-0.5">
-                            <FaPaletteIcon className="text-xs text-gray-500" />
-                            <span className="text-xs text-gray-600">Color</span>
-                          </div>
-                        )}
-                        {product.sizeOptions && (
-                          <div className="flex items-center gap-0.5">
-                            <FaRuler className="text-xs text-gray-500" />
-                            <span className="text-xs text-gray-600">Size</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Price Section */}
-                      <div className="mb-1.5 sm:mb-2">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-sm sm:text-base font-bold text-gray-900">
-                            {product.currentPrice}
-                          </span>
-                          {product.originalPrice && (
-                            <span className="text-xs sm:text-sm text-gray-500 line-through">
-                              {product.originalPrice}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Rating */}
-                      <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <FaStar
-                              key={i}
-                              className={`text-xs ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-600">
-                          ({product.sold || 0} sold)
-                        </span>
-                      </div>
-
-                      {/* Promotions */}
-                      {product.promotions && product.promotions.length > 0 && (
-                        <div className="mb-2 sm:mb-3 space-y-1">
-                          {product.promotions.map((promo: any, index: number) => (
-                            <div key={index} className="flex items-center gap-1">
-                              <div className="flex-shrink-0">
-                                {promo.icon}
-                              </div>
-                              <span className="text-xs text-gray-700 flex-1 line-clamp-1">
-                                {promo.text}
-                              </span>
+                        {/* Brand Badge */}
+                        {product.badge && (
+                          <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2">
+                            <div className="bg-amber-600 text-white text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1">
+                              {product.badgeIcon}
+                              <span className="text-xs">{product.badge}</span>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        )}
 
-                      {/* Bundle Deals Button */}
-                      <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                        {/* Discount Badge */}
+                        {product.discountPercent && (
+                          <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 mt-6 sm:mt-8">
+                            <div className="bg-red-500 text-white text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded">
+                              -{product.discountPercent}%
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Wishlist Button */}
                         <button
-                          className="text-amber-700 hover:text-amber-800 font-medium text-xs flex items-center gap-0.5"
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            if (!isOutOfStock) handleToggleWishlist(product.id); 
+                          }}
+                          disabled={isOutOfStock}
+                          className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock 
+                            ? 'bg-gray-200 cursor-not-allowed' 
+                            : 'bg-white/90 hover:bg-white'}`}
+                          title={isOutOfStock ? "Out of stock" : "Add to wishlist"}
+                        >
+                          <FaHeart className={`text-sm sm:text-base ${isOutOfStock 
+                            ? 'text-gray-400' 
+                            : isInWishlist(product.id) 
+                              ? 'text-red-500' 
+                              : 'text-gray-400 hover:text-red-500'}`} 
+                          />
+                        </button>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="p-2 sm:p-3">
+                        {/* Product Name */}
+                        <h3
+                          className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
                           onClick={() => handleProductClick(product.id)}
                         >
-                          Bundle deals <FaChevronRightIcon className="text-xs" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-                          className="bg-amber-600 hover:bg-amber-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors"
-                        >
-                          <FaCartPlus className="text-xs" />
-                          Add
-                        </button>
+                          {product.name}
+                        </h3>
+
+                        {/* Color and Size Options */}
+                        <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
+                          {product.colorOptions && (
+                            <div className="flex items-center gap-0.5">
+                              <FaPaletteIcon className="text-xs text-gray-500" />
+                              <span className="text-xs text-gray-600">Color</span>
+                            </div>
+                          )}
+                          {product.sizeOptions && (
+                            <div className="flex items-center gap-0.5">
+                              <FaRuler className="text-xs text-gray-500" />
+                              <span className="text-xs text-gray-600">Size</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Price Section */}
+                        <div className="mb-1.5 sm:mb-2">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-sm sm:text-base font-bold text-gray-900">
+                              {product.currentPrice}
+                            </span>
+                            {product.originalPrice && (
+                              <span className="text-xs sm:text-sm text-gray-500 line-through">
+                                {product.originalPrice}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Rating */}
+                        <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar
+                                key={i}
+                                className={`text-xs ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-600">
+                            ({product.sold || 0} sold)
+                          </span>
+                        </div>
+
+                        {/* Promotions */}
+                        {product.promotions && product.promotions.length > 0 && (
+                          <div className="mb-2 sm:mb-3 space-y-1">
+                            {product.promotions.map((promo: any, index: number) => (
+                              <div key={index} className="flex items-center gap-1">
+                                <div className="flex-shrink-0">
+                                  {promo.icon}
+                                </div>
+                                <span className="text-xs text-gray-700 flex-1 line-clamp-1">
+                                  {promo.text}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Bundle Deals Button - Gray for out of stock, amber for in stock */}
+                        <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                          <button
+                            className={`font-medium text-xs flex items-center gap-0.5 ${isOutOfStock 
+                              ? 'text-gray-400 cursor-not-allowed' 
+                              : 'text-amber-700 hover:text-amber-800'}`}
+                            onClick={() => !isOutOfStock && handleProductClick(product.id)}
+                            disabled={isOutOfStock}
+                          >
+                            {isOutOfStock ? 'Finished' : 'Bundle deals'} 
+                            {!isOutOfStock && <FaChevronRightIcon className="text-xs" />}
+                          </button>
+                          <button
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (!isOutOfStock) addToCart(product); 
+                            }}
+                            disabled={isOutOfStock}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors ${isOutOfStock 
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                              : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+                          >
+                            <FaCartPlus className="text-xs" />
+                            {isOutOfStock ? 'not available' : 'Add'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* View All Products CTA */}
@@ -773,7 +971,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Recently Viewed - Shows products viewed from ANY page */}
+              {/* Recently Viewed - Shows products viewed from ANY page (4th on both desktop and mobile) */}
               <div className="mb-8 sm:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <div>
@@ -809,15 +1007,17 @@ export default function Home() {
                     {recentlyViewed.map((item, index) => {
                       // Try to find full product details from products array
                       const fullProduct = products.find(p => p.id === item.id);
+                      const isOutOfStock = fullProduct?.stock <= 0;
+                      
                       return (
                         <div 
                           key={item.id} 
-                          className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-all duration-300 hover:border-amber-200 group cursor-pointer"
+                          className="relative bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-all duration-300 hover:border-amber-200 group cursor-pointer"
                           onClick={() => handleRecentlyViewedClick(item)}
                         >
                           {/* Position indicator for most recent item */}
-                          {index === 0 && (
-                            <div className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
+                          {index === 0 && !isOutOfStock && (
+                            <div className="absolute -top-1 -left-1 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
                               Latest
                             </div>
                           )}
