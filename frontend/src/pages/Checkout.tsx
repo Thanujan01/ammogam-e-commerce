@@ -15,49 +15,14 @@ import {
 import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
 import { RiSecurePaymentLine } from 'react-icons/ri';
 
-// Use the actual CartItem type from CartContext instead of redefining
-interface CartItemVariation {
-  _id: string;
-  colorName?: string;
-  color?: string;
-  colorCode?: string;
-  images?: string[];
-  image?: string;
-}
-
-interface CartItemProduct {
-  _id: string;
-  name: string;
-  price: number;
-  discount?: number;
-  shippingFee?: number;
-  image?: string; // Changed to optional string
-  variations?: CartItemVariation[];
-}
-
-interface CartItem {
-  product: CartItemProduct;
-  variationId?: string;
-  quantity: number;
-  selectedColor?: string;
-  selectedColorCode?: string;
-}
-
 export default function Checkout() {
   const cart = useContext(CartContext)!;
   const auth = useContext(AuthContext)!;
   const navigate = useNavigate();
 
-  // Cast selectedCartItems to CartItem[] to fix type issues
-  const selectedCartItems = cart.selectedCartItems as unknown as CartItem[];
-  const subtotal = cart.selectedTotalAmount;
-  const itemCount = cart.selectedItemsCount;
-  const shipping = cart.selectedShippingFee;
-  const total = subtotal + shipping;
-
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
     name: auth.user?.name || '',
@@ -65,14 +30,16 @@ export default function Checkout() {
     city: '',
     phone: auth.user?.phone || '',
     postalCode: '',
-    paymentMethod: 'Online Payment',
-    countryCode: '94'
+    paymentMethod: 'Online Payment', // Set default to Online Payment only
+    countryCode: '94' // Default country code
   });
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
+    // Scroll to top on initial load
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     
+    // Also handle browser back/forward navigation
     const handlePopState = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     };
@@ -95,21 +62,24 @@ export default function Checkout() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [step]);
+  }, [step]); // Runs when step changes
 
-  // ✅ FIXED: Added loading dependency
+  // Redirect if cart is empty
   useEffect(() => {
-    if (selectedCartItems.length === 0 && !loading) {
+    if (cart.items.length === 0 && !loading) {
+      // Scroll to top before navigating
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       setTimeout(() => navigate('/cart'), 150);
     }
-  }, [selectedCartItems.length, navigate, loading]);
+  }, [cart.items, navigate]);
 
+  // ✅ FIX: Handle back to cart with scroll
   const handleBackToCart = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate('/cart'), 150);
   };
 
+  // ✅ FIX: Handle step navigation with scroll
   const handleStepChange = (newStep: number) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => setStep(newStep), 150);
@@ -119,12 +89,16 @@ export default function Checkout() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ FIX: Get variation image for cart items with defensive checks
-  const getItemImage = (item: CartItem) => {
-    if (!item?.product) return '';
-    
+  const subtotal = cart.totalAmount;
+  const itemCount = cart.items.reduce((s: number, i: any) => s + i.quantity, 0);
+  const shipping = cart.shippingFee;
+  const total = subtotal + shipping;
+
+  // ✅ FIX: Get variation image for cart items
+  const getItemImage = (item: any) => {
+    // If product has variations and we have a variation ID
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
-      const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
+      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
       if (variation && variation.images && variation.images.length > 0) {
         return variation.images[0];
       }
@@ -133,7 +107,9 @@ export default function Checkout() {
       }
     }
     
+    // If product has variations but no specific variation selected
     if (item.product.variations && item.product.variations.length > 0) {
+      // Try to get the first variation's image
       const firstVariation = item.product.variations[0];
       if (firstVariation.images && firstVariation.images.length > 0) {
         return firstVariation.images[0];
@@ -143,30 +119,31 @@ export default function Checkout() {
       }
     }
     
-    return item.product.image || '';
+    // Fall back to main product image
+    return item.product.image;
   };
 
-  // ✅ FIX: Get variation color name with defensive checks
-  const getItemColorName = (item: CartItem) => {
+  // ✅ FIX: Get variation color name
+  const getItemColorName = (item: any) => {
     if (item.selectedColor) return item.selectedColor;
     
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
-      const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
+      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
       if (variation) {
-        return variation.colorName || variation.color || '';
+        return variation.colorName || variation.color;
       }
     }
     
     return '';
   };
 
-  // ✅ FIX: Get variation color code with defensive checks
-  const getItemColorCode = (item: CartItem) => {
+  // ✅ FIX: Get variation color code
+  const getItemColorCode = (item: any) => {
     if (item.selectedColorCode) return item.selectedColorCode;
     
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
-      const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
-      if (variation && variation.colorCode) {
+      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+      if (variation) {
         return variation.colorCode;
       }
     }
@@ -174,34 +151,12 @@ export default function Checkout() {
     return '#000000';
   };
 
-  // ✅ FIX: Phone number validation
-  const validatePhone = (phone: string) => {
-    const digits = phone.replace(/\D/g, '');
-    return digits.length >= 7;
-  };
-
   async function handlePlaceOrder() {
     setIsProcessing(true);
     setLoading(true);
 
     try {
-      // Add form validation before API call
-      if (!formData.name || !formData.address || !formData.city || !formData.phone) {
-        alert('Please fill in all required shipping information');
-        setIsProcessing(false);
-        setLoading(false);
-        return;
-      }
-
-      if (!validatePhone(formData.phone)) {
-        alert('Please enter a valid phone number with at least 7 digits');
-        setIsProcessing(false);
-        setLoading(false);
-        return;
-      }
-
-      // Use selectedCartItems
-      const items = selectedCartItems.map(it => {
+      const items = cart.items.map(it => {
         const itemPrice = it.product.discount && it.product.discount > 0
           ? Math.round(it.product.price * (1 - it.product.discount / 100))
           : it.product.price;
@@ -220,6 +175,7 @@ export default function Checkout() {
         };
       });
 
+      // Combine country code and phone number
       const fullPhoneNumber = `+${formData.countryCode} ${formData.phone}`;
 
       const orderData = {
@@ -230,7 +186,7 @@ export default function Checkout() {
           name: formData.name,
           address: formData.address,
           city: formData.city,
-          phone: fullPhoneNumber,
+          phone: fullPhoneNumber, // Use combined phone number
           postalCode: formData.postalCode
         },
         paymentMethod: formData.paymentMethod
@@ -238,18 +194,14 @@ export default function Checkout() {
 
       const res = await api.post('/orders', orderData);
       const orderId = res.data._id;
-      
-      // Clear only selected items from cart after successful order creation
-      selectedCartItems.forEach(it => {
-        cart.removeFromCart(it.product._id, it.variationId);
-      });
 
+      // Since only Online Payment is available, always redirect to Stripe
       const sessionRes = await api.post('/payments/create-checkout-session', { orderId });
       const { url } = sessionRes.data;
       window.location.href = url;
     } catch (err: any) {
       console.error(err);
-      alert(err?.response?.data?.message || err.message || 'An error occurred while placing your order');
+      alert(err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
       setIsProcessing(false);
@@ -262,6 +214,7 @@ export default function Checkout() {
     { number: 3, title: 'Payment', icon: <FaRegCreditCard /> }
   ];
 
+  // Common country codes for a worldwide website
   const countryCodes = [
     { code: '1', name: 'US/Canada' },
     { code: '44', name: 'UK' },
@@ -322,6 +275,7 @@ export default function Checkout() {
       <div className="bg-white border-b border-[#d97706]/20 py-6">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between relative">
+            {/* Progress Line */}
             <div className="absolute top-4 left-0 right-0 h-1 bg-[#d97706]/20 -z-10">
               <div
                 className="h-1 bg-gradient-to-r from-[#d97706] to-[#b45309] transition-all duration-500"
@@ -394,7 +348,6 @@ export default function Checkout() {
                         onChange={handleChange}
                         placeholder="Enter your full name"
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                        aria-label="Recipient's full name"
                       />
                     </div>
 
@@ -412,7 +365,6 @@ export default function Checkout() {
                         placeholder="House number, street name, apartment/suite"
                         rows={3}
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all resize-none"
-                        aria-label="Complete shipping address"
                       />
                     </div>
 
@@ -430,7 +382,6 @@ export default function Checkout() {
                         onChange={handleChange}
                         placeholder="e.g., Colombo"
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                        aria-label="City or state"
                       />
                     </div>
 
@@ -445,7 +396,6 @@ export default function Checkout() {
                         onChange={handleChange}
                         placeholder="e.g., 10100"
                         className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                        aria-label="Postal code"
                       />
                     </div>
 
@@ -462,8 +412,7 @@ export default function Checkout() {
                             name="countryCode"
                             value={formData.countryCode}
                             onChange={handleChange}
-                            className="appearance-none px-4 py-3 pr-8 rounded-lg border border-[#d97706] bg-[#FBF9F6FF]/10 text-[#0C0C0CFF] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                            aria-label="Country code"
+                            className="appearance-none px-4 py-3 pr-8 rounded-lg border border-[#d97706] bg-[#d97706]/10 text-[#d97706] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
                           >
                             {countryCodes.map((country) => (
                               <option key={country.code} value={country.code}>
@@ -484,7 +433,6 @@ export default function Checkout() {
                           onChange={handleChange}
                           placeholder="77 123 4567"
                           className="flex-1 px-4 py-3 rounded-lg border border-[#d97706] focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                          aria-label="Phone number"
                         />
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
@@ -497,7 +445,6 @@ export default function Checkout() {
                     <button
                       onClick={handleBackToCart}
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                      aria-label="Back to cart"
                     >
                       <FaArrowLeft className="text-sm" />
                       Back to Cart
@@ -508,14 +455,9 @@ export default function Checkout() {
                           alert('Please fill in all required shipping information');
                           return;
                         }
-                        if (!validatePhone(formData.phone)) {
-                          alert('Please enter a valid phone number with at least 7 digits');
-                          return;
-                        }
                         handleStepChange(2);
                       }}
                       className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
-                      aria-label="Continue to review order"
                     >
                       Continue to Review
                       <FaArrowRight className="text-sm" />
@@ -542,7 +484,7 @@ export default function Checkout() {
               {step === 2 && (
                 <div className="p-8 space-y-8">
                   <div className="space-y-4">
-                    {selectedCartItems.map(it => {
+                    {cart.items.map(it => {
                       const itemImage = getItemImage(it);
                       const itemColorName = getItemColorName(it);
                       const itemColorCode = getItemColorCode(it);
@@ -554,7 +496,6 @@ export default function Checkout() {
                               src={getImageUrl(itemImage)}
                               className="w-full h-full object-contain"
                               alt={it.product.name}
-                              loading="lazy"
                             />
                           </div>
                           <div className="flex-1">
@@ -620,7 +561,6 @@ export default function Checkout() {
                     <button
                       onClick={() => handleStepChange(1)}
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                      aria-label="Back to shipping information"
                     >
                       <FaArrowLeft className="text-sm" />
                       Back to Shipping
@@ -628,7 +568,6 @@ export default function Checkout() {
                     <button
                       onClick={() => handleStepChange(3)}
                       className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
-                      aria-label="Proceed to payment"
                     >
                       Proceed to Payment
                       <FaArrowRight className="text-sm" />
@@ -705,16 +644,14 @@ export default function Checkout() {
                     <button
                       onClick={() => handleStepChange(2)}
                       className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                      aria-label="Back to review order"
                     >
                       <FaArrowLeft className="text-sm" />
                       Back to Review
                     </button>
                     <button
                       onClick={handlePlaceOrder}
-                      disabled={loading || isProcessing}
+                      disabled={loading}
                       className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[180px] flex items-center justify-center gap-2"
-                      aria-label={loading ? "Processing payment" : "Place order and proceed to payment"}
                     >
                       {loading ? (
                         <div className="flex items-center gap-2">
@@ -748,7 +685,7 @@ export default function Checkout() {
               {/* Order Items Preview */}
               <div className="px-6 py-4 border-b border-[#d97706]/20">
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {selectedCartItems.map(it => {
+                  {cart.items.map(it => {
                     const itemImage = getItemImage(it);
                     const itemColorName = getItemColorName(it);
                     const itemColorCode = getItemColorCode(it);
@@ -760,7 +697,6 @@ export default function Checkout() {
                             src={getImageUrl(itemImage)}
                             className="w-full h-full object-contain"
                             alt={it.product.name}
-                            loading="lazy"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -795,8 +731,8 @@ export default function Checkout() {
                   <div className="flex flex-col">
                     <span className="text-gray-600">Shipping</span>
                     <div className="mt-1 space-y-1">
-                      {Array.from(new Set(selectedCartItems.map(it => it.product._id))).map(productId => {                        
-                        const item = selectedCartItems.find(it => it.product._id === productId);
+                      {Array.from(new Set(cart.items.map(it => it.product._id))).map(productId => {
+                        const item = cart.items.find(it => it.product._id === productId);
                         if (!item) return null;
                         return (
                           <div key={productId} className="text-[10px] text-gray-500 flex items-center gap-1">

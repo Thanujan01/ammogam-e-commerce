@@ -33,7 +33,7 @@ interface EnhancedProduct extends IProduct {
   defaultColor?: string;
   categoryName?: string;
   shippingFee?: number;
-  reviewCount?: number;
+  reviewCount?: number; // ✅ Added missing property
 }
 
 export default function ProductDetail() {
@@ -57,8 +57,10 @@ export default function ProductDetail() {
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
+    // Scroll to top on initial load
     window.scrollTo(0, 0);
     
+    // Also handle browser back/forward navigation
     const handlePopState = () => {
       window.scrollTo(0, 0);
     };
@@ -105,7 +107,7 @@ export default function ProductDetail() {
           categoryName: res.data.category?.name ||
             (typeof res.data.category === 'string' ? res.data.category : 'Category'),
           shippingFee: res.data.shippingFee || 0,
-          reviewCount: res.data.reviewCount || 0
+          reviewCount: res.data.reviewCount || 0 // ✅ Ensure reviewCount is included
         };
 
         setProduct(productData);
@@ -234,6 +236,8 @@ export default function ProductDetail() {
     }));
   }, [product]);
 
+  // ✅ FIX: Removed unused displayedColors variable
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 flex justify-center items-center min-h-[60vh]">
@@ -270,42 +274,6 @@ export default function ProductDetail() {
     if (typeof product.category === 'string') return product.category;
     if (product.category?.name) return product.category.name;
     return 'Category';
-  };
-
-  // ✅ FIXED: Corrected Buy Now functionality - Clear existing items first
-  const handleBuyNow = () => {
-    if (currentStock > 0 && product) {
-      // Clear all existing cart items and selections first
-      cart.clearCart();
-      
-      // Add the current product to cart
-      if (selectedVariation) {
-        cart.addToCart(product, quantity, selectedVariation._id, selectedVariation.colorName, selectedVariation.colorCode);
-      } else {
-        cart.addToCart(product, quantity);
-      }
-      
-      // Create a new Set with only this item selected
-      const newSelected = new Set<string>();
-      
-      // Get the item key for the product we just added
-      const itemKey = cart.getItemKey({
-        product,
-        quantity,
-        variationId: selectedVariation?._id,
-        selectedColor: selectedVariation?.colorName,
-        selectedColorCode: selectedVariation?.colorCode
-      });
-      
-      newSelected.add(itemKey);
-      
-      // Update selected items in cart context
-      cart.updateSelectedItems(newSelected);
-      
-      // Navigate to checkout
-      window.scrollTo(0, 0);
-      setTimeout(() => navigate('/checkout'), 100);
-    }
   };
 
   return (
@@ -467,6 +435,10 @@ export default function ProductDetail() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
+                    {/* Bestseller Badge */}
+                    {/* <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                      Bestseller
+                    </span> */}
                     <span className="text-sm text-gray-500">Ammogam Official</span>
                   </div>
                   <div className="flex gap-2">
@@ -654,7 +626,16 @@ export default function ProductDetail() {
               </button>
               
               <button
-                onClick={handleBuyNow}
+                onClick={() => {
+                  if (currentStock > 0 && product) {
+                    if (selectedVariation) {
+                      cart.addToCart(product, quantity, selectedVariation._id, selectedVariation.colorName, selectedVariation.colorCode);
+                    } else {
+                      cart.addToCart(product, quantity);
+                    }
+                    navigate('/cart');
+                  }
+                }}
                 disabled={currentStock === 0}
                 className={`px-6 py-3 rounded-lg font-medium transition-all ${currentStock === 0
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -753,6 +734,7 @@ export default function ProductDetail() {
           <div className="text-center">
             <button
               onClick={() => {
+                // ✅ FIX: Scroll to top before navigating
                 window.scrollTo(0, 0);
                 navigate('/products');
               }}

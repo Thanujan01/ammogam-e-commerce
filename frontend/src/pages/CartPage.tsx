@@ -16,8 +16,9 @@ export default function CartPage() {
   const auth = useContext(AuthContext)!;
   const navigate = useNavigate();
 
-  // Use selectedItems from CartContext
-  const selectedItems = cart.selectedItems;
+  // Selection state for checkboxes
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
   // Delete confirmation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteAction, setDeleteAction] = useState<{
@@ -43,23 +44,21 @@ export default function CartPage() {
     };
   }, []); // Empty dependency array means this runs once on mount
 
-  // ✅ FIX: Remove the useEffect that triggers on cart.items change
-  // This was causing the page to scroll when quantity changes
-  // REMOVED:
-  // useEffect(() => {
-  //   // When cart items change, scroll to top smoothly
-  //   if (cart.items.length > 0) {
-  //     const timer = setTimeout(() => {
-  //       window.scrollTo({
-  //         top: 0,
-  //         left: 0,
-  //         behavior: 'smooth'
-  //       });
-  //     }, 100);
-  // 
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [cart.items]); // Runs when cart items change
+  // ✅ FIX: Additional scroll for cart updates
+  useEffect(() => {
+    // When cart items change, scroll to top smoothly
+    if (cart.items.length > 0) {
+      const timer = setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [cart.items]); // Runs when cart items change
 
   // ✅ FIX: Get variation image - check product variations first
   const getItemImage = (item: any) => {
@@ -118,15 +117,32 @@ export default function CartPage() {
     return '#000000';
   };
 
-  // Use getItemKey from CartContext
-  const getItemKey = cart.getItemKey;
-  // Use selectedCartItems from CartContext
-  const selectedCartItems = cart.selectedCartItems;
+  // Helper functions for checkbox selection
+  const getItemKey = (item: any) => `${item.product._id}-${item.variationId || 'default'}`;
 
-  // Use selected totals from CartContext
-  const subtotal = cart.selectedTotalAmount;
-  const itemCount = cart.selectedItemsCount;
-  const shipping = cart.selectedShippingFee;
+  // Calculate totals based on SELECTED items only
+  const getSelectedItems = () => {
+    return cart.items.filter((item: any) => selectedItems.has(getItemKey(item)));
+  };
+
+  const selectedCartItems = getSelectedItems();
+
+  const subtotal = selectedCartItems.reduce((s, it) => {
+    const price = it.product.discount && it.product.discount > 0
+      ? Math.round(it.product.price * (100 - it.product.discount) / 100)
+      : it.product.price;
+    return s + (price || 0) * it.quantity;
+  }, 0);
+
+  const itemCount = selectedCartItems.reduce((s: number, i: any) => s + i.quantity, 0);
+
+  // Calculate shipping for selected items only (per unique product)
+  const shipping = selectedCartItems.reduce((acc, it, idx) => {
+    const isFirstOccurrence = selectedCartItems.findIndex(i => i.product._id === it.product._id) === idx;
+    if (!isFirstOccurrence) return acc;
+    return acc + (it.product.shippingFee || 0);
+  }, 0);
+
   const total = subtotal + shipping;
 
   // Group items by seller
@@ -145,7 +161,11 @@ export default function CartPage() {
   }, {});
 
   const toggleSelectAll = () => {
-    cart.toggleSelectAll();
+    if (selectedItems.size === cart.items.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(cart.items.map(getItemKey)));
+    }
   };
 
   const toggleSelectSeller = (sellerId: string) => {
@@ -159,17 +179,18 @@ export default function CartPage() {
     } else {
       sellerItemKeys.forEach((key: string) => newSelected.add(key));
     }
-    cart.updateSelectedItems(newSelected); // ✅ FIXED: Use cart.updateSelectedItems
+    setSelectedItems(newSelected);
   };
 
   const toggleSelectItem = (item: any) => {
-    cart.toggleSelectItem(item);
-  };
-
-  // ✅ FIX: Handle quantity update without triggering scroll
-  const handleQuantityUpdate = (productId: string, newQty: number, variationId?: string) => {
-    // Update quantity without triggering any scroll effects
-    cart.updateQty(productId, newQty, variationId);
+    const key = getItemKey(item);
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(key)) {
+      newSelected.delete(key);
+    } else {
+      newSelected.add(key);
+    }
+    setSelectedItems(newSelected);
   };
 
   // Show delete confirmation modal
@@ -196,6 +217,7 @@ export default function CartPage() {
             cart.removeFromCart(item.product._id, item.variationId);
           }
         });
+        setSelectedItems(new Set());
         break;
 
       case 'item':
@@ -206,6 +228,7 @@ export default function CartPage() {
 
       case 'clear':
         cart.clearCart();
+        setSelectedItems(new Set());
         break;
     }
 
@@ -244,13 +267,6 @@ export default function CartPage() {
   const handleProductNavigation = (productId: string) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate(`/products/${productId}`), 100);
-  };
-
-  // ✅ FIXED: Handle checkout - refresh page instead of smooth scroll
-  const handleCheckout = () => {
-    if (selectedCartItems.length === 0) return;
-    // Force page refresh when navigating to checkout
-    window.location.href = '/checkout';
   };
 
   return (
@@ -555,10 +571,7 @@ export default function CartPage() {
                               <div className="flex items-center justify-center">
                                 <div className="flex items-center border border-[#d97706] rounded-lg">
                                   <button
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // Prevent any parent handlers
-                                      handleQuantityUpdate(it.product._id, Math.max(1, it.quantity - 1), it.variationId);
-                                    }}
+                                    onClick={() => cart.updateQty(it.product._id, Math.max(1, it.quantity - 1), it.variationId)}
                                     className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-l-lg transition-colors"
                                   >
                                     <FaMinus className="text-sm" />
@@ -567,10 +580,7 @@ export default function CartPage() {
                                     {it.quantity}
                                   </div>
                                   <button
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // Prevent any parent handlers
-                                      handleQuantityUpdate(it.product._id, it.quantity + 1, it.variationId);
-                                    }}
+                                    onClick={() => cart.updateQty(it.product._id, it.quantity + 1, it.variationId)}
                                     className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-r-lg transition-colors"
                                   >
                                     <FaPlus className="text-sm" />
@@ -722,7 +732,7 @@ export default function CartPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={handleCheckout} // ✅ FIXED: Use handleCheckout which refreshes page
+                        onClick={() => handleNavigate('/checkout')}
                         disabled={selectedCartItems.length === 0}
                         className={`w-full py-3.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-md ${selectedCartItems.length === 0
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
