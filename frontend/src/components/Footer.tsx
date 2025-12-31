@@ -32,15 +32,15 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white">
       {/* Trust Badges Section */}
       <div className="bg-gradient-to-r from-amber-900/20 via-amber-800/20 to-amber-900/20 border-y border-amber-800/30">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-3 gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {trustBadges.map((badge, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
-                <div className={`p-3 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/20 ${badge.color}`}>
+                <div className={`p-3 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/20 ${badge.color} flex-shrink-0`}>
                   {badge.icon}
                 </div>
-                <div>
-                  <div className="font-bold text-sm">{badge.text}</div>
+                <div className="min-w-0">
+                  <div className="font-bold text-sm truncate">{badge.text}</div>
                 </div>
               </div>
             ))}
@@ -49,26 +49,24 @@ export default function Footer() {
       </div>
 
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-6 mb-8">
           {/* Company Info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-800 rounded-xl flex items-center justify-center">
+          <div className="space-y-4 text-center md:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:items-start">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-800 rounded-xl flex items-center justify-center flex-shrink-0">
                 <FaShoppingBag className="text-2xl text-white" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
                   AMMOGAM
                 </h3>
-               
+                <p className="text-gray-300 text-sm mt-2">
+                  Your trusted online destination for quality products at amazing prices.
+                </p>
               </div>
             </div>
-            <p className="text-gray-300 text-sm">
-              Your trusted online destination for quality products at amazing prices.
-            </p>
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-center md:justify-start">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
@@ -85,64 +83,41 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
+                <Link to="/" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/products" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
+                <Link to="/products" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
                   Products
                 </Link>
               </li>
               <li>
-                <Link to="/wishlist" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
+                <Link to="/wishlist" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
                   Wishlist
                 </Link>
               </li>
-
-            </ul>
-          </div>
-
-          {/* Customer Service */}
-          {/* <div>
-            <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">Customer Service</h4>
-            <ul className="space-y-2">
               <li>
-                <Link to="/faq" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
-                  FAQ & Help
-                </Link>
-              </li>
-              <li>
-                <Link to="/track-order" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
+                <Link to="/about" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
                   About Us
                 </Link>
               </li>
-              <li>
-                <Link to="/careers" className="text-gray-400 hover:text-amber-400 transition-colors text-sm">
-                  Careers
-                </Link>
-              </li>
             </ul>
-          </div> */}
+          </div>
 
           {/* Payment Methods Section */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 {paymentMethods.map((method, index) => (
                   <div
                     key={index}
-                    className={`p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 ${method.color}`}
+                    className={`p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 ${method.color} flex items-center justify-center`}
                     title={method.name}
                   >
                     {method.icon}
@@ -150,7 +125,7 @@ export default function Footer() {
                 ))}
               </div>
               <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-4 border border-amber-800/30">
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-gray-300 text-center md:text-left">
                   All transactions are secured with SSL encryption. Your payment information is protected with the highest security standards.
                 </p>
               </div>
@@ -161,19 +136,19 @@ export default function Footer() {
 
       {/* Copyright Bar */}
       <div className="border-t border-gray-800 pt-6 pb-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-center md:text-left">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-center sm:text-left order-2 sm:order-1">
               <p className="text-gray-400 text-sm">
                 © {currentYear} <span className="text-amber-500 font-semibold">AMMOGAM</span>. All rights reserved.
               </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/terms" className="text-gray-400 hover:text-amber-400 text-xs transition-colors">
+            <div className="flex flex-wrap justify-center gap-4 order-1 sm:order-2 mb-4 sm:mb-0">
+              <Link to="/terms" className="text-gray-400 hover:text-amber-400 text-xs transition-colors px-2">
                 Terms & Conditions
               </Link>
-              <Link to="/privacy" className="text-gray-400 hover:text-amber-400 text-xs transition-colors">
+              <Link to="/privacy" className="text-gray-400 hover:text-amber-400 text-xs transition-colors px-2">
                 Privacy Policy
               </Link>
             </div>
