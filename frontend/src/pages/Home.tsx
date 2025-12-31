@@ -17,7 +17,7 @@ import {
   FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
   FaImages, FaCreditCard, FaClock, FaCloudSun,
   FaPaw, FaBaby as FaBabyIcon, FaShoppingBag,
-  FaTimes
+  FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid
 } from 'react-icons/fa';
 
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -116,6 +116,7 @@ export default function Home() {
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [hoveredRecentlyViewed, setHoveredRecentlyViewed] = useState<string | null>(null);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
@@ -198,6 +199,17 @@ export default function Home() {
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Auto slide banners on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % 3);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isMobile]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -328,7 +340,51 @@ export default function Home() {
     }
   };
 
-  // Professional categories display component from ProductList.tsx
+  // Mobile hero banners data - Updated: Only first banner has text, others are image-only
+  const mobileBanners = [
+    {
+      id: 1,
+      title: "Ammogam",
+     
+      
+      buttonText: "Shop Now",
+      image: "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800",
+      // bgGradient: "from-amber-700 via-amber-600 to-orange-600",
+      showText: true
+    },
+    {
+      id: 2,
+      title: "",
+      subtitle: "",
+      description: "",
+      buttonText: "",
+      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800",
+      bgGradient: "",
+      showText: false
+    },
+    {
+      id: 3,
+      title: "",
+      subtitle: "",
+      description: "",
+      buttonText: "",
+      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800",
+      bgGradient: "",
+      showText: false
+    }
+  ];
+
+  const nextBanner = () => {
+    setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % mobileBanners.length);
+  };
+
+  const prevBanner = () => {
+    setCurrentBannerIndex((prevIndex) => 
+      prevIndex === 0 ? mobileBanners.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Professional categories display component from ProductList.tsx - MODIFIED FOR MOBILE
   const ProfessionalCategories = () => {
     const uniqueColors = [
       ['from-blue-50 to-cyan-50', 'border-blue-200', 'from-blue-600 to-cyan-600'],
@@ -354,14 +410,14 @@ export default function Home() {
 
     return (
       <div className="mb-10">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Shop by Category</h2>
-          <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">Shop by Category</h2>
+          <span className="text-xs md:text-sm text-gray-500 bg-gray-100 px-2 md:px-3 py-1 rounded-full">
             {categories.length} Categories
           </span>
         </div>
         <div className="relative">
-          <div className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide px-1">
+          <div className="flex space-x-2 md:space-x-4 overflow-x-auto pb-4 md:pb-6 scrollbar-hide px-1">
             {categories.map((category: any, index: number) => {
               const colors = getCategoryColor(index, false);
 
@@ -369,23 +425,20 @@ export default function Home() {
                 <button
                   key={category.id}
                   onClick={() => handleCategorySelect(category.id)}
-                  className="group flex-shrink-0 w-40 transition-all duration-300 hover:transform hover:-translate-y-2"
+                  className="group flex-shrink-0 w-1/5 min-w-[80px] md:min-w-[160px] transition-all duration-300 hover:transform hover:-translate-y-1 md:hover:-translate-y-2"
                 >
-                  <div className={`flex flex-col items-center justify-center p-5 rounded-xl h-full w-full transition-all duration-300 ${colors.bg} hover:shadow-xl`}>
-                    <div className={`relative w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${colors.icon}`}>
-                      <div className="text-2xl text-white">
+                  <div className={`flex flex-col items-center justify-center p-3 md:p-5 rounded-lg md:rounded-xl h-full w-full transition-all duration-300 ${colors.bg} hover:shadow-lg md:hover:shadow-xl`}>
+                    <div className={`relative w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-2 md:mb-4 transition-all duration-300 ${colors.icon}`}>
+                      <div className="text-lg md:text-2xl text-white">
                         {category.icon}
                       </div>
-                      <div className="absolute -top-1 -right-1 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                        <FaChevronRight className="text-white text-xs" />
+                      <div className="absolute -top-1 -right-1 w-5 h-5 md:w-7 md:h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <FaChevronRight className="text-white text-[10px] md:text-xs" />
                       </div>
                     </div>
-                    <h3 className="text-sm font-bold text-center mb-2 line-clamp-2 text-gray-800 group-hover:text-blue-900">
+                    <h3 className="text-xs md:text-sm font-bold text-center mb-1 md:mb-2 line-clamp-2 text-gray-800 group-hover:text-blue-900">
                       {category.name}
                     </h3>
-                    <div className="text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-800">
-                      {category.items}
-                    </div>
                   </div>
                 </button>
               );
@@ -475,6 +528,20 @@ export default function Home() {
         .image-zoom-container:hover {
           transform: scale(1.05);
         }
+
+        /* Banner animation */
+        .banner-slide {
+          transition: transform 0.5s ease-in-out;
+        }
+
+        /* Dot indicators */
+        .banner-dot {
+          transition: all 0.3s ease;
+        }
+
+        .banner-dot.active {
+          transform: scale(1.2);
+        }
       `}</style>
 
       {/* Image Zoom Modal */}
@@ -528,11 +595,95 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-        {/* Professional Categories Section - SAME AS PRODUCTLIST */}
-        <ProfessionalCategories />
+        
+        {/* Mobile Hero Banner Carousel - Only shown on mobile */}
+        <div className="md:hidden mb-6">
+          <div className="relative overflow-hidden rounded-xl shadow-lg">
+            {/* Banner Container */}
+            <div className="relative h-64">
+              <div 
+                className="flex banner-slide"
+                style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
+              >
+                {mobileBanners.map((banner) => (
+                  <div 
+                    key={banner.id}
+                    className="w-full flex-shrink-0 relative h-64"
+                  >
+                    {/* Background Image */}
+                    <div className="absolute inset-0">
+                      <img
+                        src={banner.image}
+                        alt={banner.title || "Promotional Banner"}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Only show gradient overlay for first banner */}
+                      {banner.showText && (
+                        <div className={`absolute inset-0 bg-gradient-to-r ${banner.bgGradient} opacity-80`}></div>
+                      )}
+                    </div>
+                    
+                    {/* Content - Only show for first banner */}
+                    {banner.showText && (
+                      <div className="relative h-full flex flex-col justify-center items-center text-center px-6">
+                        <div className="text-white mb-2">
+                          <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                            {banner.subtitle}
+                          </span>
+                        </div>
+                        <h1 className="text-3xl font-bold text-white mb-2">
+                          {banner.title}
+                        </h1>
+                        <p className="text-white/90 text-base mb-4 max-w-xs">
+                          {banner.description}
+                        </p>
+                        <button
+                          onClick={handleViewAllProducts}
+                          className="bg-white text-gray-800 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        >
+                          {banner.buttonText}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        {/* Hero Banner */}
-        <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevBanner}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
+            >
+              <FaChevronLeft className="text-lg" />
+            </button>
+            <button
+              onClick={nextBanner}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
+            >
+              <FaChevronRightSolid className="text-lg" />
+            </button>
+
+            {/* Dot Indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+              {mobileBanners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBannerIndex(index)}
+                  className={`w-2 h-2 rounded-full banner-dot ${index === currentBannerIndex ? 'bg-white active' : 'bg-white/50'}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Shop by Category - Hidden on mobile, shown first on desktop */}
+        <div className="hidden md:block">
+          <ProfessionalCategories />
+        </div>
+
+        {/* Desktop Hero Banner - Single banner for desktop */}
+        <div className="hidden md:block mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
           <div className="relative h-64 sm:h-80 md:h-96">
             <div className="flex flex-col md:flex-row h-full">
               {/* Left side - Text Content (50%) */}
@@ -560,7 +711,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
                 <img
                   src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
-                  alt="Summer Sale"
+                  alt="Ammogam"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -568,7 +719,12 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Featured Products */}
+        {/* Shop by Category for Mobile - Hidden on desktop, shown second on mobile */}
+        <div className="md:hidden">
+          <ProfessionalCategories />
+        </div>
+
+        {/* Featured Products (3rd on both desktop and mobile) */}
         <div className="mb-10 sm:mb-12">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
@@ -608,7 +764,7 @@ export default function Home() {
           ) : (
             <>
               {/* Products Grid - Only shows first 12 products */}
-              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
+              <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
                 {filteredFeaturedProducts.map((product) => (
                   <div
                     key={product.id}
@@ -773,7 +929,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Recently Viewed - Shows products viewed from ANY page */}
+              {/* Recently Viewed - Shows products viewed from ANY page (4th on both desktop and mobile) */}
               <div className="mb-8 sm:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <div>

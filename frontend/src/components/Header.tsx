@@ -1233,7 +1233,7 @@ export default function Header() {
                   Wishlist
                 </Link>
 
-                <Link
+                {/* <Link
                   to="/download"
                   className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
                   onClick={() => {
@@ -1244,7 +1244,7 @@ export default function Header() {
                   <FaMobileAlt className="text-amber-500" />
                   Download App
                   <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">NEW</span>
-                </Link>
+                </Link> */}
               </div>
 
               {/* Categories Section */}
@@ -1340,7 +1340,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Footer Section */}
+          {/* Footer Section
           <div className="mt-auto p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-t">
             <div className="text-center text-xs text-gray-600">
               <div className="font-bold mb-2">Secure Shopping</div>
@@ -1360,7 +1360,7 @@ export default function Header() {
               </div>
               <p className="text-[10px]">© 2025 AMMOGAM. All rights reserved.</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
