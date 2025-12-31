@@ -13,6 +13,12 @@ export default function SellerOrders() {
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [viewDialogOpen, setViewDialogOpen] = useState(false);
     const [updateLoading, setUpdateLoading] = useState(false);
+    const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; orderId: string; productId: string; newStatus: string }>({ 
+        open: false, 
+        orderId: '', 
+        productId: '', 
+        newStatus: '' 
+    });
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
@@ -44,8 +50,24 @@ export default function SellerOrders() {
     }, [searchParams, orders]);
 
     const handleUpdateItemStatus = async (orderId: string, productId: string, newStatus: string) => {
+        // Check if item is already delivered
+        const order = orders.find(o => o._id === orderId);
+        const item = order?.items.find((it: any) => it.product._id === productId);
+        
+        if (item?.status === 'delivered') {
+            alert('Cannot change status of delivered items!');
+            return;
+        }
+
+        // Show confirmation dialog
+        setConfirmDialog({ open: true, orderId, productId, newStatus });
+    };
+
+    const confirmStatusUpdate = async () => {
+        const { orderId, productId, newStatus } = confirmDialog;
         try {
             setUpdateLoading(true);
+            setConfirmDialog({ open: false, orderId: '', productId: '', newStatus: '' });
             await api.put('/orders/item-status', { orderId, productId, status: newStatus });
 
             // Update local state without fetching all again
@@ -368,14 +390,23 @@ export default function SellerOrders() {
                                                             {['pending', 'processed', 'shipped', 'delivered', 'cancelled'].map(s => (
                                                                 <button
                                                                     key={s}
-                                                                    disabled={updateLoading}
+                                                                    disabled={updateLoading || item.status === 'delivered'}
                                                                     onClick={() => handleUpdateItemStatus(selectedOrder._id, item.product?._id, s)}
-                                                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${item.status === s ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-white border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600'}`}
+                                                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+                                                                        item.status === s 
+                                                                            ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' 
+                                                                            : item.status === 'delivered'
+                                                                            ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
+                                                                            : 'bg-white border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600'
+                                                                    }`}
                                                                 >
                                                                     {s}
                                                                 </button>
                                                             ))}
                                                         </div>
+                                                        {item.status === 'delivered' && (
+                                                            <p className="text-xs text-red-500 font-medium mt-2">⚠️ Cannot change status of delivered items</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))}
@@ -454,6 +485,55 @@ export default function SellerOrders() {
                             >
                                 <FiCheckCircle className="text-green-500" />
                                 Print Shipping Label
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirmation Dialog */}
+            {confirmDialog.open && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fadeIn">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-white">
+                        <div className="bg-primary1 px-6 py-5">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                <FiAlertCircle className="w-5 h-5" />
+                                Confirm Status Change
+                            </h3>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <p className="text-gray-700">
+                                Are you sure you want to change the item status to{' '}
+                                <span className="font-bold text-primary1 capitalize">{confirmDialog.newStatus}</span>?
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                This action will update the item status and notify the customer about the change.
+                            </p>
+                        </div>
+                        <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                            <button
+                                onClick={() => setConfirmDialog({ open: false, orderId: '', productId: '', newStatus: '' })}
+                                className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"
+                                disabled={updateLoading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmStatusUpdate}
+                                className="px-6 py-2.5 bg-primary1 text-white rounded-xl font-semibold text-sm hover:bg-orange-700 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                                disabled={updateLoading}
+                            >
+                                {updateLoading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Updating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiCheckCircle className="w-4 h-4" />
+                                        Confirm Change
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
