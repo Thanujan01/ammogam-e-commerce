@@ -34,21 +34,21 @@ export default function Wishlist() {
     const [sortBy, setSortBy] = useState<'date' | 'price-high-low' | 'price-low-high' | 'name-a-z' | 'name-z-a'>('date');
     const [shareProduct, setShareProduct] = useState<any>(null);
     const [copied, setCopied] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    // const [isMobile, setIsMobile] = useState(false);
 
     // Check for mobile screen size
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
+    // useEffect(() => {
+    //     const checkMobile = () => {
+    //         setIsMobile(window.innerWidth < 768);
+    //     };
         
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
+    //     checkMobile();
+    //     window.addEventListener('resize', checkMobile);
         
-        return () => {
-            window.removeEventListener('resize', checkMobile);
-        };
-    }, []);
+    //     return () => {
+    //         window.removeEventListener('resize', checkMobile);
+    //     };
+    // }, []);
 
     // ✅ FIX: Scroll to top when component mounts
     useEffect(() => {
