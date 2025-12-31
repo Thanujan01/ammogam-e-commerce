@@ -264,24 +264,9 @@ export default function Checkout() {
 
   const countryCodes = [
     { code: '1', name: 'US/Canada' },
-    { code: '44', name: 'UK' },
-    { code: '61', name: 'Australia' },
-    { code: '64', name: 'New Zealand' },
-    { code: '81', name: 'Japan' },
-    { code: '82', name: 'South Korea' },
-    { code: '86', name: 'China' },
     { code: '91', name: 'India' },
     { code: '94', name: 'Sri Lanka' },
-    { code: '971', name: 'UAE' },
-    { code: '65', name: 'Singapore' },
-    { code: '60', name: 'Malaysia' },
-    { code: '33', name: 'France' },
-    { code: '49', name: 'Germany' },
-    { code: '34', name: 'Spain' },
-    { code: '39', name: 'Italy' },
-    { code: '7', name: 'Russia' },
-    { code: '55', name: 'Brazil' },
-    { code: '52', name: 'Mexico' },
+    
   ];
 
   return (
@@ -449,6 +434,7 @@ export default function Checkout() {
                       />
                     </div>
 
+                    {/* ✅ FIXED: Phone Number Section - Now Responsive */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
@@ -456,13 +442,13 @@ export default function Checkout() {
                           Contact Phone Number
                         </div>
                       </label>
-                      <div className="flex gap-2">
-                        <div className="relative">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative flex-shrink-0">
                           <select
                             name="countryCode"
                             value={formData.countryCode}
                             onChange={handleChange}
-                            className="appearance-none px-4 py-3 pr-8 rounded-lg border border-[#d97706] bg-[#FBF9F6FF]/10 text-[#0C0C0CFF] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                            className="w-full sm:w-auto appearance-none px-4 py-3 pr-10 rounded-lg border border-[#d97706] bg-[#FBF9F6FF]/10 text-[#0C0C0CFF] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all text-base"
                             aria-label="Country code"
                           >
                             {countryCodes.map((country) => (
@@ -471,7 +457,7 @@ export default function Checkout() {
                               </option>
                             ))}
                           </select>
-                          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                             <svg className="w-4 h-4 text-[#d97706]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
@@ -483,7 +469,7 @@ export default function Checkout() {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="77 123 4567"
-                          className="flex-1 px-4 py-3 rounded-lg border border-[#d97706] focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                          className="w-full px-4 py-3 rounded-lg border border-[#d97706] focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all text-base"
                           aria-label="Phone number"
                         />
                       </div>
@@ -493,33 +479,36 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <button
-                      onClick={handleBackToCart}
-                      className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                      aria-label="Back to cart"
-                    >
-                      <FaArrowLeft className="text-sm" />
-                      Back to Cart
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!formData.name || !formData.address || !formData.city || !formData.phone) {
-                          alert('Please fill in all required shipping information');
-                          return;
-                        }
-                        if (!validatePhone(formData.phone)) {
-                          alert('Please enter a valid phone number with at least 7 digits');
-                          return;
-                        }
-                        handleStepChange(2);
-                      }}
-                      className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
-                      aria-label="Continue to review order"
-                    >
-                      Continue to Review
-                      <FaArrowRight className="text-sm" />
-                    </button>
+                  {/* Buttons for Step 1 - Responsive */}
+                  <div className="pt-6 border-t border-[#d97706]/20">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                      <button
+                        onClick={handleBackToCart}
+                        className="w-full md:w-auto px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
+                        aria-label="Back to cart"
+                      >
+                        <FaArrowLeft className="text-sm" />
+                        Back to Cart
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (!formData.name || !formData.address || !formData.city || !formData.phone) {
+                            alert('Please fill in all required shipping information');
+                            return;
+                          }
+                          if (!validatePhone(formData.phone)) {
+                            alert('Please enter a valid phone number with at least 7 digits');
+                            return;
+                          }
+                          handleStepChange(2);
+                        }}
+                        className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center justify-center gap-2"
+                        aria-label="Continue to review order"
+                      >
+                        Continue to Review
+                        <FaArrowRight className="text-sm" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -616,23 +605,26 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <button
-                      onClick={() => handleStepChange(1)}
-                      className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                      aria-label="Back to shipping information"
-                    >
-                      <FaArrowLeft className="text-sm" />
-                      Back to Shipping
-                    </button>
-                    <button
-                      onClick={() => handleStepChange(3)}
-                      className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
-                      aria-label="Proceed to payment"
-                    >
-                      Proceed to Payment
-                      <FaArrowRight className="text-sm" />
-                    </button>
+                  {/* Buttons for Step 2 - Responsive */}
+                  <div className="pt-6 border-t border-[#d97706]/20">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                      <button
+                        onClick={() => handleStepChange(1)}
+                        className="w-full md:w-auto px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
+                        aria-label="Back to shipping information"
+                      >
+                        <FaArrowLeft className="text-sm" />
+                        Back to Shipping
+                      </button>
+                      <button
+                        onClick={() => handleStepChange(3)}
+                        className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center justify-center gap-2"
+                        aria-label="Proceed to payment"
+                      >
+                        Proceed to Payment
+                        <FaArrowRight className="text-sm" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -701,33 +693,36 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <button
-                      onClick={() => handleStepChange(2)}
-                      className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                      aria-label="Back to review order"
-                    >
-                      <FaArrowLeft className="text-sm" />
-                      Back to Review
-                    </button>
-                    <button
-                      onClick={handlePlaceOrder}
-                      disabled={loading || isProcessing}
-                      className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[180px] flex items-center justify-center gap-2"
-                      aria-label={loading ? "Processing payment" : "Place order and proceed to payment"}
-                    >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Processing...
-                        </div>
-                      ) : (
-                        <>
-                          Pay Securely
-                          <FaArrowRight className="text-sm" />
-                        </>
-                      )}
-                    </button>
+                  {/* Buttons for Step 3 - Responsive */}
+                  <div className="pt-6 border-t border-[#d97706]/20">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                      <button
+                        onClick={() => handleStepChange(2)}
+                        className="w-full md:w-auto px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
+                        aria-label="Back to review order"
+                      >
+                        <FaArrowLeft className="text-sm" />
+                        Back to Review
+                      </button>
+                      <button
+                        onClick={handlePlaceOrder}
+                        disabled={loading || isProcessing}
+                        className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        aria-label={loading ? "Processing payment" : "Place order and proceed to payment"}
+                      >
+                        {loading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Processing...
+                          </div>
+                        ) : (
+                          <>
+                            Pay Securely
+                            <FaArrowRight className="text-sm" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

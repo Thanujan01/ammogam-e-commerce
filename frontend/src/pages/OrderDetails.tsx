@@ -139,44 +139,30 @@ export default function OrderDetails() {
                         </div>
 
                         <div className="space-y-6">
-                            {/* Blue Underlined Link */}
-                            {/* <a 
-                                href={window.location.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block bg-blue-50 border border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded-lg px-4 py-3 text-sm transition-colors underline text-center"
-                            >
-                                Click to open order
-                            </a>
-                             */}
-                            {/* Share via: with only 3 icons */}
-                            <div>
-                                {/* <div className="text-sm font-medium text-gray-700 mb-4 text-center">Share via:</div> */}
-                                <div className="flex items-center justify-center gap-6">
-                                    <button
-                                        onClick={shareOnWhatsApp}
-                                        className="p-3 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors"
-                                        title="Share on WhatsApp"
-                                    >
-                                        <FaWhatsapp className="text-2xl text-emerald-600" />
-                                    </button>
+                            <div className="flex items-center justify-center gap-6">
+                                <button
+                                    onClick={shareOnWhatsApp}
+                                    className="p-3 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors"
+                                    title="Share on WhatsApp"
+                                >
+                                    <FaWhatsapp className="text-2xl text-emerald-600" />
+                                </button>
 
-                                    <button
-                                        onClick={shareOnFacebook}
-                                        className="p-3 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
-                                        title="Share on Facebook"
-                                    >
-                                        <FaFacebook className="text-2xl text-blue-600" />
-                                    </button>
+                                <button
+                                    onClick={shareOnFacebook}
+                                    className="p-3 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                                    title="Share on Facebook"
+                                >
+                                    <FaFacebook className="text-2xl text-blue-600" />
+                                </button>
 
-                                    <button
-                                        onClick={copyLink}
-                                        className={`p-3 rounded-full transition-colors ${copied ? 'bg-emerald-100' : 'bg-gray-100 hover:bg-gray-200'}`}
-                                        title={copied ? 'Link Copied!' : 'Copy URL'}
-                                    >
-                                        <FaLink className={`text-2xl ${copied ? 'text-emerald-600' : 'text-gray-600'}`} />
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={copyLink}
+                                    className={`p-3 rounded-full transition-colors ${copied ? 'bg-emerald-100' : 'bg-gray-100 hover:bg-gray-200'}`}
+                                    title={copied ? 'Link Copied!' : 'Copy URL'}
+                                >
+                                    <FaLink className={`text-2xl ${copied ? 'text-emerald-600' : 'text-gray-600'}`} />
+                                </button>
                             </div>
 
                             {/* Order info */}
@@ -195,26 +181,26 @@ export default function OrderDetails() {
 
             {/* Header */}
             <div className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
+                <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
                             <button
                                 onClick={() => navigate(-1)}
-                                className="p-3 hover:bg-amber-50 rounded-xl transition-all group"
+                                className="p-2 sm:p-3 hover:bg-amber-50 rounded-xl transition-all group mt-1"
                             >
-                                <FaChevronLeft className="text-gray-600 group-hover:text-amber-600" />
+                                <FaChevronLeft className="text-gray-600 group-hover:text-amber-600 text-sm sm:text-base" />
                             </button>
-                            <div>
-                                <div className="flex items-center gap-3">
-                                    <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
-                                    <span className={`px-3 py-1.5 rounded-full text-sm font-medium border ${statusColor.bg} ${statusColor.text} ${statusColor.border} flex items-center gap-2`}>
+                            <div className="flex-1">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Order Details</h1>
+                                    <span className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border ${statusColor.bg} ${statusColor.text} ${statusColor.border} flex items-center gap-2 w-fit`}>
                                         {statusColor.icon}
                                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-4 mt-2">
-                                    <p className="text-sm text-gray-500 flex items-center gap-2">
-                                        <FaCalendarAlt className="text-gray-400" />
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+                                    <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-2">
+                                        <FaCalendarAlt className="text-gray-400 text-xs" />
                                         {new Date(order.createdAt).toLocaleDateString('en-US', {
                                             weekday: 'long',
                                             year: 'numeric',
@@ -224,7 +210,7 @@ export default function OrderDetails() {
                                     </p>
                                     <button
                                         onClick={copyOrderId}
-                                        className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-2 transition-colors"
+                                        className="text-xs sm:text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-2 transition-colors w-fit"
                                     >
                                         <FaCopy className="text-xs" />
                                         {copied ? 'Copied!' : 'Copy ID'}
@@ -233,12 +219,12 @@ export default function OrderDetails() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-end mt-2 sm:mt-0">
                             <button
                                 onClick={() => setShowShareModal(true)}
-                                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                                className="px-3 py-2 sm:px-4 sm:py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg text-sm sm:text-base"
                             >
-                                <FaShareAlt />
+                                <FaShareAlt className="text-sm" />
                                 Share
                             </button>
                         </div>
@@ -246,22 +232,22 @@ export default function OrderDetails() {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                     {/* Left Column - Order Items & Summary */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Order Progress */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <div className="p-2.5 bg-amber-100 rounded-lg">
-                                    <FaTruck className="text-amber-600" />
+                    <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+                        {/* Order Progress - FIXED FOR MOBILE */}
+                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
+                                <div className="p-2 sm:p-2.5 bg-amber-100 rounded-lg">
+                                    <FaTruck className="text-amber-600 text-sm sm:text-base" />
                                 </div>
                                 Order Progress
                             </h2>
 
                             <div className="relative">
                                 {/* Progress Line */}
-                                <div className="absolute left-0 top-8 h-1 w-full bg-gray-200">
+                                <div className="absolute left-0 right-0 top-4 sm:top-8 h-1 bg-gray-200">
                                     <div
                                         className="h-1 bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-500"
                                         style={{
@@ -272,34 +258,36 @@ export default function OrderDetails() {
                                     ></div>
                                 </div>
 
-                                {/* Steps */}
-                                <div className="flex justify-between relative z-10">
-                                    {getStatusSteps(order.status).map((step) => (
-                                        <div key={step.id} className="flex flex-col items-center">
-                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 border-4 transition-all duration-300 ${step.status === 'completed'
-                                                ? 'bg-emerald-100 border-emerald-300 text-emerald-600'
-                                                : 'bg-white border-gray-300 text-gray-400'
-                                                }`}>
-                                                {step.icon}
+                                {/* Steps - Responsive for mobile without scrolling */}
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-start">
+                                        {getStatusSteps(order.status).map((step) => (
+                                            <div key={step.id} className="flex flex-col items-center w-1/5 px-1 sm:px-0">
+                                                <div className={`w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-2 border-3 sm:border-4 transition-all duration-300 ${step.status === 'completed'
+                                                    ? 'bg-emerald-100 border-emerald-300 text-emerald-600'
+                                                    : 'bg-white border-gray-300 text-gray-400'
+                                                    }`}>
+                                                    {step.icon}
+                                                </div>
+                                                <div className="text-center w-full">
+                                                    <p className={`text-[9px] xs:text-[10px] sm:text-xs font-medium ${step.status === 'completed' ? 'text-emerald-700' : 'text-gray-500'} leading-tight`}>
+                                                        {step.name}
+                                                    </p>
+                                                    <p className="text-[8px] xs:text-[9px] sm:text-xs text-gray-400 mt-0.5">Step {step.id}</p>
+                                                </div>
                                             </div>
-                                            <div className="text-center">
-                                                <p className={`text-sm font-medium ${step.status === 'completed' ? 'text-emerald-700' : 'text-gray-500'}`}>
-                                                    {step.name}
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-1">Step {step.id}</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Order Items */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div className="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                                    <div className="p-2.5 bg-blue-100 rounded-lg">
-                                        <FaShoppingBag className="text-blue-600" />
+                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                            <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-3">
+                                    <div className="p-2 sm:p-2.5 bg-blue-100 rounded-lg">
+                                        <FaShoppingBag className="text-blue-600 text-sm sm:text-base" />
                                     </div>
                                     Order Items ({order.items.length})
                                 </h2>
@@ -307,23 +295,25 @@ export default function OrderDetails() {
 
                             <div className="divide-y divide-gray-100">
                                 {order.items.map((item: any, idx: number) => (
-                                    <div key={idx} className="p-6 hover:bg-gray-50 transition-colors">
-                                        <div className="flex gap-6">
-                                            <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border border-gray-200 p-3 flex-shrink-0">
+                                    <div key={idx} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                                        <div className="flex gap-4 sm:gap-6">
+                                            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl overflow-hidden border border-gray-200 p-2 sm:p-3 flex-shrink-0">
                                                 <img
                                                     src={getImageUrl(item.product?.image)}
                                                     className="w-full h-full object-contain"
                                                     alt={item.product?.name}
                                                 />
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h3 className="font-bold text-gray-900 text-lg mb-2">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-bold text-gray-900 text-sm sm:text-lg mb-1 sm:mb-2 truncate">
                                                             {item.product?.name || 'Unknown Product'}
                                                         </h3>
-                                                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                                                            <span>Quantity: {item.quantity}</span>
+                                                        <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
+                                                            <span>Qty: {item.quantity}</span>
+                                                            <span className="hidden sm:inline">•</span>
+                                                            <span className="text-xs sm:text-sm">${item.price.toLocaleString()} each</span>
                                                         </div>
                                                         {/* Display selected color if available */}
                                                         {item.color && (
@@ -331,7 +321,7 @@ export default function OrderDetails() {
                                                                 <span className="text-xs text-gray-500">Color:</span>
                                                                 <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
                                                                     <div
-                                                                        className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                                                        className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300 shadow-sm"
                                                                         style={{ backgroundColor: item.colorCode || '#000' }}
                                                                     />
                                                                     <span className="text-xs font-medium text-gray-700">{item.color}</span>
@@ -340,18 +330,18 @@ export default function OrderDetails() {
                                                         )}
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-lg font-bold text-gray-900">
+                                                        <div className="text-base sm:text-lg font-bold text-gray-900">
                                                             ${(item.price * item.quantity).toLocaleString()}
                                                         </div>
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-xs sm:text-sm text-gray-500 sm:hidden">
                                                             ${item.price.toLocaleString()} each
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {item.status && (
-                                                    <div className="mt-4 flex items-center justify-between">
-                                                        <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(item.status).bg} ${getStatusColor(item.status).text} ${getStatusColor(item.status).border}`}>
+                                                    <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                        <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(item.status).bg} ${getStatusColor(item.status).text} ${getStatusColor(item.status).border} w-fit`}>
                                                             {getStatusColor(item.status).icon}
                                                             {item.status}
                                                         </span>
@@ -359,9 +349,9 @@ export default function OrderDetails() {
                                                         {order.status === 'delivered' && (
                                                             <button
                                                                 onClick={() => setReviewingItem(item)}
-                                                                className="flex items-center gap-2 px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition-all border border-amber-200"
+                                                                className="flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition-all border border-amber-200 w-full sm:w-auto"
                                                             >
-                                                                <FaStar className="text-amber-500" />
+                                                                <FaStar className="text-amber-500 text-xs" />
                                                                 Write a Review
                                                             </button>
                                                         )}
@@ -376,38 +366,32 @@ export default function OrderDetails() {
                     </div>
 
                     {/* Right Column - Order Summary & Details */}
-                    <div className="space-y-8">
+                    <div className="space-y-6 sm:space-y-8">
                         {/* Order Summary */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <div className="p-2.5 bg-emerald-100 rounded-lg">
-                                    <FaReceipt className="text-emerald-600" />
+                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
+                                <div className="p-2 sm:p-2.5 bg-emerald-100 rounded-lg">
+                                    <FaReceipt className="text-emerald-600 text-sm sm:text-base" />
                                 </div>
                                 Order Summary
                             </h2>
 
-                            <div className="space-y-4">
+                            <div className="space-y-3 sm:space-y-4">
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Subtotal</span>
-                                    <span className="font-medium text-gray-900">
+                                    <span className="text-gray-600 text-sm sm:text-base">Subtotal</span>
+                                    <span className="font-medium text-gray-900 text-sm sm:text-base">
                                         ${(order.totalAmount - (order.shippingFee || 0)).toLocaleString()}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Shipping</span>
-                                    <span className="font-medium text-gray-900">
+                                    <span className="text-gray-600 text-sm sm:text-base">Shipping</span>
+                                    <span className="font-medium text-gray-900 text-sm sm:text-base">
                                         ${(order.shippingFee || 0).toLocaleString()}
                                     </span>
                                 </div>
-                                {/* <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Tax</span>
-                                    <span className="font-medium text-gray-900">
-                                        $0.00
-                                    </span>
-                                </div> */}
-                                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                                    <span className="text-lg font-bold text-gray-900">Total Amount</span>
-                                    <span className="text-2xl font-bold text-amber-700">
+                                <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-200">
+                                    <span className="text-base sm:text-lg font-bold text-gray-900">Total Amount</span>
+                                    <span className="text-xl sm:text-2xl font-bold text-amber-700">
                                         ${order.totalAmount.toLocaleString()}
                                     </span>
                                 </div>
@@ -415,69 +399,69 @@ export default function OrderDetails() {
                         </div>
 
                         {/* Customer Information */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <div className="p-2.5 bg-blue-100 rounded-lg">
-                                    <FaUser className="text-blue-600" />
+                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
+                                <div className="p-2 sm:p-2.5 bg-blue-100 rounded-lg">
+                                    <FaUser className="text-blue-600 text-sm sm:text-base" />
                                 </div>
                                 Customer Information
                             </h2>
 
-                            <div className="space-y-6">
-                                <div className="flex gap-4">
-                                    <div className="p-3 bg-amber-50 rounded-lg">
-                                        <FaUser className="text-amber-600" />
+                            <div className="space-y-4 sm:space-y-6">
+                                <div className="flex gap-3 sm:gap-4">
+                                    <div className="p-2 sm:p-3 bg-amber-50 rounded-lg">
+                                        <FaUser className="text-amber-600 text-sm" />
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500 mb-1">Customer Name</p>
-                                        <p className="font-medium text-gray-900">{order.shippingAddress.name}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-xs sm:text-sm text-gray-500 mb-1">Customer Name</p>
+                                        <p className="font-medium text-gray-900 text-sm sm:text-base">{order.shippingAddress.name}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4">
-                                    <div className="p-3 bg-amber-50 rounded-lg">
-                                        <FaHome className="text-amber-600" />
+                                <div className="flex gap-3 sm:gap-4">
+                                    <div className="p-2 sm:p-3 bg-amber-50 rounded-lg">
+                                        <FaHome className="text-amber-600 text-sm" />
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500 mb-1">Shipping Address</p>
-                                        <p className="font-medium text-gray-900 leading-tight">
+                                    <div className="min-w-0">
+                                        <p className="text-xs sm:text-sm text-gray-500 mb-1">Shipping Address</p>
+                                        <p className="font-medium text-gray-900 text-sm sm:text-base leading-tight break-words">
                                             {order.shippingAddress.address}
                                         </p>
-                                        <p className="text-sm text-gray-600 mt-1">
+                                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                             {order.shippingAddress.city}, {order.shippingAddress.postalCode}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4">
-                                    <div className="p-3 bg-amber-50 rounded-lg">
-                                        <FaPhoneAlt className="text-amber-600" />
+                                <div className="flex gap-3 sm:gap-4">
+                                    <div className="p-2 sm:p-3 bg-amber-50 rounded-lg">
+                                        <FaPhoneAlt className="text-amber-600 text-sm" />
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500 mb-1">Phone Number</p>
-                                        <p className="font-medium text-gray-900">{order.shippingAddress.phone}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-xs sm:text-sm text-gray-500 mb-1">Phone Number</p>
+                                        <p className="font-medium text-gray-900 text-sm sm:text-base">{order.shippingAddress.phone}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Payment Information */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <div className="p-2.5 bg-emerald-100 rounded-lg">
-                                    <FaCard className="text-emerald-600" />
+                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
+                                <div className="p-2 sm:p-2.5 bg-emerald-100 rounded-lg">
+                                    <FaCard className="text-emerald-600 text-sm sm:text-base" />
                                 </div>
                                 Payment Information
                             </h2>
 
-                            <div className="space-y-4">
+                            <div className="space-y-3 sm:space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Payment Method</span>
-                                    <span className="font-medium text-gray-900">{order.paymentMethod}</span>
+                                    <span className="text-gray-600 text-sm sm:text-base">Payment Method</span>
+                                    <span className="font-medium text-gray-900 text-sm sm:text-base">{order.paymentMethod}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Payment Status</span>
-                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${order.paymentStatus === 'paid'
+                                    <span className="text-gray-600 text-sm sm:text-base">Payment Status</span>
+                                    <span className={`px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${order.paymentStatus === 'paid'
                                         ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                                         : 'bg-amber-100 text-amber-700 border border-amber-200'
                                         }`}>
@@ -485,8 +469,8 @@ export default function OrderDetails() {
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Transaction ID</span>
-                                    <span className="font-mono text-sm text-gray-900">{order._id.slice(-12)}</span>
+                                    <span className="text-gray-600 text-sm sm:text-base">Transaction ID</span>
+                                    <span className="font-mono text-xs sm:text-sm text-gray-900 truncate max-w-[100px] sm:max-w-none">{order._id.slice(-12)}</span>
                                 </div>
                             </div>
                         </div>
@@ -497,9 +481,9 @@ export default function OrderDetails() {
             {/* Review Modal */}
             {reviewingItem && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 border border-white">
+                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-white mx-4">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-gray-900">Write a Review</h3>
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900">Write a Review</h3>
                             <button
                                 onClick={() => setReviewingItem(null)}
                                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
@@ -509,9 +493,9 @@ export default function OrderDetails() {
                         </div>
 
                         <div className="space-y-6">
-                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                                <img src={getImageUrl(reviewingItem.product?.image)} className="w-16 h-16 object-contain" alt="" />
-                                <div>
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl sm:rounded-2xl border border-gray-100">
+                                <img src={getImageUrl(reviewingItem.product?.image)} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" alt="" />
+                                <div className="min-w-0">
                                     <p className="font-bold text-gray-900 text-sm line-clamp-1">{reviewingItem.product?.name}</p>
                                     <p className="text-xs text-gray-500 mt-1">Order #{order._id.slice(-8).toUpperCase()}</p>
                                 </div>
@@ -519,14 +503,14 @@ export default function OrderDetails() {
 
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-3 text-center">Your Rating</label>
-                                <div className="flex justify-center gap-3">
+                                <div className="flex justify-center gap-2 sm:gap-3">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
                                             key={star}
                                             onClick={() => setRating(star)}
                                             className="transition-transform active:scale-90"
                                         >
-                                            <FaStar className={`text-3xl ${star <= rating ? 'text-yellow-400' : 'text-gray-200'}`} />
+                                            <FaStar className={`text-2xl sm:text-3xl ${star <= rating ? 'text-yellow-400' : 'text-gray-200'}`} />
                                         </button>
                                     ))}
                                 </div>
@@ -541,7 +525,7 @@ export default function OrderDetails() {
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
                                     placeholder="Write your honest experience with this product..."
-                                    className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm resize-none"
+                                    className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm resize-none"
                                 />
                             </div>
 
@@ -567,7 +551,7 @@ export default function OrderDetails() {
                                     }
                                 }}
                                 disabled={submittingReview}
-                                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-4 rounded-2xl font-black shadow-lg shadow-amber-600/20 active:scale-95 transition-all text-lg disabled:opacity-50"
+                                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold sm:font-black shadow-lg shadow-amber-600/20 active:scale-95 transition-all text-base sm:text-lg disabled:opacity-50"
                             >
                                 {submittingReview ? 'Submitting...' : 'Post Review'}
                             </button>
@@ -577,26 +561,28 @@ export default function OrderDetails() {
             )}
 
             {/* Bottom Navigation */}
-            <div className="bg-white border-t border-gray-200 py-6">
+            <div className="bg-white border-t border-gray-200 py-4 sm:py-6">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="text-sm text-gray-500">
-                            Order ID: <span className="font-mono text-gray-900">{order._id}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="text-center sm:text-left order-2 sm:order-1">
+                            <p className="text-xs sm:text-sm text-gray-500">
+                                Order ID: <span className="font-mono text-gray-900 text-xs sm:text-sm">{order._id}</span>
+                            </p>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-center gap-3 order-1 sm:order-2 mb-2 sm:mb-0">
                             <button
                                 onClick={() => navigate('/orders')}
-                                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+                                className="w-full sm:w-auto px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm"
                             >
                                 View All Orders
-                                <FaChevronRight className="text-sm" />
+                                <FaChevronRight className="text-xs" />
                             </button>
                             <button
                                 onClick={() => navigate('/products')}
-                                className="px-6 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
+                                className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
                             >
                                 Continue Shopping
-                                <FaShoppingBag className="text-sm" />
+                                <FaShoppingBag className="text-xs" />
                             </button>
                         </div>
                     </div>
