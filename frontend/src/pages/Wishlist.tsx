@@ -568,114 +568,194 @@ export default function Wishlist() {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-[640px]">
-                                <thead>
-                                    <tr className="border-b border-gray-200">
-                                        <th className="py-4 px-4 sm:px-6 text-left">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedItems.length === products.length}
-                                                onChange={selectAll}
-                                                className="w-4 h-4 text-[#e67e00] border-gray-300 rounded focus:ring-[#e67e00]"
-                                            />
-                                        </th>
-                                        <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
-                                        <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Category</th>
-                                        <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Unit Price</th>
-                                        <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                                        <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {sortedProducts.filter((p: any) => p !== null).map((product: any, index: number) => (
-                                        <tr key={product._id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-[#e67e00]/5`}>
-                                            <td className="py-4 px-4 sm:px-6">
+                    // ✅ FIXED: Mobile-friendly list view
+                    <>
+                        {/* Desktop Table View - Hidden on Mobile */}
+                        <div className="hidden sm:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-gray-200">
+                                            <th className="py-4 px-4 sm:px-6 text-left">
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedItems.includes(product._id)}
-                                                    onChange={() => toggleSelectItem(product._id)}
+                                                    checked={selectedItems.length === products.length}
+                                                    onChange={selectAll}
                                                     className="w-4 h-4 text-[#e67e00] border-gray-300 rounded focus:ring-[#e67e00]"
                                                 />
-                                            </td>
-                                            <td className="py-4 px-4 sm:px-6">
-                                                <div className="flex items-center gap-3 sm:gap-4">
-                                                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <img
-                                                            src={getImageUrl(product.image)}
-                                                            alt={product.name}
-                                                            className="w-full h-full object-cover"
-                                                            loading="lazy"
-                                                        />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <div className="font-semibold text-gray-900 text-sm sm:text-base truncate">{product.name}</div>
-                                                        
-                                                        <div className="flex items-center gap-1 mt-1">
-                                                            <FaStar className="text-yellow-400 text-xs" />
-                                                            <span className="text-xs sm:text-sm">{product.rating || '4.5'}</span>
+                                            </th>
+                                            <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
+                                            <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Category</th>
+                                            <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Unit Price</th>
+                                            <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                                            <th className="py-4 px-4 sm:px-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {sortedProducts.filter((p: any) => p !== null).map((product: any, index: number) => (
+                                            <tr key={product._id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-[#e67e00]/5`}>
+                                                <td className="py-4 px-4 sm:px-6">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedItems.includes(product._id)}
+                                                        onChange={() => toggleSelectItem(product._id)}
+                                                        className="w-4 h-4 text-[#e67e00] border-gray-300 rounded focus:ring-[#e67e00]"
+                                                    />
+                                                </td>
+                                                <td className="py-4 px-4 sm:px-6">
+                                                    <div className="flex items-center gap-3 sm:gap-4">
+                                                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <img
+                                                                src={getImageUrl(product.image)}
+                                                                alt={product.name}
+                                                                className="w-full h-full object-cover"
+                                                                loading="lazy"
+                                                            />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <div className="font-semibold text-gray-900 text-sm sm:text-base truncate">{product.name}</div>
+                                                            
+                                                            <div className="flex items-center gap-1 mt-1">
+                                                                <FaStar className="text-yellow-400 text-xs" />
+                                                                <span className="text-xs sm:text-sm">{product.rating || '4.5'}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4 sm:px-6">
-                                                <div className="text-sm font-medium text-gray-900 truncate">{product.category?.name}</div>
-                                                <div className="text-xs text-gray-500 hidden sm:block">Primary Category</div>
-                                            </td>
-                                            <td className="py-4 px-4 sm:px-6">
-                                                <div className="text-base sm:text-lg font-bold text-gray-900">${product.price.toLocaleString()}</div>
-                                                {product.discount > 0 && (
-                                                    <div className="text-xs sm:text-sm text-red-600">
-                                                        Save {product.discount}%
+                                                </td>
+                                                <td className="py-4 px-4 sm:px-6">
+                                                    <div className="text-sm font-medium text-gray-900 truncate">{product.category?.name}</div>
+                                                    <div className="text-xs text-gray-500 hidden sm:block">Primary Category</div>
+                                                </td>
+                                                <td className="py-4 px-4 sm:px-6">
+                                                    <div className="text-base sm:text-lg font-bold text-gray-900">${product.price.toLocaleString()}</div>
+                                                    {product.discount > 0 && (
+                                                        <div className="text-xs sm:text-sm text-red-600">
+                                                            Save {product.discount}%
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="py-4 px-4 sm:px-6">
+                                                    <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                                        <FaCheckCircle className="mr-1 hidden sm:inline" />
+                                                        Available
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 px-4 sm:px-6">
+                                                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                                        <button
+                                                            onClick={() => cart.addToCart(product)}
+                                                            className="px-2 sm:px-3 py-1 bg-[#e67e00] text-white text-xs sm:text-sm font-medium rounded hover:bg-[#d47300] transition-colors flex items-center gap-1"
+                                                        >
+                                                            <FaShoppingCart className="text-xs" />
+                                                            <span className="hidden sm:inline">Cart</span>
+                                                        </button>
+                                                        <Link
+                                                            to={`/products/${product._id}`}
+                                                            className="px-2 sm:px-3 py-1 border border-gray-300 text-gray-700 text-xs sm:text-sm font-medium rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
+                                                        >
+                                                            <FaEye className="text-xs" />
+                                                            <span className="hidden sm:inline">View</span>
+                                                        </Link>
+                                                        <button
+                                                            onClick={() => handleShareClick(product)}
+                                                            className="px-2 sm:px-3 py-1 border border-blue-300 text-blue-600 text-xs sm:text-sm font-medium rounded hover:bg-blue-50 transition-colors"
+                                                            title="Share"
+                                                            aria-label="Share product"
+                                                        >
+                                                            <FaShareAlt className="text-xs" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => removeItem(product._id)}
+                                                            className="px-2 sm:px-3 py-1 border border-red-300 text-red-600 text-xs sm:text-sm font-medium rounded hover:bg-red-50 transition-colors"
+                                                            aria-label="Remove from wishlist"
+                                                        >
+                                                            <FaTrash className="text-xs" />
+                                                        </button>
                                                     </div>
-                                                )}
-                                            </td>
-                                            <td className="py-4 px-4 sm:px-6">
-                                                <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                                                    <FaCheckCircle className="mr-1 hidden sm:inline" />
-                                                    Available
-                                                </span>
-                                            </td>
-                                            <td className="py-4 px-4 sm:px-6">
-                                                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                                                    <button
-                                                        onClick={() => cart.addToCart(product)}
-                                                        className="px-2 sm:px-3 py-1 bg-[#e67e00] text-white text-xs sm:text-sm font-medium rounded hover:bg-[#d47300] transition-colors flex items-center gap-1"
-                                                    >
-                                                        <FaShoppingCart className="text-xs" />
-                                                        <span className="hidden sm:inline">Cart</span>
-                                                    </button>
-                                                    <Link
-                                                        to={`/products/${product._id}`}
-                                                        className="px-2 sm:px-3 py-1 border border-gray-300 text-gray-700 text-xs sm:text-sm font-medium rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
-                                                    >
-                                                        <FaEye className="text-xs" />
-                                                        <span className="hidden sm:inline">View</span>
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => handleShareClick(product)}
-                                                        className="px-2 sm:px-3 py-1 border border-blue-300 text-blue-600 text-xs sm:text-sm font-medium rounded hover:bg-blue-50 transition-colors"
-                                                        title="Share"
-                                                        aria-label="Share product"
-                                                    >
-                                                        <FaShareAlt className="text-xs" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => removeItem(product._id)}
-                                                        className="px-2 sm:px-3 py-1 border border-red-300 text-red-600 text-xs sm:text-sm font-medium rounded hover:bg-red-50 transition-colors"
-                                                        aria-label="Remove from wishlist"
-                                                    >
-                                                        <FaTrash className="text-xs" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+
+                        {/* Mobile List View - Hidden on Desktop */}
+                        <div className="sm:hidden space-y-3">
+                            {sortedProducts.filter((p: any) => p !== null).map((product: any) => (
+                                <div key={product._id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex items-start gap-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems.includes(product._id)}
+                                                onChange={() => toggleSelectItem(product._id)}
+                                                className="mt-1 w-4 h-4 text-[#e67e00] border-gray-300 rounded focus:ring-[#e67e00] flex-shrink-0"
+                                            />
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img
+                                                        src={getImageUrl(product.image)}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="text-xs font-semibold text-[#e67e00] uppercase tracking-wider mb-1">
+                                                        {product.category?.name || 'PRODUCT'}
+                                                    </div>
+                                                    <h4 className="text-sm font-bold text-gray-900 leading-tight truncate">
+                                                        {product.name}
+                                                    </h4>
+                                                    <div className="flex items-center gap-1 mt-1">
+                                                        <FaStar className="text-yellow-400 text-xs" />
+                                                        <span className="text-xs font-semibold text-gray-700">{product.rating || '4.5'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                        <div>
+                                            <div className="text-lg font-bold text-gray-900">${product.price.toLocaleString()}</div>
+                                            {product.discount > 0 && (
+                                                <div className="text-xs text-red-600">
+                                                    Save {product.discount}%
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => cart.addToCart(product)}
+                                                className="px-3 py-2 bg-[#e67e00] text-white text-xs font-medium rounded hover:bg-[#d47300] transition-colors flex items-center gap-1"
+                                            >
+                                                <FaShoppingCart className="text-xs" />
+                                                <span>Cart</span>
+                                            </button>
+                                            <button
+                                                onClick={() => handleShareClick(product)}
+                                                className="px-3 py-2 border border-blue-300 text-blue-600 text-xs font-medium rounded hover:bg-blue-50 transition-colors"
+                                                title="Share"
+                                                aria-label="Share product"
+                                            >
+                                                <FaShareAlt className="text-xs" />
+                                            </button>
+                                            <button
+                                                onClick={() => removeItem(product._id)}
+                                                className="px-3 py-2 border border-red-300 text-red-600 text-xs font-medium rounded hover:bg-red-50 transition-colors"
+                                                aria-label="Remove from wishlist"
+                                            >
+                                                <FaTrash className="text-xs" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 )}
 
                 {/* Procurement Summary Section */}
