@@ -8,7 +8,7 @@ type CartContextType = {
   items: ICartItem[];
   selectedItems: Set<string>;
   selectedCartItems: ICartItem[];
-  addToCart: (product: IProduct, qty?: number, variationId?: string, color?: string, colorCode?: string) => string;
+  addToCart: (product: IProduct, qty?: number, variationId?: string, color?: string, colorCode?: string, selectedImageIndex?: number) => string;
   removeFromCart: (productId: string, variationId?: string) => void;
   updateQty: (productId: string, qty: number, variationId?: string) => void;
   clearCart: () => void;
@@ -123,62 +123,74 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const selectedItemsCount = selectedCartItems.reduce((s, it) => s + it.quantity, 0);
 
-  // ✅ FIXED: addToCart function now returns the item key
-  function addToCart(product: IProduct, qty = 1, variationId?: string, color?: string, colorCode?: string): string {
+  function addToCart(
+    product: IProduct,
+    qty = 1,
+    variationId?: string,
+    color?: string,
+    colorCode?: string,
+    selectedImageIndex?: number  // ✅ ADDED: Selected image index parameter
+  ): string {
     if (!product) return '';
+
     const pid = product._id || (product as any).id;
     if (!pid) return '';
-
-    const processedProduct = {
-      ...product,
-      _id: pid as string,
-      price: Number(product.price) || 0
-    };
 
     const itemKey = `${pid}-${variationId || 'default'}`;
 
     setItems(prev => {
       const exist = prev.find(it =>
-        (it.product._id || (it.product as any).id) === pid &&
+        it.product._id === pid &&
         it.variationId === variationId
       );
 
       if (exist) {
         return prev.map(it =>
-          (it.product._id || (it.product as any).id) === pid && it.variationId === variationId
-            ? { ...it, quantity: it.quantity + qty }
+          it.product._id === pid && it.variationId === variationId
+            ? { 
+                ...it, 
+                quantity: it.quantity + qty,
+                selectedImageIndex: selectedImageIndex !== undefined ? selectedImageIndex : it.selectedImageIndex  // ✅ UPDATE: Keep or update image index
+              }
             : it
         );
       }
-      
-      // Add new item and auto-select it
-      const newSelectedItems = new Set(selectedItems);
-      newSelectedItems.add(itemKey);
-      setSelectedItems(newSelectedItems);
-      
-      return [...prev, {
-        product: processedProduct,
-        quantity: qty,
-        variationId,
-        selectedColor: color,
-        selectedColorCode: colorCode
-      }];
+
+      return [
+        ...prev,
+        {
+          product: { ...product, _id: pid, price: Number(product.price) || 0 },
+          quantity: qty,
+          variationId,
+          selectedColor: color,
+          selectedColorCode: colorCode,
+          selectedImageIndex: selectedImageIndex !== undefined ? selectedImageIndex : 0  // ✅ ADDED: Store selected image index
+        }
+      ];
     });
 
-    // ✅ Return the item key
+    // ✅ SAFE update
+    setSelectedItems(prev => {
+      const next = new Set(prev);
+      next.add(itemKey);
+      return next;
+    });
+
     return itemKey;
   }
 
   function removeFromCart(productId: string, variationId?: string) {
     const itemKey = `${productId}-${variationId || 'default'}`;
-    setItems(prev => prev.filter(it =>
-      !(it.product._id === productId && it.variationId === variationId)
-    ));
-    
-    // Also remove from selected items
-    const newSelectedItems = new Set(selectedItems);
-    newSelectedItems.delete(itemKey);
-    setSelectedItems(newSelectedItems);
+
+    setItems(prev =>
+      prev.filter(it => getItemKey(it) !== itemKey)
+    );
+
+    setSelectedItems(prev => {
+      const next = new Set(prev);
+      next.delete(itemKey);
+      return next;
+    });
   }
 
   function updateQty(productId: string, qty: number, variationId?: string) {
@@ -211,10 +223,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedItems.size === items.length) {
+    const allKeys = items.map(getItemKey);
+
+    if (selectedItems.size === allKeys.length) {
       setSelectedItems(new Set());
     } else {
-      const allKeys = items.map(getItemKey);
       setSelectedItems(new Set(allKeys));
     }
   };

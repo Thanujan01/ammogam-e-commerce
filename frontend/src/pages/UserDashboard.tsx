@@ -11,7 +11,7 @@ import {
   FaCalendarAlt, FaUser, FaArrowRight,
   FaTruck,  FaHeart, FaFilter, FaBars
 } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface User {
   _id: string;
@@ -35,6 +35,7 @@ interface Order {
 
 export default function UserDashboard() {
   const { user, updateUser } = useContext(AuthContext)!;
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -173,6 +174,11 @@ export default function UserDashboard() {
     if (tabId === 'orders') {
       setStatusFilter('all');
     }
+  };
+
+  // Function to view order details (navigate to order page)
+  const viewOrderDetails = (orderId: string) => {
+    navigate(`/orders/${orderId}`);
   };
 
   return (
@@ -417,7 +423,7 @@ export default function UserDashboard() {
                                 {order.items.length} item{order.items.length !== 1 ? 's' : ''} • ${order.totalAmount.toLocaleString()}
                               </div>
                               <button 
-                                onClick={() => handleTabChange('orders')}
+                                onClick={() => viewOrderDetails(order._id)}
                                 className="text-[#d97706] hover:text-[#b45309] text-xs sm:text-sm font-medium flex items-center gap-1"
                               >
                                 View details
@@ -535,12 +541,12 @@ export default function UserDashboard() {
                                 <span className={getStatusBadge(order.status)}>
                                   {order.status}
                                 </span>
-                                <Link 
-                                  to={`/orders/${order._id}`}
+                                <button 
+                                  onClick={() => viewOrderDetails(order._id)}
                                   className="p-1.5 sm:p-2 hover:bg-[#d97706]/10 rounded-lg transition-colors text-[#d97706] hover:text-[#b45309]"
                                 >
                                   <FaChevronRight />
-                                </Link>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -584,13 +590,13 @@ export default function UserDashboard() {
                           {/* Order Footer */}
                           <div className="bg-[#d97706]/5 px-4 sm:px-6 py-3 sm:py-4 border-t border-[#d97706]/20">
                             <div className="flex gap-3">
-                              <Link 
-                                to={`/orders/${order._id}`}
+                              <button 
+                                onClick={() => viewOrderDetails(order._id)}
                                 className="inline-flex items-center justify-center w-full py-2.5 bg-[#d97706] text-white font-medium rounded-lg hover:bg-[#b45309] transition-colors text-sm sm:text-base"
                               >
                                 View Order Details
                                 <FaChevronRight className="ml-2 text-xs sm:text-sm" />
-                              </Link>
+                              </button>
                             </div>
                           </div>
                         </div>
