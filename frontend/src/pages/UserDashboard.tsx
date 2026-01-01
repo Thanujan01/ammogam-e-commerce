@@ -4,12 +4,12 @@ import { api } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaBox, FaCheckCircle,
- FaChevronRight,
+  FaChevronRight,
   FaShoppingBag, FaUserCircle, FaExclamationCircle,
   FaShoppingCart, FaCog, FaChartLine,
   FaLock, FaEdit, FaPhone, FaHome, FaEnvelope,
   FaCalendarAlt, FaUser, FaArrowRight,
-  FaTruck,  FaHeart, FaFilter, FaBars
+  FaTruck, FaHeart, FaFilter, FaBars
 } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -66,10 +66,199 @@ export default function UserDashboard() {
     }) : 'Recently'
   });
 
+  // ✅ FIXED: Function to get the correct image for order item (SIMPLIFIED VERSION)
+  // ✅ UPDATED: Function to get the correct image for order item with debugging
+const getItemImage = (item: any): string => {
+  try {
+    if (!item || !item.product) {
+      console.log('No item or product found:', item);
+      return '/placeholder.png';
+    }
+
+    // Debug log to see what data we have
+    console.log('Order Item Data:', {
+      itemId: item._id || item.product?._id,
+      productName: item.product?.name,
+      color: item.color,
+      selectedImageIndex: item.selectedImageIndex,
+      variationId: item.variationId,
+      hasProductImage: !!item.product.image,
+      hasVariations: !!item.product.variations,
+      variationsCount: item.product.variations?.length,
+      colorVariantsCount: item.product.colorVariants?.length
+    });
+
+    // 1️⃣ Check if selectedImageIndex exists (most important)
+    if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
+      console.log(`Found selectedImageIndex: ${item.selectedImageIndex} for color: ${item.color}`);
+      
+      // Try to find the correct variation
+      let targetVariation = null;
+      
+      // First, try by variationId if it exists
+      if (item.variationId && item.product.variations && Array.isArray(item.product.variations)) {
+        targetVariation = item.product.variations.find((v: any) => v._id === item.variationId);
+        console.log('Looking for variation by variationId:', item.variationId, 'Found:', !!targetVariation);
+      }
+      
+      // If not found by variationId, try by color
+      if (!targetVariation && item.color && item.product.variations && Array.isArray(item.product.variations)) {
+        targetVariation = item.product.variations.find((v: any) => 
+          v.color === item.color || 
+          v.colorName === item.color ||
+          (v.colorCode && v.colorCode === item.colorCode)
+        );
+        console.log('Looking for variation by color:', item.color, 'Found:', !!targetVariation);
+      }
+      
+      // If found variation, get the specific image
+      if (targetVariation) {
+        const images = targetVariation.images || (targetVariation.image ? [targetVariation.image] : []);
+        console.log(`Variation has ${images.length} images`);
+        
+        if (images.length > 0) {
+          const index = Math.min(item.selectedImageIndex, images.length - 1);
+          const selectedImage = images[index] || images[0];
+          console.log(`Using image at index ${index}: ${selectedImage}`);
+          return selectedImage;
+        }
+      }
+      
+      // Try colorVariants as fallback
+      if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
+        const colorVariant = item.product.colorVariants.find((v: any) => 
+          v.colorName === item.color || 
+          v.color === item.color
+        );
+        if (colorVariant?.images?.length) {
+          const index = Math.min(item.selectedImageIndex, colorVariant.images.length - 1);
+          return colorVariant.images[index] || colorVariant.images[0];
+        }
+      }
+    }
+    
+    // 2️⃣ Fallback: Check if selectedImage is stored directly
+    if (item.selectedImage) {
+      console.log('Using directly stored selectedImage:', item.selectedImage);
+      return item.selectedImage;
+    }
+    
+    // 3️⃣ Fallback: Try to get first variation image based on color
+    if (item.color && item.product.variations && Array.isArray(item.product.variations)) {
+      const colorVariation = item.product.variations.find((v: any) => 
+        v.color === item.color || 
+        v.colorName === item.color
+      );
+      if (colorVariation) {
+        const images = colorVariation.images || (colorVariation.image ? [colorVariation.image] : []);
+        if (images.length > 0) {
+          console.log(`Using first image from color variation: ${images[0]}`);
+          return images[0];
+        }
+      }
+    }
+    
+    // 4️⃣ Fallback: Try colorVariants
+    if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
+      const colorVariant = item.product.colorVariants.find((v: any) => 
+        v.colorName === item.color || 
+        v.color === item.color
+      );
+      if (colorVariant?.images?.length) {
+        console.log(`Using first image from color variant: ${colorVariant.images[0]}`);
+        return colorVariant.images[0];
+      }
+    }
+    
+    // 5️⃣ Fallback: Use product image
+    if (item.product.image) {
+      console.log('Using product image:', item.product.image);
+      return item.product.image;
+    }
+    
+    // 6️⃣ Ultimate fallback
+    console.log('No image found, using placeholder');
+    return '/placeholder.png';
+  } catch (err) {
+    console.error('Error getting item image:', err, item);
+    return '/placeholder.png';
+  }
+};
+
+  // ✅ FIXED: Function to get color code for order item (SAFER VERSION)
+  const getItemColorCode = (item: any): string => {
+    try {
+      if (item.colorCode) return item.colorCode;
+      
+      if (item.product?.variations && Array.isArray(item.product.variations)) {
+        let variation = null;
+        
+        if (item.variationId) {
+          variation = item.product.variations.find((v: any) => v._id === item.variationId);
+        }
+        
+        if (!variation && item.color) {
+          variation = item.product.variations.find((v: any) => 
+            v.color === item.color || 
+            v.colorName === item.color
+          );
+        }
+        
+        if (variation?.colorCode) return variation.colorCode;
+      }
+      
+      if (item.product?.colorVariants && Array.isArray(item.product.colorVariants) && item.color) {
+        const colorVariant = item.product.colorVariants.find((v: any) => 
+          v.colorName === item.color || 
+          v.color === item.color
+        );
+        if (colorVariant?.colorCode) return colorVariant.colorCode;
+      }
+      
+      return '#d97706'; // Default to your theme color
+    } catch (err) {
+      console.error('Error getting item color code:', err);
+      return '#d97706';
+    }
+  };
+
+  // ✅ FIXED: Function to get color name for order item (SAFER VERSION)
+  const getItemColorName = (item: any): string => {
+    try {
+      if (item.color) return item.color;
+      
+      if (item.product?.variations && Array.isArray(item.product.variations)) {
+        let variation = null;
+        
+        if (item.variationId) {
+          variation = item.product.variations.find((v: any) => v._id === item.variationId);
+        }
+        
+        if (variation) {
+          return variation.colorName || variation.color || '';
+        }
+      }
+      
+      if (item.product?.colorVariants && Array.isArray(item.product.colorVariants)) {
+        const colorVariant = item.product.colorVariants.find((v: any) => 
+          v.colorName === item.color || 
+          v.color === item.color
+        );
+        if (colorVariant?.colorName) return colorVariant.colorName;
+      }
+      
+      return '';
+    } catch (err) {
+      console.error('Error getting item color name:', err);
+      return '';
+    }
+  };
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const res = await api.get('/orders/my');
+        console.log('Fetched orders:', res.data); // Debug log
         setOrders(res.data);
         
         // Calculate user stats
@@ -185,7 +374,7 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-gradient-to-b from-[#d97706]/5 to-white">
       {/* Mobile Menu Overlay */}
       {showMobileMenu && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setShowMobileMenu(false)}
         />
@@ -200,10 +389,10 @@ export default function UserDashboard() {
                 <div className="relative">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
                     {user?.avatar ? (
-                      <img 
-                        src={getImageUrl(user.avatar)} 
-                        className="w-full h-full object-cover" 
-                        alt="Profile" 
+                      <img
+                        src={getImageUrl(user.avatar)}
+                        className="w-full h-full object-cover"
+                        alt="Profile"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-[#d97706] to-[#b45309] flex items-center justify-center">
@@ -217,7 +406,7 @@ export default function UserDashboard() {
                     <FaCheckCircle className="text-white text-[8px] sm:text-xs" />
                   </div>
                 </div>
-                
+
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold">{user?.name}</h1>
                   <p className="text-[#d97706]/90 text-xs sm:text-sm mt-1">{user?.email}</p>
@@ -235,8 +424,8 @@ export default function UserDashboard() {
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-              <Link 
-                to="/cart" 
+              <Link
+                to="/cart"
                 className="px-3 py-2 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg flex items-center gap-2 text-xs sm:text-sm transition-colors"
               >
                 <FaShoppingBag className="text-xs sm:text-sm" />
@@ -249,8 +438,8 @@ export default function UserDashboard() {
                 <FaEdit className="text-xs sm:text-sm" />
                 Edit Profile
               </button>
-              <Link 
-                to="/products" 
+              <Link
+                to="/products"
                 className="px-3 py-2 sm:px-4 sm:py-2 bg-white text-[#d97706] hover:bg-[#d97706]/2 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-medium transition-colors"
               >
                 <FaShoppingCart className="text-xs sm:text-sm" />
@@ -289,19 +478,24 @@ export default function UserDashboard() {
                   <button
                     key={tab.id}
                     onClick={() => handleTabChange(tab.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg transition-all ${activeTab === tab.id
-                      ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
-                      : 'text-gray-700 hover:bg-[#d97706]/5'
+                    className={`w-full flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg transition-all ${
+                      activeTab === tab.id
+                        ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
+                        : 'text-gray-700 hover:bg-[#d97706]/5'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === tab.id ? 'bg-[#d97706]/20 text-[#d97706]' : 'bg-gray-100 text-gray-600'}`}>
+                      <div className={`p-1.5 sm:p-2 rounded-lg ${
+                        activeTab === tab.id ? 'bg-[#d97706]/20 text-[#d97706]' : 'bg-gray-100 text-gray-600'
+                      }`}>
                         {tab.icon}
                       </div>
                       <span className="font-medium text-sm">{tab.label}</span>
                     </div>
                     {tab.count !== undefined && (
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${activeTab === tab.id ? 'bg-[#d97706] text-white' : 'bg-gray-200 text-gray-700'}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        activeTab === tab.id ? 'bg-[#d97706] text-white' : 'bg-gray-200 text-gray-700'
+                      }`}>
                         {tab.count}
                       </span>
                     )}
@@ -350,7 +544,7 @@ export default function UserDashboard() {
                       <h3 className="font-semibold text-gray-700 mb-1 text-sm sm:text-base">Total Orders</h3>
                       <p className="text-xs sm:text-sm text-[#d97706]">All time purchases</p>
                     </div>
-                    
+
                     <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-4 sm:p-6">
                       <div className="flex items-center justify-between mb-3 sm:mb-4">
                         <div className="p-2 sm:p-3 bg-[#d97706]/10 rounded-lg">
@@ -361,7 +555,7 @@ export default function UserDashboard() {
                       <h3 className="font-semibold text-gray-700 mb-1 text-sm sm:text-base">Active Orders</h3>
                       <p className="text-xs sm:text-sm text-[#d97706]">Currently processing</p>
                     </div>
-                    
+
                     <div className="col-span-2 md:col-span-1 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-4 sm:p-6">
                       <div className="flex items-center justify-between mb-3 sm:mb-4">
                         <div className="p-2 sm:p-3 bg-emerald-100 rounded-lg">
@@ -378,7 +572,7 @@ export default function UserDashboard() {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-                      <button 
+                      <button
                         onClick={() => handleTabChange('orders')}
                         className="text-[#d97706] hover:text-[#b45309] text-sm font-medium flex items-center gap-1"
                       >
@@ -386,7 +580,7 @@ export default function UserDashboard() {
                         <FaArrowRight className="text-xs" />
                       </button>
                     </div>
-                    
+
                     {orders.length === 0 ? (
                       <div className="text-center py-8 sm:py-12">
                         <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#d97706]/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -394,8 +588,8 @@ export default function UserDashboard() {
                         </div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h4>
                         <p className="text-gray-600 mb-6 text-sm sm:text-base">Start shopping to see your orders here</p>
-                        <Link 
-                          to="/products" 
+                        <Link
+                          to="/products"
                           className="inline-flex items-center gap-2 bg-[#d97706] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-medium hover:bg-[#b45309] transition-colors text-sm sm:text-base"
                         >
                           <FaShoppingCart />
@@ -422,7 +616,7 @@ export default function UserDashboard() {
                               <div className="text-xs sm:text-sm text-gray-600">
                                 {order.items.length} item{order.items.length !== 1 ? 's' : ''} • ${order.totalAmount.toLocaleString()}
                               </div>
-                              <button 
+                              <button
                                 onClick={() => viewOrderDetails(order._id)}
                                 className="text-[#d97706] hover:text-[#b45309] text-xs sm:text-sm font-medium flex items-center gap-1"
                               >
@@ -456,7 +650,7 @@ export default function UserDashboard() {
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                       <div className="relative w-full sm:w-auto">
                         <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#d97706] z-10" />
-                        <select 
+                        <select
                           value={statusFilter}
                           onChange={(e) => setStatusFilter(e.target.value)}
                           className="w-full sm:w-auto pl-10 pr-4 py-2 border border-[#d97706] rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] appearance-none cursor-pointer"
@@ -486,14 +680,14 @@ export default function UserDashboard() {
                         {statusFilter === 'all' ? 'No orders yet' : `No ${statusFilter} orders`}
                       </h3>
                       <p className="text-gray-500 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base">
-                        {statusFilter === 'all' 
+                        {statusFilter === 'all'
                           ? "You haven't placed any orders yet. Start shopping to see your order history here."
                           : `You don't have any orders with "${statusFilter}" status.`
                         }
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                        <Link 
-                          to="/products" 
+                        <Link
+                          to="/products"
                           className="inline-flex items-center justify-center gap-2 bg-[#d97706] text-white px-4 py-3 sm:px-6 sm:py-3.5 rounded-lg font-medium hover:bg-[#b45309] transition-colors text-sm sm:text-base"
                         >
                           <FaShoppingCart />
@@ -541,7 +735,7 @@ export default function UserDashboard() {
                                 <span className={getStatusBadge(order.status)}>
                                   {order.status}
                                 </span>
-                                <button 
+                                <button
                                   onClick={() => viewOrderDetails(order._id)}
                                   className="p-1.5 sm:p-2 hover:bg-[#d97706]/10 rounded-lg transition-colors text-[#d97706] hover:text-[#b45309]"
                                 >
@@ -554,30 +748,45 @@ export default function UserDashboard() {
                           {/* Order Items */}
                           <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                              {order.items.slice(0, 2).map((item: any, idx: number) => (
-                                <div key={idx} className="flex items-center gap-3 sm:gap-4 p-3 border border-[#d97706]/10 rounded-lg hover:bg-[#d97706]/5 transition-colors">
-                                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/10 flex-shrink-0">
-                                    <img
-                                      src={getImageUrl(item.product?.image)}
-                                      className="w-full h-full object-contain"
-                                      alt={item.product?.name}
-                                    />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1">
-                                      {item.product?.name || 'Unknown Product'}
-                                    </h4>
-                                    <div className="flex items-center justify-between mt-1 sm:mt-2">
-                                      <span className="text-xs sm:text-sm text-[#d97706]">Qty: {item.quantity}</span>
-                                      <span className="font-medium text-[#d97706] text-sm sm:text-base">
-                                        ${(item.price * item.quantity).toLocaleString()}
-                                      </span>
+                              {order.items.slice(0, 2).map((item: any, idx: number) => {
+                                const itemColorName = getItemColorName(item);
+                                const itemColorCode = getItemColorCode(item);
+                                
+                                return (
+                                  <div key={idx} className="flex items-center gap-3 sm:gap-4 p-3 border border-[#d97706]/10 rounded-lg hover:bg-[#d97706]/5 transition-colors">
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/10 flex-shrink-0">
+                                      <img
+                                        src={getImageUrl(getItemImage(item))}
+                                        className="w-full h-full object-contain"
+                                        alt={item.product?.name || 'Product'}
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1">
+                                        {item.product?.name || 'Unknown Product'}
+                                      </h4>
+                                      {/* Display selected color if available */}
+                                      {itemColorName && (
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <div
+                                            className="w-3 h-3 rounded-full border border-gray-300"
+                                            style={{ backgroundColor: itemColorCode }}
+                                          />
+                                          <span className="text-xs text-gray-600">{itemColorName}</span>
+                                        </div>
+                                      )}
+                                      <div className="flex items-center justify-between mt-1 sm:mt-2">
+                                        <span className="text-xs sm:text-sm text-[#d97706]">Qty: {item.quantity}</span>
+                                        <span className="font-medium text-[#d97706] text-sm sm:text-base">
+                                          ${(item.price * item.quantity).toLocaleString()}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
-                            
+
                             {order.items.length > 2 && (
                               <div className="mt-3 sm:mt-4 text-center">
                                 <span className="text-xs sm:text-sm text-[#d97706] font-medium px-3 sm:px-4 py-1.5 sm:py-2 bg-[#d97706]/10 rounded-full">
@@ -590,7 +799,7 @@ export default function UserDashboard() {
                           {/* Order Footer */}
                           <div className="bg-[#d97706]/5 px-4 sm:px-6 py-3 sm:py-4 border-t border-[#d97706]/20">
                             <div className="flex gap-3">
-                              <button 
+                              <button
                                 onClick={() => viewOrderDetails(order._id)}
                                 className="inline-flex items-center justify-center w-full py-2.5 bg-[#d97706] text-white font-medium rounded-lg hover:bg-[#b45309] transition-colors text-sm sm:text-base"
                               >
@@ -710,7 +919,7 @@ export default function UserDashboard() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col sm:flex-row items-center justify-between pt-4 sm:pt-6 border-t border-[#d97706]/20 gap-4">
                       <button
                         type="button"
@@ -801,7 +1010,7 @@ export default function UserDashboard() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-[#d97706]/20">
                       <button
                         type="submit"
@@ -838,8 +1047,8 @@ export default function UserDashboard() {
                 <p className="text-gray-500 max-w-md mx-auto mb-6 sm:mb-8 text-sm sm:text-base">
                   Save your favorite products here for easy access later.
                 </p>
-                <Link 
-                  to="/products" 
+                <Link
+                  to="/products"
                   className="inline-flex items-center gap-2 bg-[#d97706] text-white px-6 py-2.5 sm:px-8 sm:py-3.5 rounded-lg font-medium hover:bg-[#b45309] transition-colors text-sm sm:text-base"
                 >
                   <FaShoppingCart />
@@ -869,8 +1078,8 @@ export default function UserDashboard() {
                   >
                     Back to Dashboard
                   </button>
-                  <Link 
-                    to="/support" 
+                  <Link
+                    to="/support"
                     className="w-full sm:w-auto px-4 py-2.5 sm:px-6 sm:py-3 bg-[#d97706] text-white font-medium rounded-lg hover:bg-[#b45309] transition-colors text-sm sm:text-base"
                   >
                     Contact Support

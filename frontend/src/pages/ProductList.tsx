@@ -105,7 +105,7 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
             if (!isOutOfStock) toggleWishlist(product.id); 
           }}
           disabled={isOutOfStock}
-          className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock 
+          className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock 
             ? 'bg-gray-200 cursor-not-allowed' 
             : 'bg-white/90 hover:bg-white'}`}
           title={isOutOfStock ? "Out of stock" : "Add to wishlist"}
@@ -439,7 +439,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
             onClick={() => onCategorySelect(null)}
             onMouseEnter={() => setHoveredCategory('all')}
             onMouseLeave={() => setHoveredCategory(null)}
-            className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-12 h-12 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${selectedCategory === null 
+            className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-8 h-8 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${selectedCategory === null 
               ? 'bg-[#e1630d] border-[#e1630d] text-white shadow-md' 
               : 'bg-orange-50 border-orange-100 hover:bg-orange-100 text-orange-700'}`}
           >
@@ -471,7 +471,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
                 onClick={() => onCategorySelect(category.id)}
                 onMouseEnter={() => setHoveredCategory(category.id)}
                 onMouseLeave={() => setHoveredCategory(null)}
-                className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-12 h-12 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${colors.bg} ${colors.border} ${colors.text}`}
+                className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-10 h-10 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${colors.bg} ${colors.border} ${colors.text}`}
               >
                 <div className={`rounded-full flex items-center justify-center sm:mb-3 w-8 h-8 sm:w-14 sm:h-14 ${colors.iconBg}`}>
                   <CategoryIcon name={category.iconName} className={`text-base sm:text-xl ${colors.iconColor}`} />
