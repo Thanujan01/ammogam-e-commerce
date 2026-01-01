@@ -115,6 +115,7 @@ export default function ProductDetail() {
           const defaultVariation = productData.variations.find(v => v.color === productData.defaultColor) || productData.variations[0];
           setSelectedVariation(defaultVariation);
           setSelectedColor(defaultVariation.color);
+          setSelectedImageIndex(0); // Start with first image
         }
       })
       .catch(err => {
@@ -151,7 +152,15 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (product && selectedVariation) {
-      cart.addToCart(product, quantity, selectedVariation._id, selectedVariation.colorName, selectedVariation.colorCode);
+      // ✅ FIXED: Pass the selected image index to cart
+      cart.addToCart(
+        product, 
+        quantity, 
+        selectedVariation._id, 
+        selectedVariation.colorName, 
+        selectedVariation.colorCode,
+        selectedImageIndex // Pass the selected image index
+      );
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 3000);
     } else if (product) {
@@ -177,7 +186,7 @@ export default function ProductDetail() {
     if (variation) {
       setSelectedVariation(variation);
       setSelectedColor(color);
-      setSelectedImageIndex(0);
+      setSelectedImageIndex(0); // Reset to first image when color changes
     }
   };
 
@@ -278,9 +287,16 @@ export default function ProductDetail() {
       // Clear all existing cart items and selections first
       cart.clearCart();
       
-      // Add the current product to cart
+      // Add the current product to cart with selected image
       if (selectedVariation) {
-        cart.addToCart(product, quantity, selectedVariation._id, selectedVariation.colorName, selectedVariation.colorCode);
+        cart.addToCart(
+          product, 
+          quantity, 
+          selectedVariation._id, 
+          selectedVariation.colorName, 
+          selectedVariation.colorCode,
+          selectedImageIndex // Pass the selected image index
+        );
       } else {
         cart.addToCart(product, quantity);
       }

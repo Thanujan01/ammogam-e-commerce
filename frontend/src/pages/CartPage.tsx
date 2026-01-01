@@ -41,29 +41,27 @@ export default function CartPage() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
-  // ✅ FIX: Remove the useEffect that triggers on cart.items change
-  // This was causing the page to scroll when quantity changes
-  // REMOVED:
-  // useEffect(() => {
-  //   // When cart items change, scroll to top smoothly
-  //   if (cart.items.length > 0) {
-  //     const timer = setTimeout(() => {
-  //       window.scrollTo({
-  //         top: 0,
-  //         left: 0,
-  //         behavior: 'smooth'
-  //       });
-  //     }, 100);
-  // 
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [cart.items]); // Runs when cart items change
-
-  // ✅ FIX: Get variation image - check product variations first
+  // ✅ FIXED: Get variation image - use selectedImageIndex if available
   const getItemImage = (item: any) => {
-    // If product has variations and we have a variation ID
+    // If we have a selected image index, use it
+    if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
+      // If product has variations and we have a variation ID
+      if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+        const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+        if (variation && variation.images && variation.images.length > 0) {
+          // Use the selected image index, fallback to 0 if out of bounds
+          const index = Math.min(item.selectedImageIndex, variation.images.length - 1);
+          return variation.images[index];
+        }
+        if (variation && variation.image) {
+          return variation.image;
+        }
+      }
+    }
+    
+    // If no selected image index or variation not found, use the old logic
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: any) => v._id === item.variationId);
       if (variation && variation.images && variation.images.length > 0) {
@@ -76,7 +74,6 @@ export default function CartPage() {
     
     // If product has variations but no specific variation selected
     if (item.product.variations && item.product.variations.length > 0) {
-      // Try to get the first variation's image
       const firstVariation = item.product.variations[0];
       if (firstVariation.images && firstVariation.images.length > 0) {
         return firstVariation.images[0];
@@ -159,16 +156,14 @@ export default function CartPage() {
     } else {
       sellerItemKeys.forEach((key: string) => newSelected.add(key));
     }
-    cart.updateSelectedItems(newSelected); // ✅ FIXED: Use cart.updateSelectedItems
+    cart.updateSelectedItems(newSelected);
   };
 
   const toggleSelectItem = (item: any) => {
     cart.toggleSelectItem(item);
   };
 
-  // ✅ FIX: Handle quantity update without triggering scroll
   const handleQuantityUpdate = (productId: string, newQty: number, variationId?: string) => {
-    // Update quantity without triggering any scroll effects
     cart.updateQty(productId, newQty, variationId);
   };
 
@@ -212,7 +207,6 @@ export default function CartPage() {
     setShowDeleteModal(false);
     setDeleteAction(null);
 
-    // ✅ FIX: Scroll to top after delete action
     setTimeout(() => {
       window.scrollTo({
         top: 0,
@@ -228,28 +222,23 @@ export default function CartPage() {
     setDeleteAction(null);
   };
 
-  // ✅ FIX: Handle navigation with scroll to top
   const handleNavigate = (path: string) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate(path), 100);
   };
 
-  // ✅ FIX: Handle continue shopping with scroll
   const handleContinueShopping = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate('/products'), 100);
   };
 
-  // ✅ FIX: Handle product navigation with scroll
   const handleProductNavigation = (productId: string) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate(`/products/${productId}`), 100);
   };
 
-  // ✅ FIXED: Handle checkout - refresh page instead of smooth scroll
   const handleCheckout = () => {
     if (selectedCartItems.length === 0) return;
-    // Force page refresh when navigating to checkout
     window.location.href = '/checkout';
   };
 
@@ -391,7 +380,6 @@ export default function CartPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
         {cart.items.length === 0 ? (
-          // Empty Cart State
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-lg border border-[#d97706]/20 p-12 text-center">
               <div className="w-24 h-24 bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#d97706]/20">
@@ -556,7 +544,7 @@ export default function CartPage() {
                                 <div className="flex items-center border border-[#d97706] rounded-lg">
                                   <button
                                     onClick={(e) => {
-                                      e.stopPropagation(); // Prevent any parent handlers
+                                      e.stopPropagation();
                                       handleQuantityUpdate(it.product._id, Math.max(1, it.quantity - 1), it.variationId);
                                     }}
                                     className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-l-lg transition-colors"
@@ -568,7 +556,7 @@ export default function CartPage() {
                                   </div>
                                   <button
                                     onClick={(e) => {
-                                      e.stopPropagation(); // Prevent any parent handlers
+                                      e.stopPropagation();
                                       handleQuantityUpdate(it.product._id, it.quantity + 1, it.variationId);
                                     }}
                                     className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-r-lg transition-colors"
@@ -722,7 +710,7 @@ export default function CartPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={handleCheckout} // ✅ FIXED: Use handleCheckout which refreshes page
+                        onClick={handleCheckout}
                         disabled={selectedCartItems.length === 0}
                         className={`w-full py-3.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-md ${selectedCartItems.length === 0
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
