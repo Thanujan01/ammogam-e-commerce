@@ -39,6 +39,60 @@ export default function OrderDetails() {
         fetchOrder();
     }, [id]);
 
+    // ✅ FIXED: Function to get the correct image for order item
+    const getItemImage = (item: any) => {
+        if (!item || !item.product) return '/placeholder.png';
+
+        // 1️⃣ If exact selected image is stored, use it
+        if (item.selectedImage) return item.selectedImage;
+
+        // 2️⃣ If product has variations and selectedImageIndex exists
+        if (item.product.variations?.length > 0) {
+            let variation = null;
+
+            // Try by variationId
+            if (item.variationId) {
+                variation = item.product.variations.find((v: any) => v._id === item.variationId);
+            }
+
+            // Try by color
+            if (!variation && item.color) {
+                variation = item.product.variations.find((v: any) => v.color === item.color || v.colorName === item.color);
+            }
+
+            if (variation) {
+                const images = variation.images?.length ? variation.images : variation.image ? [variation.image] : [];
+                if (images.length > 0) {
+                    const index = Math.min(item.selectedImageIndex || 0, images.length - 1);
+                    return images[index];
+                }
+            }
+        }
+
+        // 3️⃣ If colorVariants exist
+        if (item.color && item.product.colorVariants?.length > 0) {
+            const colorVariant = item.product.colorVariants.find((v: any) => v.colorName === item.color);
+            if (colorVariant?.images?.length) return colorVariant.images[0];
+        }
+
+        // 4️⃣ Fallback to product image
+        return item.product.image || '/placeholder.png';
+    };
+
+    // ✅ Function to get color code for order item
+    const getItemColorCode = (item: any) => {
+        if (item.colorCode) return item.colorCode;
+        
+        if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+            const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+            if (variation && variation.colorCode) {
+                return variation.colorCode;
+            }
+        }
+        
+        return '#000000';
+    };
+
     const getStatusColor = (status: string) => {
         const colors = {
             pending: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: <FaClock className="text-amber-600" /> },
@@ -294,73 +348,77 @@ export default function OrderDetails() {
                             </div>
 
                             <div className="divide-y divide-gray-100">
-                                {order.items.map((item: any, idx: number) => (
-                                    <div key={idx} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
-                                        <div className="flex gap-4 sm:gap-6">
-                                            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl overflow-hidden border border-gray-200 p-2 sm:p-3 flex-shrink-0">
-                                                <img
-                                                    src={getImageUrl(item.product?.image)}
-                                                    className="w-full h-full object-contain"
-                                                    alt={item.product?.name}
-                                                />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="font-bold text-gray-900 text-sm sm:text-lg mb-1 sm:mb-2 truncate">
-                                                            {item.product?.name || 'Unknown Product'}
-                                                        </h3>
-                                                        <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
-                                                            <span>Qty: {item.quantity}</span>
-                                                            <span className="hidden sm:inline">•</span>
-                                                            <span className="text-xs sm:text-sm">${item.price.toLocaleString()} each</span>
-                                                        </div>
-                                                        {/* Display selected color if available */}
-                                                        {item.color && (
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <span className="text-xs text-gray-500">Color:</span>
-                                                                <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
-                                                                    <div
-                                                                        className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300 shadow-sm"
-                                                                        style={{ backgroundColor: item.colorCode || '#000' }}
-                                                                    />
-                                                                    <span className="text-xs font-medium text-gray-700">{item.color}</span>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="text-base sm:text-lg font-bold text-gray-900">
-                                                            ${(item.price * item.quantity).toLocaleString()}
-                                                        </div>
-                                                        <div className="text-xs sm:text-sm text-gray-500 sm:hidden">
-                                                            ${item.price.toLocaleString()} each
-                                                        </div>
-                                                    </div>
+                                {order.items.map((item: any, idx: number) => {
+                                    const itemColorCode = getItemColorCode(item);
+                                    
+                                    return (
+                                        <div key={idx} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                                            <div className="flex gap-4 sm:gap-6">
+                                                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl overflow-hidden border border-gray-200 p-2 sm:p-3 flex-shrink-0">
+                                                   <img
+                                                        src={getImageUrl(getItemImage(item))}
+                                                        className="w-full h-full object-contain"
+                                                        alt={item.product?.name || 'Product Image'}
+                                                    />
                                                 </div>
-
-                                                {item.status && (
-                                                    <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                                        <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(item.status).bg} ${getStatusColor(item.status).text} ${getStatusColor(item.status).border} w-fit`}>
-                                                            {getStatusColor(item.status).icon}
-                                                            {item.status}
-                                                        </span>
-
-                                                        {order.status === 'delivered' && (
-                                                            <button
-                                                                onClick={() => setReviewingItem(item)}
-                                                                className="flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition-all border border-amber-200 w-full sm:w-auto"
-                                                            >
-                                                                <FaStar className="text-amber-500 text-xs" />
-                                                                Write a Review
-                                                            </button>
-                                                        )}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-bold text-gray-900 text-sm sm:text-lg mb-1 sm:mb-2 truncate">
+                                                                {item.product?.name || 'Unknown Product'}
+                                                            </h3>
+                                                            <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
+                                                                <span>Qty: {item.quantity}</span>
+                                                                <span className="hidden sm:inline">•</span>
+                                                                <span className="text-xs sm:text-sm">${item.price.toLocaleString()} each</span>
+                                                            </div>
+                                                            {/* Display selected color if available */}
+                                                            {item.color && (
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <span className="text-xs text-gray-500">Color:</span>
+                                                                    <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                                                        <div
+                                                                            className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300 shadow-sm"
+                                                                            style={{ backgroundColor: itemColorCode }}
+                                                                        />
+                                                                        <span className="text-xs font-medium text-gray-700">{item.color}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-base sm:text-lg font-bold text-gray-900">
+                                                                ${(item.price * item.quantity).toLocaleString()}
+                                                            </div>
+                                                            <div className="text-xs sm:text-sm text-gray-500 sm:hidden">
+                                                                ${item.price.toLocaleString()} each
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                )}
+
+                                                    {item.status && (
+                                                        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(item.status).bg} ${getStatusColor(item.status).text} ${getStatusColor(item.status).border} w-fit`}>
+                                                                {getStatusColor(item.status).icon}
+                                                                {item.status}
+                                                            </span>
+
+                                                            {order.status === 'delivered' && (
+                                                                <button
+                                                                    onClick={() => setReviewingItem(item)}
+                                                                    className="flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition-all border border-amber-200 w-full sm:w-auto"
+                                                                >
+                                                                    <FaStar className="text-amber-500 text-xs" />
+                                                                    Write a Review
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -494,7 +552,7 @@ export default function OrderDetails() {
 
                         <div className="space-y-6">
                             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl sm:rounded-2xl border border-gray-100">
-                                <img src={getImageUrl(reviewingItem.product?.image)} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" alt="" />
+                                <img src={getImageUrl(getItemImage(reviewingItem))} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" alt="" />
                                 <div className="min-w-0">
                                     <p className="font-bold text-gray-900 text-sm line-clamp-1">{reviewingItem.product?.name}</p>
                                     <p className="text-xs text-gray-500 mt-1">Order #{order._id.slice(-8).toUpperCase()}</p>

@@ -79,6 +79,7 @@ export interface ICartItem {
   selectedColorCode?: string;
   variationId?: string;
   selectedImage?: string;
+  selectedImageIndex?: number;  // ✅ ADDED: Store selected image index
 }
 
 export interface ICategory {

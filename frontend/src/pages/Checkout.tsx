@@ -41,6 +41,7 @@ interface CartItem {
   quantity: number;
   selectedColor?: string;
   selectedColorCode?: string;
+  selectedImageIndex?: number;  // ✅ ADDED: Selected image index
 }
 
 export default function Checkout() {
@@ -119,10 +120,26 @@ export default function Checkout() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ FIX: Get variation image for cart items with defensive checks
+  // ✅ FIX: Get variation image for cart items with selectedImageIndex
   const getItemImage = (item: CartItem) => {
     if (!item?.product) return '';
     
+    // ✅ FIXED: First check if we have a selected image index
+    if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
+      if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+        const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
+        if (variation && variation.images && variation.images.length > 0) {
+          // Use the selected image index, fallback to 0 if out of bounds
+          const index = Math.min(item.selectedImageIndex, variation.images.length - 1);
+          return variation.images[index];
+        }
+        if (variation && variation.image) {
+          return variation.image;
+        }
+      }
+    }
+    
+    // If no selected image index or variation not found, use the old logic
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
       if (variation && variation.images && variation.images.length > 0) {
@@ -216,7 +233,8 @@ export default function Checkout() {
           color: itemColorName || undefined,
           colorCode: itemColorCode || undefined,
           variationId: it.variationId || undefined,
-          shippingFee: it.product.shippingFee || 0
+          shippingFee: it.product.shippingFee || 0,
+          selectedImageIndex: it.selectedImageIndex || 0  // ✅ ADDED: Include selected image index in order
         };
       });
 
@@ -266,7 +284,6 @@ export default function Checkout() {
     { code: '1', name: 'US/Canada' },
     { code: '91', name: 'India' },
     { code: '94', name: 'Sri Lanka' },
-    
   ];
 
   return (
