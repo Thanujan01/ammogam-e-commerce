@@ -10,6 +10,11 @@ export default function Register() {
   const [success, setSuccess] = useState('');
   const nav = useNavigate();
 
+  const handleBackClick = () => {
+    // Navigate to home page
+    nav('/');
+  };
+
   return (
     <div className="min-h-screen w-screen flex items-center justify-center py-10 px-4">
       <div className="w-full max-w-4xl">
@@ -23,13 +28,13 @@ export default function Register() {
 
             {/* Back Button */}
             <button
-              type="button"
-              className="absolute top-5 left-5 bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/30 hover:-translate-x-1 z-10 focus:outline-none focus:ring-3 focus:ring-white/40"
-              onClick={() => nav('/')}
-              aria-label="Back to home"
-            >
-              <FaArrowLeft />
-            </button>
+                          type="button"
+                          className="absolute top-5 left-5 bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/30 hover:-translate-x-1 z-10 focus:outline-none focus:ring-3 focus:ring-white/40"
+                          onClick={handleBackClick} // This will work for both desktop and mobile
+                          aria-label="Back to home"
+                        >
+                          <FaArrowLeft />
+                        </button>
 
             <h1 className="text-3xl sm:text-4xl font-bold mb-2 relative z-10">Join AMMOGAM</h1>
             <p className="text-green-100 opacity-90 relative z-10">Create your account to start {accountType === 'seller' ? 'selling' : 'shopping'}</p>
