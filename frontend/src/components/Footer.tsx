@@ -4,11 +4,7 @@ import {
   FaShieldAlt, FaTruck, FaHeadset, FaShoppingBag,
   FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcAmex
 } from 'react-icons/fa';
-// For TikTok icon, you'll need to import from 'react-icons/fa' or 'react-icons/fa6'
-// If using react-icons v4, use: import { FaTiktok } from 'react-icons/fa';
-// If using react-icons v5+, use: import { FaTiktok } from 'react-icons/fa6';
-// I'll use a placeholder SVG for now - you can replace with the correct import
-import { FaTiktok } from 'react-icons/fa6'; // Make sure you have react-icons/fa6 installed
+import { FaTiktok } from 'react-icons/fa6';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -19,7 +15,6 @@ export default function Footer() {
     { icon: <FaHeadset className="text-xl" />, text: '24/7 Support', color: 'text-blue-500' },
   ];
 
-  // Updated social links: Facebook, Instagram, TikTok only
   const socialLinks = [
     { icon: <FaFacebook />, link: 'https://www.facebook.com/profile.php?id=61585485344842', color: 'hover:bg-blue-600', label: 'Facebook' },
     { icon: <FaInstagram />, link: 'https://www.instagram.com/ammogam_eworld/', color: 'hover:bg-pink-600', label: 'Instagram' },
@@ -55,21 +50,25 @@ export default function Footer() {
 
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-6 mb-8">
-          {/* Company Info */}
-          <div className="space-y-4 text-center md:text-left">
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:items-start">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-800 rounded-xl flex items-center justify-center flex-shrink-0">
-                <FaShoppingBag className="text-2xl text-white" />
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-8 sm:gap-6 mb-8">
+          {/* Company Info - Now takes 2 columns on medium screens */}
+          <div className="md:col-span-2 lg:col-span-2 space-y-4">
+            <div className="flex flex-col items-center md:items-start gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <FaShoppingBag className="text-2xl text-white" />
+                </div>
+                <div>
+                  {/* Company Name with responsive text size */}
+                  <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent text-center md:text-left">
+                    <span className="block">AMMOGAM E WORLD &</span>
+                    <span className="block">COMPANY INC</span>
+                  </h3>
+                </div>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
-                  AMMOGAM
-                </h3>
-                <p className="text-gray-300 text-sm mt-2">
-                  Your trusted online destination for quality products at amazing prices.
-                </p>
-              </div>
+              <p className="text-gray-300 text-sm text-center md:text-left max-w-md">
+                Your trusted online destination for quality products at amazing prices.
+              </p>
             </div>
             <div className="flex gap-3 justify-center md:justify-start">
               {socialLinks.map((social, index) => (
@@ -92,22 +91,38 @@ export default function Footer() {
             <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
+                <Link 
+                  to="/" 
+                  className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/products" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
+                <Link 
+                  to="/products" 
+                  className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   Products
                 </Link>
               </li>
               <li>
-                <Link to="/wishlist" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
+                <Link 
+                  to="/wishlist" 
+                  className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   Wishlist
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1">
+                <Link 
+                  to="/about" 
+                  className="text-gray-400 hover:text-amber-400 transition-colors text-sm block py-1"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   About Us
                 </Link>
               </li>
@@ -129,8 +144,8 @@ export default function Footer() {
                   </div>
                 ))}
               </div>
-              <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-4 border border-amber-800/30">
-                <p className="text-sm text-gray-300 text-center md:text-left">
+              <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-3 md:p-4 border border-amber-800/30">
+                <p className="text-xs md:text-sm text-gray-300">
                   All transactions are secured with SSL encryption. Your payment information is protected with the highest security standards.
                 </p>
               </div>
@@ -142,18 +157,26 @@ export default function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-gray-800 pt-6 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-center sm:text-left order-2 sm:order-1">
-              <p className="text-gray-400 text-sm">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-center md:text-left">
+              <p className="text-gray-400 text-xs md:text-sm">
                 © {currentYear} <span className="text-amber-500 font-semibold">AMMOGAM</span>. All rights reserved.
               </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-4 order-1 sm:order-2 mb-4 sm:mb-0">
-              <Link to="/terms" className="text-gray-400 hover:text-amber-400 text-xs transition-colors px-2">
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link 
+                to="/terms" 
+                className="text-gray-400 hover:text-amber-400 text-xs transition-colors px-2"
+                onClick={() => window.scrollTo(0, 0)}
+              >
                 Terms & Conditions
               </Link>
-              <Link to="/privacy" className="text-gray-400 hover:text-amber-400 text-xs transition-colors px-2">
+              <Link 
+                to="/privacy" 
+                className="text-gray-400 hover:text-amber-400 text-xs transition-colors px-2"
+                onClick={() => window.scrollTo(0, 0)}
+              >
                 Privacy Policy
               </Link>
             </div>
