@@ -319,7 +319,7 @@ export default function OrderSuccess() {
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-xs sm:text-sm text-[#d97706]">Email Support</p>
-                                        <p className="text-sm sm:text-base font-medium text-gray-900 truncate">support@example.com</p>
+                                        <p className="text-sm sm:text-base font-medium text-gray-900 truncate">ammogameworld@gmail.com</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-3">
@@ -328,7 +328,7 @@ export default function OrderSuccess() {
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-xs sm:text-sm text-[#d97706]">Phone Support</p>
-                                        <p className="text-sm sm:text-base font-medium text-gray-900 truncate">+1 (555) 123-4567</p>
+                                        <p className="text-sm sm:text-base font-medium text-gray-900 truncate">+1 416 9919591</p>
                                     </div>
                                 </div>
                             </div>
