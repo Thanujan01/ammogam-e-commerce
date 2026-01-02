@@ -7,7 +7,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTruck, FaCreditCard, FaCheckCircle,
-  FaMapMarkerAlt, FaPhoneAlt, FaLock, FaShieldAlt,
+  FaMapMarkerAlt, FaPhoneAlt, FaLock, 
   FaHome, FaUser, FaShoppingBag,
   FaList, FaReceipt, FaArrowRight, FaArrowLeft,
   FaRegCreditCard,

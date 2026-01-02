@@ -10,7 +10,7 @@ import {
   FaEye, 
   FaTrash, 
   FaEdit,
-  FaDownload,
+ 
   FaGlobe,
   FaUserCheck
 } from 'react-icons/fa';
