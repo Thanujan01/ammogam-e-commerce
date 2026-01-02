@@ -818,13 +818,13 @@ export default function Header() {
                   >
                     Sign In
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/register"
                     className="px-3 py-1.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg text-xs font-medium"
                     onClick={handleQuickLinkClick}
                   >
                     Register
-                  </Link>
+                  </Link> */}
                 </div>
               )}
             </div>
