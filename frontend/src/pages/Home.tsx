@@ -20,30 +20,30 @@ import {
   FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid
 } from 'react-icons/fa';
 
+// CategoryIcon component - receives icon name string and returns the icon
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
   const icons: any = {
-    FaMobileAlt: FaMobileAlt,
-    FaCamera: FaCamera,
-    FaTshirt: FaTShirt,
-    FaCrown: FaCrown,
-    FaCreditCard: FaCreditCard,
-    FaPaw: FaPaw,
-    FaBaby: FaBaby,
-    FaClock: FaClock,
-    FaGlobeAsia: FaGlobeAsia,
-    FaCloudSun: FaCloudSun,
-    FaTools: FaTools,
-    FaLaptop: FaLaptop,
-    FaHome: FaHome,
-    FaImages: FaImages,
-    FaPrint: FaPrint,
-    FaDog: FaDog,
-    FaBabyIcon: FaBabyIcon,
-    FaWallet: FaWallet,
-    FaShoppingBag: FaShoppingBag
+    FaMobileAlt: <FaMobileAlt className={className} />,
+    FaCamera: <FaCamera className={className} />,
+    FaTshirt: <FaTShirt className={className} />,
+    FaCrown: <FaCrown className={className} />,
+    FaCreditCard: <FaCreditCard className={className} />,
+    FaPaw: <FaPaw className={className} />,
+    FaBaby: <FaBaby className={className} />,
+    FaClock: <FaClock className={className} />,
+    FaGlobeAsia: <FaGlobeAsia className={className} />,
+    FaCloudSun: <FaCloudSun className={className} />,
+    FaTools: <FaTools className={className} />,
+    FaLaptop: <FaLaptop className={className} />,
+    FaHome: <FaHome className={className} />,
+    FaImages: <FaImages className={className} />,
+    FaPrint: <FaPrint className={className} />,
+    FaDog: <FaDog className={className} />,
+    FaBabyIcon: <FaBabyIcon className={className} />,
+    FaWallet: <FaWallet className={className} />,
+    FaShoppingBag: <FaShoppingBag className={className} />
   };
-  const IconComponent = icons[name] || FaShoppingBag;
-  return <IconComponent className={className} />;
+  return icons[name] || <FaShoppingBag className={className} />;
 };
 
 // Function to add product to recently viewed (available globally)
@@ -220,14 +220,13 @@ export default function Home() {
           api.get('/categories')
         ]);
 
-        // Process categories
+        // Process categories - FIXED: Store icon name string, not JSX element
         const dbCategories = categoriesRes.data;
         const mergedCategories = dbCategories.map((dbCat: any) => ({
           ...dbCat,
           id: dbCat._id,
           name: dbCat.name,
-          icon: <CategoryIcon name={dbCat.icon} />,
-          iconName: dbCat.icon,
+          iconName: dbCat.icon, // Store the icon name string
           image: dbCat.image || '',
           items: `${dbCat.subCategories?.length || 0} Items`,
           mainSubcategories: dbCat.mainSubcategories || [],
@@ -409,17 +408,13 @@ export default function Home() {
       ['from-green-50 to-emerald-50', 'border-green-200', 'from-green-600 to-emerald-600'],
     ];
 
-    const getCategoryColor = (index: number, isSelected: boolean) => {
+    const getCategoryColor = (index: number) => {
       const colorIndex = index % uniqueColors.length;
       const [bgGradient, borderColor, iconGradient] = uniqueColors[colorIndex];
 
       return {
-        bg: isSelected
-          ? `bg-gradient-to-br ${bgGradient} border-2 ${borderColor.replace('200', '500')} shadow-lg`
-          : `bg-gradient-to-br ${bgGradient}/80 border hover:${borderColor.replace('200', '300')} hover:shadow-md`,
-        icon: isSelected
-          ? `bg-gradient-to-br ${iconGradient} shadow-lg scale-110`
-          : `bg-gradient-to-br ${iconGradient.replace('600', '500')}`
+        bg: `bg-gradient-to-br ${bgGradient} border ${borderColor}`,
+        icon: `bg-gradient-to-br ${iconGradient}`
       };
     };
 
@@ -434,7 +429,7 @@ export default function Home() {
         <div className="relative">
           <div className="flex space-x-2 md:space-x-4 overflow-x-auto pb-4 md:pb-6 scrollbar-hide px-1">
             {categories.map((category: any, index: number) => {
-              const colors = getCategoryColor(index, false);
+              const colors = getCategoryColor(index);
 
               return (
                 <button
@@ -443,10 +438,9 @@ export default function Home() {
                   className="group flex-shrink-0 w-1/5 min-w-[80px] md:min-w-[160px] transition-all duration-300 hover:transform hover:-translate-y-1 md:hover:-translate-y-2"
                 >
                   <div className={`flex flex-col items-center justify-center p-3 md:p-5 rounded-lg md:rounded-xl h-full w-full transition-all duration-300 ${colors.bg} hover:shadow-lg md:hover:shadow-xl`}>
-                    <div className={`relative w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-2 md:mb-4 transition-all duration-300 ${colors.icon}`}>
-                      <div className="text-lg md:text-2xl text-white">
-                        {category.icon}
-                      </div>
+                    <div className={`relative w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-2 md:mb-4 transition-all duration-300 ${colors.icon} group-hover:scale-110`}>
+                      {/* FIXED: Use CategoryIcon with iconName, not the JSX element */}
+                      <CategoryIcon name={category.iconName} className="text-lg md:text-2xl text-white" />
                       <div className="absolute -top-1 -right-1 w-5 h-5 md:w-7 md:h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         <FaChevronRight className="text-white text-[10px] md:text-xs" />
                       </div>
