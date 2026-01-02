@@ -307,7 +307,7 @@ export default function Checkout() {
                 </div>
               </Link>
             </div>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className="p-2 bg-[#d97706]/10 rounded-lg">
                 <FaShieldAlt className="text-[#d97706]" />
               </div>
@@ -315,7 +315,7 @@ export default function Checkout() {
                 <p className="text-sm font-medium text-gray-900">Secure Checkout</p>
                 <p className="text-xs text-gray-500">256-bit SSL encryption</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -460,7 +460,7 @@ export default function Checkout() {
                         </div>
                       </label>
                       <div className="flex flex-col sm:flex-row gap-3">
-                        <div className="relative w-full sm:w-auto">
+                        <div className="relative w-full sm:w-[350px]">
                           <select
                             name="countryCode"
                             value={formData.countryCode}

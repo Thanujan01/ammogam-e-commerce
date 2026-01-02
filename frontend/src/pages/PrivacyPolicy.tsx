@@ -120,14 +120,14 @@ export default function PrivacyPolicy() {
             </div>
             <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
               <p>
-                Welcome to <span className="font-semibold text-amber-700">AMMOGAM</span> ("we," "our," or "us"). 
+                Welcome to <span className="font-semibold text-amber-700">AMMOGAM E WORLD & COMPANY INC</span> ("we," "our," or "us"). 
                 We are committed to protecting your personal information and your right to privacy. 
                 If you have any questions or concerns about this privacy policy or our practices 
-                with regard to your personal information, please contact us at privacy@ammogam.com.
+                with regard to your personal information, please contact us at ammogameworld@gmail.com
               </p>
               <p>
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information 
-                when you visit our website <span className="font-medium">ammogam.com</span> or use our services. 
+                when you visit our website  or use our services. 
                 Please read this privacy policy carefully. If you do not agree with the terms of this 
                 privacy policy, please do not access the site or use our services.
               </p>
@@ -367,7 +367,7 @@ export default function PrivacyPolicy() {
                   </div>
                 </div>
                 
-                <div className="mt-6 p-4 bg-white rounded-lg">
+                {/* <div className="mt-6 p-4 bg-white rounded-lg">
                   <h4 className="font-semibold text-gray-800 mb-2">Cookie Management</h4>
                   <p className="text-sm text-gray-700">
                     You can control cookies through your browser settings. Most browsers allow you to 
@@ -381,7 +381,7 @@ export default function PrivacyPolicy() {
                   >
                     Learn more about our Cookie Policy →
                   </Link>
-                </div>
+                </div> */}
               </div>
             </div>
           </section>
@@ -443,7 +443,7 @@ export default function PrivacyPolicy() {
                 </div>
               </div>
 
-              <div className="mt-8 p-5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+              {/* <div className="mt-8 p-5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Exercising Your Rights</h3>
                 <p className="text-gray-700">
                   To exercise any of these rights, please contact our Data Protection Officer at 
@@ -456,80 +456,71 @@ export default function PrivacyPolicy() {
                     You can download your personal data from your account dashboard
                   </span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </section>
 
           {/* Contact Information */}
-          <section id="contact" className="scroll-mt-24 pt-8 border-t border-gray-200">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-teal-100 rounded-xl">
-                <FaEnvelope className="text-teal-600 text-xl" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">7. Contact Information</h2>
-            </div>
-            <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
-              <p>
-                If you have questions or comments about this policy, you may contact our 
-                Data Protection Officer (DPO) or our privacy team at:
-              </p>
+         {/* Contact Information */}
+<section id="contact" className="scroll-mt-24 pt-8 border-t border-gray-200">
+  <div className="flex items-center gap-3 mb-6">
+    <div className="p-3 bg-teal-100 rounded-xl">
+      <FaEnvelope className="text-teal-600 text-xl" />
+    </div>
+    <h2 className="text-2xl font-bold text-gray-900">7. Contact Information</h2>
+  </div>
+  <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
+    <p>
+      If you have questions or comments about this policy, you may contact our 
+      Data Protection Officer (DPO) or our privacy team at:
+    </p>
 
-              <div className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-6 mt-6 border border-teal-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-bold text-teal-800 mb-4 flex items-center gap-2">
-                      <FaEnvelope className="text-teal-600" />
-                      Email Contacts
-                    </h3>
-                    <div className="space-y-3">
-                      <p className="flex items-center gap-3">
-                        <span className="font-semibold text-gray-700">General Privacy:</span>
-                        <span className="text-blue-600">privacy@ammogam.com</span>
-                      </p>
-                      <p className="flex items-center gap-3">
-                        <span className="font-semibold text-gray-700">Data Protection Officer:</span>
-                        <span className="text-blue-600">dpo@ammogam.com</span>
-                      </p>
-                      <p className="flex items-center gap-3">
-                        <span className="font-semibold text-gray-700">Legal Inquiries:</span>
-                        <span className="text-blue-600">legal@ammogam.com</span>
-                      </p>
-                    </div>
-                  </div>
+    <div className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-6 mt-6 border border-teal-200">
+      <div className="space-y-6">
+        {/* Email */}
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-teal-100 rounded-lg">
+            <FaEnvelope className="text-teal-600" />
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-800">Email</h4>
+            <p className="text-blue-600">ammogameworld@gmail.com</p>
+          </div>
+        </div>
 
-                  <div>
-                    <h3 className="font-bold text-teal-800 mb-4 flex items-center gap-2">
-                      <FaPhone className="text-teal-600" />
-                      Phone & Address
-                    </h3>
-                    <div className="space-y-3">
-                      <p className="flex items-center gap-3">
-                        <FaPhone className="text-teal-500" />
-                        <span>+94 77 123 4567 (Privacy Hotline)</span>
-                      </p>
-                      <p className="flex items-start gap-3">
-                        <FaEnvelope className="text-teal-500 mt-1" />
-                        <span>
-                          123 E-Commerce Street<br />
-                          Colombo 01000<br />
-                          Sri Lanka
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
+        {/* Phone */}
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-teal-100 rounded-lg">
+            <FaPhone className="text-teal-600" />
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-800">Phone</h4>
+            <p>+1 416 9919591 (Privacy Hotline)</p>
+          </div>
+        </div>
 
-                <div className="mt-6 pt-6 border-t border-teal-200">
-                  <h4 className="font-semibold text-teal-800 mb-3">Response Time</h4>
-                  <p className="text-sm text-gray-700">
-                    We strive to respond to all privacy-related inquiries within 48 hours. 
-                    For complex requests, we will acknowledge receipt within 24 hours and 
-                    provide a full response within 30 days as required by applicable laws.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+        {/* Address - Now with location icon */}
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-teal-100 rounded-lg">
+            {/* Location icon added */}
+            <svg className="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-800">Address</h4>
+            <p className="text-gray-700">
+              165,HERTFORD  CRESCENT,<br />
+              MARKHAM,<br />
+              ONTARIO,<br />
+              L3S3R3.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
           {/* Policy Updates */}
           <section className="scroll-mt-24 pt-8 border-t border-gray-200">
@@ -590,7 +581,7 @@ export default function PrivacyPolicy() {
             <div>
               <h3 className="font-bold text-green-800 text-lg mb-2">Compliance Statement</h3>
               <p className="text-green-700">
-                AMMOGAM complies with applicable data protection laws including:
+                AMMOGAM E WORLD & COMPANY INC complies with applicable data protection laws including:
               </p>
               <ul className="list-disc pl-6 text-green-700 mt-2 space-y-1">
                 <li>General Data Protection Regulation (GDPR) for EU customers</li>

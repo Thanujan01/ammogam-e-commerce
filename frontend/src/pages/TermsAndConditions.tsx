@@ -47,7 +47,7 @@ export default function TermsAndConditions() {
             <div>
               <h3 className="font-bold text-amber-800 text-lg mb-2">Important Legal Notice</h3>
               <p className="text-amber-700">
-                This is a sample terms and conditions document for the AMMOGAM e-commerce platform. 
+                This is a sample terms and conditions document for the AMMOGAM E WORLD & COMPANY INC. 
                 For actual legal compliance, please consult with a qualified legal professional.
               </p>
             </div>
@@ -118,7 +118,7 @@ export default function TermsAndConditions() {
             </div>
             <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
               <p>
-                By accessing and using the <span className="font-semibold text-amber-700">AMMOGAM</span> e-commerce website ("the Platform"), 
+                By accessing and using the <span className="font-semibold text-amber-700">AMMOGAM E WORLD & COMPANY INC</span> e-commerce website ("the Platform"), 
                 you agree to be bound by these Terms and Conditions ("Terms"), all applicable laws, and regulations. 
                 If you do not agree with any part of these Terms, you are prohibited from using the Platform.
               </p>
@@ -147,7 +147,7 @@ export default function TermsAndConditions() {
               <h3 className="text-xl font-semibold text-gray-900">Seller Accounts</h3>
               <p>
                 Sellers must provide valid business information and comply with all applicable laws regarding product sales, 
-                taxes, and consumer protection. AMMOGAM reserves the right to suspend seller accounts for violations.
+                taxes, and consumer protection. AMMOGAM E WORLD & COMPANY INC reserves the right to suspend seller accounts for violations.
               </p>
 
               <h3 className="text-xl font-semibold text-gray-900">Security Measures</h3>
@@ -222,7 +222,7 @@ export default function TermsAndConditions() {
             </div>
             <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
               <p>
-                AMMOGAM, its developers, and hosts will not be liable for any indirect, incidental, or consequential damages arising from:
+                AMMOGAM E WORLD & COMPANY INC, its developers, and hosts will not be liable for any indirect, incidental, or consequential damages arising from:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Your use or inability to use the Platform</li>
@@ -268,15 +268,15 @@ export default function TermsAndConditions() {
               <div className="bg-gray-50 rounded-xl p-6 mt-4 space-y-3">
                 <p className="flex items-center gap-3">
                   <FaHeadset className="text-amber-600" />
-                  <span><strong>Email:</strong> support@ammogam.com</span>
+                  <span><strong>Email:</strong>ammogameworld@gmail.com</span>
                 </p>
                 <p className="flex items-center gap-3">
                   <FaTruck className="text-amber-600" />
-                  <span><strong>Address:</strong> 123 E-Commerce Street, Colombo 01000, Sri Lanka</span>
+                  <span><strong>Address:</strong> 165,HERTFORD  CRESCENT, MARKHAM, ONTARIO, L3S3R3</span>
                 </p>
                 <p className="flex items-center gap-3">
                   <FaHeadset className="text-amber-600" />
-                  <span><strong>Phone:</strong> +94 77 123 4567</span>
+                  <span><strong>Phone:</strong> +1 416 9919591</span>
                 </p>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function TermsAndConditions() {
             in the courts of Colombo.
           </p>
           <p className="mt-2">
-            AMMOGAM reserves the right to modify these Terms at any time. Continued use of the 
+            AMMOGAM E WORLD & COMPANY INC reserves the right to modify these Terms at any time. Continued use of the 
             Platform constitutes acceptance of any changes.
           </p>
         </div>
