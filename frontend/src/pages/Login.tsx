@@ -14,7 +14,7 @@ export default function Login() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockTimeRemaining, setLockTimeRemaining] = useState(0);
-  const nav = useNavigate(); // This is defined as 'nav'
+  const nav = useNavigate();
 
   // Load failed attempts from localStorage on component mount
   useEffect(() => {
@@ -119,12 +119,6 @@ export default function Login() {
     return `${lockTimeRemaining}m`;
   };
 
-  // FIXED: Use 'nav' instead of 'navigate'
-  const handleBackClick = () => {
-    // Navigate to home page
-    nav('/');
-  };
-
   return (
     <div className="min-h-screen w-screen flex items-center justify-center ">
       <div className="w-full max-w-md  py-10">
@@ -134,10 +128,10 @@ export default function Login() {
             {/* Shimmer Effect Background */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_linear_infinite]"></div>
             {/* Back Button */}
-           <button
+            <button
               type="button"
               className="absolute top-5 left-5 bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/30 hover:-translate-x-1 z-10 focus:outline-none focus:ring-3 focus:ring-white/40"
-              onClick={handleBackClick} // This will work for both desktop and mobile
+              onClick={() => nav('/')}
               aria-label="Back to home"
             >
               <FaArrowLeft />
@@ -288,6 +282,34 @@ export default function Login() {
                 </Link>
               </p>
             </div>
+
+            {/* Reset Account Lock */}
+            {/* {isLocked && (
+              <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <span className="text-gray-500 text-lg">🔓</span>
+                  <div>
+                    <p className="text-sm text-gray-700 mb-2">
+                      If you believe this is an error or need immediate access, please contact support.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Reset for demo purposes - in production, this would be handled by admin/support
+                        localStorage.removeItem(`lockTime_${email}`);
+                        localStorage.removeItem(`failedAttempts_${email}`);
+                        setIsLocked(false);
+                        setFailedAttempts(0);
+                        setError('');
+                      }}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium underline"
+                    >
+                      Reset lock (for demo only)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )} */}
           </div>
         </div>
       </div>
