@@ -473,7 +473,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
                 onMouseLeave={() => setHoveredCategory(null)}
                 className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-10 h-10 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${colors.bg} ${colors.border} ${colors.text}`}
               >
-                <div className={`rounded-full flex items-center justify-center sm:mb-3 w-8 h-8 sm:w-14 sm:h-14 ${colors.iconBg}`}>
+                <div className={`rounded-full flex items-center justify-center sm:mb-3  sm:w-14 sm:h-14 ${colors.iconBg}`}>
                   <CategoryIcon name={category.iconName} className={`text-base sm:text-xl ${colors.iconColor}`} />
                 </div>
                 
