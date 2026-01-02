@@ -16,41 +16,66 @@ type AuthContextType = {
   user: User | null;
   token: string | null;
   loading: boolean;
+  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<User>;
   logout: () => void;
-  register: (payload: any) => Promise<void>;
+  register: (payload: any) => Promise<void>; // No auto login
   updateUser: (userData: User) => void;
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const r = localStorage.getItem('ammogam_user'); return r ? JSON.parse(r) : null;
-  });
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('ammogam_token'));
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Initialize auth state from localStorage
   useEffect(() => {
-    setAuthToken(token ?? undefined);
-    setLoading(false);
-  }, [token]);
+    const initializeAuth = () => {
+      const storedToken = localStorage.getItem('ammogam_token');
+      const storedUser = localStorage.getItem('ammogam_user');
+
+      if (storedToken && storedUser) {
+        // Only set auth if both token and user exist
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        setIsAuthenticated(true);
+        setAuthToken(storedToken);
+      } else {
+        // Ensure clean state if no valid auth
+        setToken(null);
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthToken(undefined);
+      }
+      
+      setLoading(false);
+    };
+
+    initializeAuth();
+  }, []);
 
   async function login(email: string, password: string) {
     const { data } = await api.post('/auth/login', { email, password });
     const { token: t, user } = data;
+    
     localStorage.setItem('ammogam_token', t);
     localStorage.setItem('ammogam_user', JSON.stringify(user));
+    
     setToken(t);
     setUser(user);
+    setIsAuthenticated(true);
     setAuthToken(t);
+    
     return user;
   }
 
   async function register(payload: any) {
+    // Only register, NO auto login
     await api.post('/auth/register', payload);
-    // auto login after registration
-    await login(payload.email, payload.password);
+    // That's it! Don't call login() here
   }
 
   function logout() {
@@ -58,6 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('ammogam_user');
     setToken(null);
     setUser(null);
+    setIsAuthenticated(false);
     setAuthToken(undefined);
   }
 
@@ -66,5 +92,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData);
   }
 
-  return <AuthContext.Provider value={{ user, token, loading, login, logout, register, updateUser }}>{children}</AuthContext.Provider>;
+  const value = {
+    user,
+    token,
+    loading,
+    isAuthenticated,
+    login,
+    logout,
+    register,
+    updateUser
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
