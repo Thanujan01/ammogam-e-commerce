@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom';
 import {
-  FaFacebook, FaInstagram, FaLinkedin, FaYoutube,
+  FaFacebook, FaInstagram,
   FaShieldAlt, FaTruck, FaHeadset, FaShoppingBag,
   FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcAmex
 } from 'react-icons/fa';
+// For TikTok icon, you'll need to import from 'react-icons/fa' or 'react-icons/fa6'
+// If using react-icons v4, use: import { FaTiktok } from 'react-icons/fa';
+// If using react-icons v5+, use: import { FaTiktok } from 'react-icons/fa6';
+// I'll use a placeholder SVG for now - you can replace with the correct import
+import { FaTiktok } from 'react-icons/fa6'; // Make sure you have react-icons/fa6 installed
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,11 +19,11 @@ export default function Footer() {
     { icon: <FaHeadset className="text-xl" />, text: '24/7 Support', color: 'text-blue-500' },
   ];
 
+  // Updated social links: Facebook, Instagram, TikTok only
   const socialLinks = [
-    { icon: <FaFacebook />, link: 'https://facebook.com/ammogam', color: 'hover:bg-blue-600', label: 'Facebook' },
-    { icon: <FaInstagram />, link: 'https://instagram.com/ammogam', color: 'hover:bg-pink-600', label: 'Instagram' },
-    { icon: <FaLinkedin />, link: 'https://linkedin.com/company/ammogam', color: 'hover:bg-blue-700', label: 'LinkedIn' },
-    { icon: <FaYoutube />, link: 'https://youtube.com/ammogam', color: 'hover:bg-red-600', label: 'YouTube' },
+    { icon: <FaFacebook />, link: 'https://www.facebook.com/profile.php?id=61585485344842', color: 'hover:bg-blue-600', label: 'Facebook' },
+    { icon: <FaInstagram />, link: 'https://www.instagram.com/ammogam_eworld/', color: 'hover:bg-pink-600', label: 'Instagram' },
+    { icon: <FaTiktok />, link: 'https://www.tiktok.com/@ammogam_eworld', color: 'hover:bg-black', label: 'TikTok' },
   ];
 
   const paymentMethods = [
