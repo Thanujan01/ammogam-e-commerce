@@ -32,6 +32,7 @@ interface EnhancedProduct extends IProduct {
   hasVariations: boolean;
   defaultColor?: string;
   categoryName?: string;
+  categoryId?: string; // ✅ Added categoryId
   shippingFee?: number;
   reviewCount?: number;
 }
@@ -98,12 +99,23 @@ export default function ProductDetail() {
           images: v.images || (v.image ? [v.image] : []),
         }));
 
+        // Extract category ID from the product data
+        let categoryId = '';
+        if (res.data.category) {
+          if (typeof res.data.category === 'string') {
+            categoryId = res.data.category;
+          } else if (res.data.category._id) {
+            categoryId = res.data.category._id;
+          }
+        }
+
         const productData: EnhancedProduct = {
           ...res.data,
           hasVariations: normalizedVariations.length > 0,
           variations: normalizedVariations,
           categoryName: res.data.category?.name ||
             (typeof res.data.category === 'string' ? res.data.category : 'Category'),
+          categoryId: categoryId, // ✅ Store categoryId
           shippingFee: res.data.shippingFee || 0,
           reviewCount: res.data.reviewCount || 0
         };
@@ -324,6 +336,18 @@ export default function ProductDetail() {
     }
   };
 
+  // ✅ FIXED: Handle category click to navigate to products page with category filter
+  const handleCategoryClick = () => {
+    if (product.categoryId) {
+      window.scrollTo(0, 0);
+      navigate(`/products?category=${product.categoryId}`);
+    } else {
+      // Fallback if no categoryId, navigate to products page without filter
+      window.scrollTo(0, 0);
+      navigate('/products');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Share Modal */}
@@ -387,14 +411,17 @@ export default function ProductDetail() {
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
         <button
-          onClick={() => navigate('/products')}
+          onClick={() => {
+            window.scrollTo(0, 0);
+            navigate('/products');
+          }}
           className="hover:text-amber-600 transition-colors"
         >
           Products
         </button>
         <FaChevronRight className="text-xs" />
         <button
-          onClick={() => navigate(`/products?category=${product.categoryId || ''}`)}
+          onClick={handleCategoryClick} // ✅ Fixed: Now navigates to /products?category=categoryId
           className="hover:text-amber-600 transition-colors"
         >
           {getCategoryName()}

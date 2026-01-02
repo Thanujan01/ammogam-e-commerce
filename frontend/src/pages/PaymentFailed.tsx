@@ -25,10 +25,6 @@ export default function PaymentFailed() {
         navigate('/');
     };
 
-    const contactSupport = () => {
-        navigate('/contact');
-    };
-
     return (
         <div className="min-h-screen bg-white flex items-center justify-center p-4 md:p-6">
             <div className="max-w-lg w-full mx-auto">
@@ -99,12 +95,6 @@ export default function PaymentFailed() {
                             <p className="text-gray-600 text-sm mb-4">
                                 Your order is temporarily reserved. Complete payment within 30 minutes to secure your items.
                             </p>
-                            <button 
-                                onClick={contactSupport}
-                                className="text-[#d97706] hover:text-[#b45309] font-medium text-sm underline decoration-[#d97706]/30 hover:decoration-[#d97706] transition-colors"
-                            >
-                                Need assistance? Contact our support team
-                            </button>
                         </div>
                     </div>
                 </div>
