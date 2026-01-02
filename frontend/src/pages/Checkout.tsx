@@ -10,7 +10,7 @@ import {
   FaMapMarkerAlt, FaPhoneAlt, FaLock, 
   FaHome, FaUser, FaShoppingBag,
   FaList, FaReceipt, FaArrowRight, FaArrowLeft,
-  FaRegCreditCard,
+  FaRegCreditCard, FaTimes,
 } from 'react-icons/fa';
 import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
 import { RiSecurePaymentLine } from 'react-icons/ri';
@@ -44,6 +44,15 @@ interface CartItem {
   selectedImageIndex?: number;  // ✅ ADDED: Selected image index
 }
 
+// Country data with validation rules
+const countries = [
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94', digits: 9, example: '745869521', pattern: /^[1-9][0-9]{8}$/ },
+  { code: 'IN', name: 'India', dialCode: '+91', digits: 10, example: '9876543210', pattern: /^[6-9][0-9]{9}$/ },
+  { code: 'US', name: 'USA/Canada', dialCode: '+1', digits: 10, example: '4112336985', pattern: /^[2-9][0-9]{9}$/ },
+  { code: 'GB', name: 'UK', dialCode: '+44', digits: 10, example: '2079460958', pattern: /^[1-9][0-9]{9}$/ },
+  { code: 'AU', name: 'Australia', dialCode: '+61', digits: 9, example: '412345678', pattern: /^[4-5][0-9]{8}$/ },
+];
+
 export default function Checkout() {
   const cart = useContext(CartContext)!;
   const auth = useContext(AuthContext)!;
@@ -59,16 +68,21 @@ export default function Checkout() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [touchedFields, setTouchedFields] = useState<{[key: string]: boolean}>({});
 
   const [formData, setFormData] = useState({
     name: auth.user?.name || '',
     address: auth.user?.address || '',
     city: '',
-    phone: auth.user?.phone || '',
+    phone: '',
     postalCode: '',
     paymentMethod: 'Online Payment',
-    countryCode: '94'
+    countryCode: 'LK' // Default to Sri Lanka
   });
+
+  // Get current country object
+  const currentCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
@@ -106,18 +120,150 @@ export default function Checkout() {
     }
   }, [selectedCartItems.length, navigate, loading]);
 
+  // Validation functions
+  const validateName = (value: string) => {
+    if (!value.trim()) return 'Name is required';
+    if (value.trim().length < 2) return 'Name must be at least 2 characters';
+    return '';
+  };
+
+  const validateAddress = (value: string) => {
+    if (!value.trim()) return 'Address is required';
+    if (value.trim().length < 10) return 'Please enter a complete address';
+    return '';
+  };
+
+  const validateCity = (value: string) => {
+    if (!value.trim()) return 'City is required';
+    
+    // Only allow letters, spaces, and hyphens
+    const cityRegex = /^[A-Za-z\s\-]+$/;
+    if (!cityRegex.test(value)) return 'City can only contain letters, spaces, and hyphens';
+    
+    if (value.trim().length < 2) return 'City must be at least 2 characters';
+    return '';
+  };
+
+  const validatePhone = (value: string, countryCode: string) => {
+    if (!value.trim()) return 'Phone number is required';
+    
+    // Remove any non-digit characters
+    const digitsOnly = value.replace(/\D/g, '');
+    
+    const country = countries.find(c => c.code === countryCode);
+    if (!country) return 'Please select a valid country';
+    
+    // Check digit length
+    if (digitsOnly.length !== country.digits) {
+      return `${country.name} numbers should be ${country.digits} digits`;
+    }
+    
+    // Check pattern
+    if (!country.pattern.test(digitsOnly)) {
+      return `Invalid ${country.name} phone number`;
+    }
+    
+    return '';
+  };
+
+  const validatePostalCode = (value: string) => {
+    if (!value.trim()) return '';
+    if (value.trim().length < 3) return 'Postal code is too short';
+    return '';
+  };
+
+  const validateForm = () => {
+    const errors = {
+      name: validateName(formData.name),
+      address: validateAddress(formData.address),
+      city: validateCity(formData.city),
+      phone: validatePhone(formData.phone, formData.countryCode),
+      postalCode: validatePostalCode(formData.postalCode),
+    };
+    
+    setFormErrors(errors);
+    setTouchedFields({
+      name: true,
+      address: true,
+      city: true,
+      phone: true,
+      postalCode: true,
+    });
+    
+    return !Object.values(errors).some(error => error);
+  };
+
   const handleBackToCart = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate('/cart'), 150);
   };
 
   const handleStepChange = (newStep: number) => {
+    if (newStep === 2) {
+      if (!validateForm()) {
+        alert('Please fix the errors in the form before proceeding');
+        return;
+      }
+    }
+    
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => setStep(newStep), 150);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Special handling for city field - only allow letters, spaces, and hyphens
+    if (name === 'city') {
+      // Allow only letters, spaces, and hyphens
+      const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
+      setFormData({ ...formData, [name]: filteredValue });
+    } 
+    // Special handling for phone field - only allow digits
+    else if (name === 'phone') {
+      // Allow only digits
+      const filteredValue = value.replace(/\D/g, '');
+      setFormData({ ...formData, [name]: filteredValue });
+    } 
+    // When country changes, clear phone validation
+    else if (name === 'countryCode') {
+      setFormData({ ...formData, [name]: value, phone: '' });
+      setFormErrors({...formErrors, phone: ''});
+    }
+    else {
+      setFormData({ ...formData, [name]: value });
+    }
+    
+    // Clear error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors({...formErrors, [name]: ''});
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    setTouchedFields({...touchedFields, [field]: true});
+    
+    // Validate the field
+    let error = '';
+    switch (field) {
+      case 'name':
+        error = validateName(formData.name);
+        break;
+      case 'address':
+        error = validateAddress(formData.address);
+        break;
+      case 'city':
+        error = validateCity(formData.city);
+        break;
+      case 'phone':
+        error = validatePhone(formData.phone, formData.countryCode);
+        break;
+      case 'postalCode':
+        error = validatePostalCode(formData.postalCode);
+        break;
+    }
+    
+    setFormErrors({...formErrors, [field]: error});
   };
 
   // ✅ FIX: Get variation image for cart items with selectedImageIndex
@@ -191,27 +337,14 @@ export default function Checkout() {
     return '#000000';
   };
 
-  // ✅ FIX: Phone number validation
-  const validatePhone = (phone: string) => {
-    const digits = phone.replace(/\D/g, '');
-    return digits.length >= 7;
-  };
-
   async function handlePlaceOrder() {
     setIsProcessing(true);
     setLoading(true);
 
     try {
-      // Add form validation before API call
-      if (!formData.name || !formData.address || !formData.city || !formData.phone) {
-        alert('Please fill in all required shipping information');
-        setIsProcessing(false);
-        setLoading(false);
-        return;
-      }
-
-      if (!validatePhone(formData.phone)) {
-        alert('Please enter a valid phone number with at least 7 digits');
+      // Final validation before API call
+      if (!validateForm()) {
+        alert('Please fix the errors in the form before placing your order');
         setIsProcessing(false);
         setLoading(false);
         return;
@@ -238,7 +371,7 @@ export default function Checkout() {
         };
       });
 
-      const fullPhoneNumber = `+${formData.countryCode} ${formData.phone}`;
+      const fullPhoneNumber = `${currentCountry.dialCode}${formData.phone}`;
 
       const orderData = {
         items,
@@ -249,7 +382,9 @@ export default function Checkout() {
           address: formData.address,
           city: formData.city,
           phone: fullPhoneNumber,
-          postalCode: formData.postalCode
+          postalCode: formData.postalCode,
+          country: currentCountry.name,
+          countryCode: currentCountry.dialCode
         },
         paymentMethod: formData.paymentMethod
       };
@@ -280,12 +415,6 @@ export default function Checkout() {
     { number: 3, title: 'Payment', icon: <FaRegCreditCard /> }
   ];
 
-  const countryCodes = [
-    { code: '1', name: 'US/Canada' },
-    { code: '91', name: 'India' },
-    { code: '94', name: 'Sri Lanka' },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#d97706]/5 to-white">
       {/* Professional Header */}
@@ -307,15 +436,6 @@ export default function Checkout() {
                 </div>
               </Link>
             </div>
-            {/* <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#d97706]/10 rounded-lg">
-                <FaShieldAlt className="text-[#d97706]" />
-              </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">Secure Checkout</p>
-                <p className="text-xs text-gray-500">256-bit SSL encryption</p>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>
@@ -382,11 +502,12 @@ export default function Checkout() {
               {step === 1 && (
                 <div className="p-4 sm:p-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Name Field */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaUser className="text-[#d97706]" />
-                          <span className="text-xs sm:text-sm">Recipient's Full Name</span>
+                          <span className="text-xs sm:text-sm">Recipient's Full Name *</span>
                         </div>
                       </label>
                       <input
@@ -394,35 +515,59 @@ export default function Checkout() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        onBlur={() => handleBlur('name')}
                         placeholder="Enter your full name"
-                        className="w-full px-4 py-3 text-sm sm:text-base border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${
+                          touchedFields.name && formErrors.name 
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
+                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                        }`}
                         aria-label="Recipient's full name"
                       />
+                      {touchedFields.name && formErrors.name && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.name}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Address Field */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaMapMarkerAlt className="text-[#d97706]" />
-                          <span className="text-xs sm:text-sm">Complete Address</span>
+                          <span className="text-xs sm:text-sm">Complete Address *</span>
                         </div>
                       </label>
                       <textarea
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
+                        onBlur={() => handleBlur('address')}
                         placeholder="House number, street name, apartment/suite"
                         rows={3}
-                        className="w-full px-4 py-3 text-sm sm:text-base border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all resize-none"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all resize-none ${
+                          touchedFields.address && formErrors.address 
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
+                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                        }`}
                         aria-label="Complete shipping address"
                       />
+                      {touchedFields.address && formErrors.address && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.address}
+                        </p>
+                      )}
                     </div>
 
+                    {/* City Field - Only letters, spaces, and hyphens */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaHome className="text-[#d97706]" />
-                          <span className="text-xs sm:text-sm">City / State</span>
+                          <span className="text-xs sm:text-sm">City / State *</span>
                         </div>
                       </label>
                       <input
@@ -430,12 +575,27 @@ export default function Checkout() {
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
-                        placeholder="e.g., Colombo"
-                        className="w-full px-4 py-3 text-sm sm:text-base border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                        onBlur={() => handleBlur('city')}
+                        placeholder="e.g., Colombo or New York"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${
+                          touchedFields.city && formErrors.city 
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
+                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                        }`}
                         aria-label="City or state"
                       />
+                      {touchedFields.city && formErrors.city && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.city}
+                        </p>
+                      )}
+                      <p className="mt-1 text-xs text-gray-500">
+                        Only letters, spaces, and hyphens allowed
+                      </p>
                     </div>
 
+                    {/* Postal Code Field */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <span className="text-xs sm:text-sm">Postal Code</span>
@@ -445,21 +605,33 @@ export default function Checkout() {
                         name="postalCode"
                         value={formData.postalCode}
                         onChange={handleChange}
+                        onBlur={() => handleBlur('postalCode')}
                         placeholder="e.g., 10100"
-                        className="w-full px-4 py-3 text-sm sm:text-base border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${
+                          touchedFields.postalCode && formErrors.postalCode 
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
+                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                        }`}
                         aria-label="Postal code"
                       />
+                      {touchedFields.postalCode && formErrors.postalCode && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.postalCode}
+                        </p>
+                      )}
                     </div>
 
-                    {/* ✅ FIXED: Phone Number Section - Now Responsive */}
+                    {/* Phone Number Section */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaPhoneAlt className="text-[#d97706]" />
-                          <span className="text-xs sm:text-sm">Contact Phone Number</span>
+                          <span className="text-xs sm:text-sm">Contact Phone Number *</span>
                         </div>
                       </label>
                       <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Country Selector */}
                         <div className="relative w-full sm:w-[350px]">
                           <select
                             name="countryCode"
@@ -468,9 +640,9 @@ export default function Checkout() {
                             className="w-full text-sm sm:text-base appearance-none px-4 py-3 pr-10 rounded-lg border border-[#d97706] bg-[#FBF9F6FF]/10 text-[#0C0C0CFF] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
                             aria-label="Country code"
                           >
-                            {countryCodes.map((country) => (
+                            {countries.map((country) => (
                               <option key={country.code} value={country.code}>
-                                +{country.code} ({country.name})
+                                {country.dialCode} ({country.name})
                               </option>
                             ))}
                           </select>
@@ -480,19 +652,48 @@ export default function Checkout() {
                             </svg>
                           </div>
                         </div>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="77 123 4567"
-                          className="w-full text-sm sm:text-base px-4 py-3 rounded-lg border border-[#d97706] focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                          aria-label="Phone number"
-                        />
+                        
+                        {/* Phone Number Input */}
+                        <div className="flex-1">
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('phone')}
+                            placeholder={`e.g., ${currentCountry.example}`}
+                            className={`w-full text-sm sm:text-base px-4 py-3 rounded-lg border focus:outline-none transition-all ${
+                              touchedFields.phone && formErrors.phone 
+                                ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
+                                : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                            }`}
+                            aria-label="Phone number"
+                          />
+                          {touchedFields.phone && formErrors.phone ? (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <FaTimes className="text-xs" />
+                              {formErrors.phone}
+                            </p>
+                          ) : (
+                            <div className="flex justify-between items-center mt-2">
+                              <p className="text-xs text-gray-500">
+                                Enter without country code
+                              </p>
+                              <span className="text-xs text-gray-400">
+                                {formData.phone.length}/{currentCountry.digits} digits
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Enter your phone number without the country code
-                      </p>
+                      
+                      {/* Country Information */}
+                      <div className="mt-2 p-2 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20">
+                        <div className="text-xs text-gray-600 flex items-center gap-2">
+                          <span className="font-medium">Format:</span>
+                          <span>{currentCountry.dialCode} {currentCountry.example} ({currentCountry.digits} digits)</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -508,17 +709,7 @@ export default function Checkout() {
                         Back to Cart
                       </button>
                       <button
-                        onClick={() => {
-                          if (!formData.name || !formData.address || !formData.city || !formData.phone) {
-                            alert('Please fill in all required shipping information');
-                            return;
-                          }
-                          if (!validatePhone(formData.phone)) {
-                            alert('Please enter a valid phone number with at least 7 digits');
-                            return;
-                          }
-                          handleStepChange(2);
-                        }}
+                        onClick={() => handleStepChange(2)}
                         className="w-full md:w-auto px-4 sm:px-8 py-3 text-sm sm:text-base bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center justify-center gap-2"
                         aria-label="Continue to review order"
                       >
@@ -635,7 +826,7 @@ export default function Checkout() {
                       </div>
                       <div>
                         <p className="text-xs sm:text-sm text-gray-600 mb-1">Phone</p>
-                        <p className="font-medium text-gray-900 text-sm sm:text-base">+{formData.countryCode} {formData.phone}</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{currentCountry.dialCode} {formData.phone}</p>
                       </div>
                       <div className="sm:col-span-2">
                         <p className="text-xs sm:text-sm text-gray-600 mb-1">Address</p>
@@ -647,7 +838,11 @@ export default function Checkout() {
                       </div>
                       <div>
                         <p className="text-xs sm:text-sm text-gray-600 mb-1">Postal Code</p>
-                        <p className="font-medium text-gray-900 text-sm sm:text-base">{formData.postalCode}</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{formData.postalCode || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">Country</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{currentCountry.name}</p>
                       </div>
                     </div>
                   </div>
@@ -870,7 +1065,8 @@ export default function Checkout() {
                           <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">Shipping to</p>
                           <p className="text-xs text-gray-600 truncate">{formData.address}</p>
                           <p className="text-xs text-gray-600">{formData.city}, {formData.postalCode}</p>
-                          <p className="text-xs text-gray-600">Phone: +{formData.countryCode} {formData.phone}</p>
+                          <p className="text-xs text-gray-600">Phone: {currentCountry.dialCode} {formData.phone}</p>
+                          <p className="text-xs text-gray-600">Country: {currentCountry.name}</p>
                         </div>
                       </div>
                     </div>
