@@ -7,7 +7,15 @@ exports.createProduct = async (req, res) => {
     const colorVariants = req.body.colorVariants || [];
     
     // Calculate total stock from variants
-    const totalStock = colorVariants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
+    const totalStock = colorVariants.reduce((sum, variant) => {
+      if (variant.variantType === 'size' && variant.sizes) {
+        return sum + variant.sizes.reduce((s, size) => s + (Number(size.stock) || 0), 0);
+      } else if (variant.variantType === 'weight' && variant.weights) {
+        return sum + variant.weights.reduce((w, weight) => w + (Number(weight.stock) || 0), 0);
+      } else {
+        return sum + (Number(variant.stock) || 0);
+      }
+    }, 0);
     
     // Pick the first image of the first variant as the main image
     let defaultImage = null;
@@ -95,7 +103,15 @@ exports.updateProduct = async (req, res) => {
     // If colorVariants are provided, recalculate stock and image
     if (updateData.colorVariants) {
       const colorVariants = updateData.colorVariants;
-      updateData.stock = colorVariants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
+      updateData.stock = colorVariants.reduce((sum, variant) => {
+        if (variant.variantType === 'size' && variant.sizes) {
+          return sum + variant.sizes.reduce((s, size) => s + (Number(size.stock) || 0), 0);
+        } else if (variant.variantType === 'weight' && variant.weights) {
+          return sum + variant.weights.reduce((w, weight) => w + (Number(weight.stock) || 0), 0);
+        } else {
+          return sum + (Number(variant.stock) || 0);
+        }
+      }, 0);
       
       if (colorVariants.length > 0 && colorVariants[0].images && colorVariants[0].images.length > 0) {
         updateData.image = colorVariants[0].images[0];

@@ -40,136 +40,136 @@ export default function OrderDetails() {
     }, [id]);
 
     // ✅ FIXED: Function to get the correct image for order item
-   // ✅ FIXED: Function to get the correct image for order item
-// ✅ UPDATED: Function to get the correct image for order item with debugging
-const getItemImage = (item: any): string => {
-  try {
-    if (!item || !item.product) {
-      console.log('No item or product found:', item);
-      return '/placeholder.png';
-    }
+    // ✅ FIXED: Function to get the correct image for order item
+    // ✅ UPDATED: Function to get the correct image for order item with debugging
+    const getItemImage = (item: any): string => {
+        try {
+            if (!item || !item.product) {
+                console.log('No item or product found:', item);
+                return '/placeholder.png';
+            }
 
-    // Debug log to see what data we have
-    console.log('Order Item Data:', {
-      itemId: item._id || item.product?._id,
-      productName: item.product?.name,
-      color: item.color,
-      selectedImageIndex: item.selectedImageIndex,
-      variationId: item.variationId,
-      hasProductImage: !!item.product.image,
-      hasVariations: !!item.product.variations,
-      variationsCount: item.product.variations?.length,
-      colorVariantsCount: item.product.colorVariants?.length
-    });
+            // Debug log to see what data we have
+            console.log('Order Item Data:', {
+                itemId: item._id || item.product?._id,
+                productName: item.product?.name,
+                color: item.color,
+                selectedImageIndex: item.selectedImageIndex,
+                variationId: item.variationId,
+                hasProductImage: !!item.product.image,
+                hasVariations: !!item.product.variations,
+                variationsCount: item.product.variations?.length,
+                colorVariantsCount: item.product.colorVariants?.length
+            });
 
-    // 1️⃣ Check if selectedImageIndex exists (most important)
-    if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
-      console.log(`Found selectedImageIndex: ${item.selectedImageIndex} for color: ${item.color}`);
-      
-      // Try to find the correct variation
-      let targetVariation = null;
-      
-      // First, try by variationId if it exists
-      if (item.variationId && item.product.variations && Array.isArray(item.product.variations)) {
-        targetVariation = item.product.variations.find((v: any) => v._id === item.variationId);
-        console.log('Looking for variation by variationId:', item.variationId, 'Found:', !!targetVariation);
-      }
-      
-      // If not found by variationId, try by color
-      if (!targetVariation && item.color && item.product.variations && Array.isArray(item.product.variations)) {
-        targetVariation = item.product.variations.find((v: any) => 
-          v.color === item.color || 
-          v.colorName === item.color ||
-          (v.colorCode && v.colorCode === item.colorCode)
-        );
-        console.log('Looking for variation by color:', item.color, 'Found:', !!targetVariation);
-      }
-      
-      // If found variation, get the specific image
-      if (targetVariation) {
-        const images = targetVariation.images || (targetVariation.image ? [targetVariation.image] : []);
-        console.log(`Variation has ${images.length} images`);
-        
-        if (images.length > 0) {
-          const index = Math.min(item.selectedImageIndex, images.length - 1);
-          const selectedImage = images[index] || images[0];
-          console.log(`Using image at index ${index}: ${selectedImage}`);
-          return selectedImage;
+            // 1️⃣ Check if selectedImageIndex exists (most important)
+            if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
+                console.log(`Found selectedImageIndex: ${item.selectedImageIndex} for color: ${item.color}`);
+
+                // Try to find the correct variation
+                let targetVariation = null;
+
+                // First, try by variationId if it exists
+                if (item.variationId && item.product.variations && Array.isArray(item.product.variations)) {
+                    targetVariation = item.product.variations.find((v: any) => v._id === item.variationId);
+                    console.log('Looking for variation by variationId:', item.variationId, 'Found:', !!targetVariation);
+                }
+
+                // If not found by variationId, try by color
+                if (!targetVariation && item.color && item.product.variations && Array.isArray(item.product.variations)) {
+                    targetVariation = item.product.variations.find((v: any) =>
+                        v.color === item.color ||
+                        v.colorName === item.color ||
+                        (v.colorCode && v.colorCode === item.colorCode)
+                    );
+                    console.log('Looking for variation by color:', item.color, 'Found:', !!targetVariation);
+                }
+
+                // If found variation, get the specific image
+                if (targetVariation) {
+                    const images = targetVariation.images || (targetVariation.image ? [targetVariation.image] : []);
+                    console.log(`Variation has ${images.length} images`);
+
+                    if (images.length > 0) {
+                        const index = Math.min(item.selectedImageIndex, images.length - 1);
+                        const selectedImage = images[index] || images[0];
+                        console.log(`Using image at index ${index}: ${selectedImage}`);
+                        return selectedImage;
+                    }
+                }
+
+                // Try colorVariants as fallback
+                if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
+                    const colorVariant = item.product.colorVariants.find((v: any) =>
+                        v.colorName === item.color ||
+                        v.color === item.color
+                    );
+                    if (colorVariant?.images?.length) {
+                        const index = Math.min(item.selectedImageIndex, colorVariant.images.length - 1);
+                        return colorVariant.images[index] || colorVariant.images[0];
+                    }
+                }
+            }
+
+            // 2️⃣ Fallback: Check if selectedImage is stored directly
+            if (item.selectedImage) {
+                console.log('Using directly stored selectedImage:', item.selectedImage);
+                return item.selectedImage;
+            }
+
+            // 3️⃣ Fallback: Try to get first variation image based on color
+            if (item.color && item.product.variations && Array.isArray(item.product.variations)) {
+                const colorVariation = item.product.variations.find((v: any) =>
+                    v.color === item.color ||
+                    v.colorName === item.color
+                );
+                if (colorVariation) {
+                    const images = colorVariation.images || (colorVariation.image ? [colorVariation.image] : []);
+                    if (images.length > 0) {
+                        console.log(`Using first image from color variation: ${images[0]}`);
+                        return images[0];
+                    }
+                }
+            }
+
+            // 4️⃣ Fallback: Try colorVariants
+            if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
+                const colorVariant = item.product.colorVariants.find((v: any) =>
+                    v.colorName === item.color ||
+                    v.color === item.color
+                );
+                if (colorVariant?.images?.length) {
+                    console.log(`Using first image from color variant: ${colorVariant.images[0]}`);
+                    return colorVariant.images[0];
+                }
+            }
+
+            // 5️⃣ Fallback: Use product image
+            if (item.product.image) {
+                console.log('Using product image:', item.product.image);
+                return item.product.image;
+            }
+
+            // 6️⃣ Ultimate fallback
+            console.log('No image found, using placeholder');
+            return '/placeholder.png';
+        } catch (err) {
+            console.error('Error getting item image:', err, item);
+            return '/placeholder.png';
         }
-      }
-      
-      // Try colorVariants as fallback
-      if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
-        const colorVariant = item.product.colorVariants.find((v: any) => 
-          v.colorName === item.color || 
-          v.color === item.color
-        );
-        if (colorVariant?.images?.length) {
-          const index = Math.min(item.selectedImageIndex, colorVariant.images.length - 1);
-          return colorVariant.images[index] || colorVariant.images[0];
-        }
-      }
-    }
-    
-    // 2️⃣ Fallback: Check if selectedImage is stored directly
-    if (item.selectedImage) {
-      console.log('Using directly stored selectedImage:', item.selectedImage);
-      return item.selectedImage;
-    }
-    
-    // 3️⃣ Fallback: Try to get first variation image based on color
-    if (item.color && item.product.variations && Array.isArray(item.product.variations)) {
-      const colorVariation = item.product.variations.find((v: any) => 
-        v.color === item.color || 
-        v.colorName === item.color
-      );
-      if (colorVariation) {
-        const images = colorVariation.images || (colorVariation.image ? [colorVariation.image] : []);
-        if (images.length > 0) {
-          console.log(`Using first image from color variation: ${images[0]}`);
-          return images[0];
-        }
-      }
-    }
-    
-    // 4️⃣ Fallback: Try colorVariants
-    if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
-      const colorVariant = item.product.colorVariants.find((v: any) => 
-        v.colorName === item.color || 
-        v.color === item.color
-      );
-      if (colorVariant?.images?.length) {
-        console.log(`Using first image from color variant: ${colorVariant.images[0]}`);
-        return colorVariant.images[0];
-      }
-    }
-    
-    // 5️⃣ Fallback: Use product image
-    if (item.product.image) {
-      console.log('Using product image:', item.product.image);
-      return item.product.image;
-    }
-    
-    // 6️⃣ Ultimate fallback
-    console.log('No image found, using placeholder');
-    return '/placeholder.png';
-  } catch (err) {
-    console.error('Error getting item image:', err, item);
-    return '/placeholder.png';
-  }
-};
+    };
 
     // ✅ Function to get color code for order item
     const getItemColorCode = (item: any) => {
         if (item.colorCode) return item.colorCode;
-        
+
         if (item.product.variations && item.variationId && item.product.variations.length > 0) {
             const variation = item.product.variations.find((v: any) => v._id === item.variationId);
             if (variation && variation.colorCode) {
                 return variation.colorCode;
             }
         }
-        
+
         return '#000000';
     };
 
@@ -430,12 +430,12 @@ const getItemImage = (item: any): string => {
                             <div className="divide-y divide-gray-100">
                                 {order.items.map((item: any, idx: number) => {
                                     const itemColorCode = getItemColorCode(item);
-                                    
+
                                     return (
                                         <div key={idx} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
                                             <div className="flex gap-4 sm:gap-6">
                                                 <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl overflow-hidden border border-gray-200 p-2 sm:p-3 flex-shrink-0">
-                                                   <img
+                                                    <img
                                                         src={getImageUrl(getItemImage(item))}
                                                         className="w-full h-full object-contain"
                                                         alt={item.product?.name || 'Product Image'}
@@ -462,6 +462,15 @@ const getItemImage = (item: any): string => {
                                                                             style={{ backgroundColor: itemColorCode }}
                                                                         />
                                                                         <span className="text-xs font-medium text-gray-700">{item.color}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {/* Display selected size/weight if available */}
+                                                            {(item.selectedSize || item.selectedWeight) && (
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <span className="text-xs text-gray-500">{item.selectedSize ? 'Size:' : 'Weight:'}</span>
+                                                                    <div className="bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
+                                                                        <span className="text-xs font-medium text-indigo-700">{item.selectedSize || item.selectedWeight}</span>
                                                                     </div>
                                                                 </div>
                                                             )}

@@ -68,153 +68,153 @@ export default function UserDashboard() {
 
   // ✅ FIXED: Function to get the correct image for order item (SIMPLIFIED VERSION)
   // ✅ UPDATED: Function to get the correct image for order item with debugging
-const getItemImage = (item: any): string => {
-  try {
-    if (!item || !item.product) {
-      console.log('No item or product found:', item);
-      return '/placeholder.png';
-    }
-
-    // Debug log to see what data we have
-    console.log('Order Item Data:', {
-      itemId: item._id || item.product?._id,
-      productName: item.product?.name,
-      color: item.color,
-      selectedImageIndex: item.selectedImageIndex,
-      variationId: item.variationId,
-      hasProductImage: !!item.product.image,
-      hasVariations: !!item.product.variations,
-      variationsCount: item.product.variations?.length,
-      colorVariantsCount: item.product.colorVariants?.length
-    });
-
-    // 1️⃣ Check if selectedImageIndex exists (most important)
-    if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
-      console.log(`Found selectedImageIndex: ${item.selectedImageIndex} for color: ${item.color}`);
-      
-      // Try to find the correct variation
-      let targetVariation = null;
-      
-      // First, try by variationId if it exists
-      if (item.variationId && item.product.variations && Array.isArray(item.product.variations)) {
-        targetVariation = item.product.variations.find((v: any) => v._id === item.variationId);
-        console.log('Looking for variation by variationId:', item.variationId, 'Found:', !!targetVariation);
+  const getItemImage = (item: any): string => {
+    try {
+      if (!item || !item.product) {
+        console.log('No item or product found:', item);
+        return '/placeholder.png';
       }
-      
-      // If not found by variationId, try by color
-      if (!targetVariation && item.color && item.product.variations && Array.isArray(item.product.variations)) {
-        targetVariation = item.product.variations.find((v: any) => 
-          v.color === item.color || 
-          v.colorName === item.color ||
-          (v.colorCode && v.colorCode === item.colorCode)
-        );
-        console.log('Looking for variation by color:', item.color, 'Found:', !!targetVariation);
-      }
-      
-      // If found variation, get the specific image
-      if (targetVariation) {
-        const images = targetVariation.images || (targetVariation.image ? [targetVariation.image] : []);
-        console.log(`Variation has ${images.length} images`);
-        
-        if (images.length > 0) {
-          const index = Math.min(item.selectedImageIndex, images.length - 1);
-          const selectedImage = images[index] || images[0];
-          console.log(`Using image at index ${index}: ${selectedImage}`);
-          return selectedImage;
+
+      // Debug log to see what data we have
+      console.log('Order Item Data:', {
+        itemId: item._id || item.product?._id,
+        productName: item.product?.name,
+        color: item.color,
+        selectedImageIndex: item.selectedImageIndex,
+        variationId: item.variationId,
+        hasProductImage: !!item.product.image,
+        hasVariations: !!item.product.variations,
+        variationsCount: item.product.variations?.length,
+        colorVariantsCount: item.product.colorVariants?.length
+      });
+
+      // 1️⃣ Check if selectedImageIndex exists (most important)
+      if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
+        console.log(`Found selectedImageIndex: ${item.selectedImageIndex} for color: ${item.color}`);
+
+        // Try to find the correct variation
+        let targetVariation = null;
+
+        // First, try by variationId if it exists
+        if (item.variationId && item.product.variations && Array.isArray(item.product.variations)) {
+          targetVariation = item.product.variations.find((v: any) => v._id === item.variationId);
+          console.log('Looking for variation by variationId:', item.variationId, 'Found:', !!targetVariation);
+        }
+
+        // If not found by variationId, try by color
+        if (!targetVariation && item.color && item.product.variations && Array.isArray(item.product.variations)) {
+          targetVariation = item.product.variations.find((v: any) =>
+            v.color === item.color ||
+            v.colorName === item.color ||
+            (v.colorCode && v.colorCode === item.colorCode)
+          );
+          console.log('Looking for variation by color:', item.color, 'Found:', !!targetVariation);
+        }
+
+        // If found variation, get the specific image
+        if (targetVariation) {
+          const images = targetVariation.images || (targetVariation.image ? [targetVariation.image] : []);
+          console.log(`Variation has ${images.length} images`);
+
+          if (images.length > 0) {
+            const index = Math.min(item.selectedImageIndex, images.length - 1);
+            const selectedImage = images[index] || images[0];
+            console.log(`Using image at index ${index}: ${selectedImage}`);
+            return selectedImage;
+          }
+        }
+
+        // Try colorVariants as fallback
+        if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
+          const colorVariant = item.product.colorVariants.find((v: any) =>
+            v.colorName === item.color ||
+            v.color === item.color
+          );
+          if (colorVariant?.images?.length) {
+            const index = Math.min(item.selectedImageIndex, colorVariant.images.length - 1);
+            return colorVariant.images[index] || colorVariant.images[0];
+          }
         }
       }
-      
-      // Try colorVariants as fallback
+
+      // 2️⃣ Fallback: Check if selectedImage is stored directly
+      if (item.selectedImage) {
+        console.log('Using directly stored selectedImage:', item.selectedImage);
+        return item.selectedImage;
+      }
+
+      // 3️⃣ Fallback: Try to get first variation image based on color
+      if (item.color && item.product.variations && Array.isArray(item.product.variations)) {
+        const colorVariation = item.product.variations.find((v: any) =>
+          v.color === item.color ||
+          v.colorName === item.color
+        );
+        if (colorVariation) {
+          const images = colorVariation.images || (colorVariation.image ? [colorVariation.image] : []);
+          if (images.length > 0) {
+            console.log(`Using first image from color variation: ${images[0]}`);
+            return images[0];
+          }
+        }
+      }
+
+      // 4️⃣ Fallback: Try colorVariants
       if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
-        const colorVariant = item.product.colorVariants.find((v: any) => 
-          v.colorName === item.color || 
+        const colorVariant = item.product.colorVariants.find((v: any) =>
+          v.colorName === item.color ||
           v.color === item.color
         );
         if (colorVariant?.images?.length) {
-          const index = Math.min(item.selectedImageIndex, colorVariant.images.length - 1);
-          return colorVariant.images[index] || colorVariant.images[0];
+          console.log(`Using first image from color variant: ${colorVariant.images[0]}`);
+          return colorVariant.images[0];
         }
       }
-    }
-    
-    // 2️⃣ Fallback: Check if selectedImage is stored directly
-    if (item.selectedImage) {
-      console.log('Using directly stored selectedImage:', item.selectedImage);
-      return item.selectedImage;
-    }
-    
-    // 3️⃣ Fallback: Try to get first variation image based on color
-    if (item.color && item.product.variations && Array.isArray(item.product.variations)) {
-      const colorVariation = item.product.variations.find((v: any) => 
-        v.color === item.color || 
-        v.colorName === item.color
-      );
-      if (colorVariation) {
-        const images = colorVariation.images || (colorVariation.image ? [colorVariation.image] : []);
-        if (images.length > 0) {
-          console.log(`Using first image from color variation: ${images[0]}`);
-          return images[0];
-        }
+
+      // 5️⃣ Fallback: Use product image
+      if (item.product.image) {
+        console.log('Using product image:', item.product.image);
+        return item.product.image;
       }
+
+      // 6️⃣ Ultimate fallback
+      console.log('No image found, using placeholder');
+      return '/placeholder.png';
+    } catch (err) {
+      console.error('Error getting item image:', err, item);
+      return '/placeholder.png';
     }
-    
-    // 4️⃣ Fallback: Try colorVariants
-    if (item.color && item.product.colorVariants && Array.isArray(item.product.colorVariants)) {
-      const colorVariant = item.product.colorVariants.find((v: any) => 
-        v.colorName === item.color || 
-        v.color === item.color
-      );
-      if (colorVariant?.images?.length) {
-        console.log(`Using first image from color variant: ${colorVariant.images[0]}`);
-        return colorVariant.images[0];
-      }
-    }
-    
-    // 5️⃣ Fallback: Use product image
-    if (item.product.image) {
-      console.log('Using product image:', item.product.image);
-      return item.product.image;
-    }
-    
-    // 6️⃣ Ultimate fallback
-    console.log('No image found, using placeholder');
-    return '/placeholder.png';
-  } catch (err) {
-    console.error('Error getting item image:', err, item);
-    return '/placeholder.png';
-  }
-};
+  };
 
   // ✅ FIXED: Function to get color code for order item (SAFER VERSION)
   const getItemColorCode = (item: any): string => {
     try {
       if (item.colorCode) return item.colorCode;
-      
+
       if (item.product?.variations && Array.isArray(item.product.variations)) {
         let variation = null;
-        
+
         if (item.variationId) {
           variation = item.product.variations.find((v: any) => v._id === item.variationId);
         }
-        
+
         if (!variation && item.color) {
-          variation = item.product.variations.find((v: any) => 
-            v.color === item.color || 
+          variation = item.product.variations.find((v: any) =>
+            v.color === item.color ||
             v.colorName === item.color
           );
         }
-        
+
         if (variation?.colorCode) return variation.colorCode;
       }
-      
+
       if (item.product?.colorVariants && Array.isArray(item.product.colorVariants) && item.color) {
-        const colorVariant = item.product.colorVariants.find((v: any) => 
-          v.colorName === item.color || 
+        const colorVariant = item.product.colorVariants.find((v: any) =>
+          v.colorName === item.color ||
           v.color === item.color
         );
         if (colorVariant?.colorCode) return colorVariant.colorCode;
       }
-      
+
       return '#d97706'; // Default to your theme color
     } catch (err) {
       console.error('Error getting item color code:', err);
@@ -226,27 +226,27 @@ const getItemImage = (item: any): string => {
   const getItemColorName = (item: any): string => {
     try {
       if (item.color) return item.color;
-      
+
       if (item.product?.variations && Array.isArray(item.product.variations)) {
         let variation = null;
-        
+
         if (item.variationId) {
           variation = item.product.variations.find((v: any) => v._id === item.variationId);
         }
-        
+
         if (variation) {
           return variation.colorName || variation.color || '';
         }
       }
-      
+
       if (item.product?.colorVariants && Array.isArray(item.product.colorVariants)) {
-        const colorVariant = item.product.colorVariants.find((v: any) => 
-          v.colorName === item.color || 
+        const colorVariant = item.product.colorVariants.find((v: any) =>
+          v.colorName === item.color ||
           v.color === item.color
         );
         if (colorVariant?.colorName) return colorVariant.colorName;
       }
-      
+
       return '';
     } catch (err) {
       console.error('Error getting item color name:', err);
@@ -260,16 +260,16 @@ const getItemImage = (item: any): string => {
         const res = await api.get('/orders/my');
         console.log('Fetched orders:', res.data); // Debug log
         setOrders(res.data);
-        
+
         // Calculate user stats
         const totalSpent = res.data.reduce((sum: number, order: any) => sum + order.totalAmount, 0);
-        const pendingOrders = res.data.filter((order: any) => 
+        const pendingOrders = res.data.filter((order: any) =>
           ['pending', 'processing', 'shipped'].includes(order.status)
         ).length;
-        const completedOrders = res.data.filter((order: any) => 
+        const completedOrders = res.data.filter((order: any) =>
           order.status === 'delivered'
         ).length;
-        
+
         setUserStats({
           totalOrders: res.data.length,
           totalSpent,
@@ -453,9 +453,8 @@ const getItemImage = (item: any): string => {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
           {/* Mobile Sidebar */}
-          <div className={`lg:w-1/4 fixed lg:static top-0 left-0 h-full lg:h-auto z-50 transform transition-transform duration-300 ${
-            showMobileMenu ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0`}>
+          <div className={`lg:w-1/4 fixed lg:static top-0 left-0 h-full lg:h-auto z-50 transform transition-transform duration-300 ${showMobileMenu ? 'translate-x-0' : '-translate-x-full'
+            } lg:translate-x-0`}>
             <div className="bg-white rounded-none lg:rounded-xl shadow-lg lg:shadow-xl border border-[#d97706]/20 overflow-hidden h-full lg:h-auto">
               {/* Mobile Header */}
               <div className="flex items-center justify-between p-4 border-b border-[#d97706]/20 lg:hidden">
@@ -478,24 +477,21 @@ const getItemImage = (item: any): string => {
                   <button
                     key={tab.id}
                     onClick={() => handleTabChange(tab.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg transition-all ${
-                      activeTab === tab.id
+                    className={`w-full flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg transition-all ${activeTab === tab.id
                         ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
                         : 'text-gray-700 hover:bg-[#d97706]/5'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-1.5 sm:p-2 rounded-lg ${
-                        activeTab === tab.id ? 'bg-[#d97706]/20 text-[#d97706]' : 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === tab.id ? 'bg-[#d97706]/20 text-[#d97706]' : 'bg-gray-100 text-gray-600'
+                        }`}>
                         {tab.icon}
                       </div>
                       <span className="font-medium text-sm">{tab.label}</span>
                     </div>
                     {tab.count !== undefined && (
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        activeTab === tab.id ? 'bg-[#d97706] text-white' : 'bg-gray-200 text-gray-700'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${activeTab === tab.id ? 'bg-[#d97706] text-white' : 'bg-gray-200 text-gray-700'
+                        }`}>
                         {tab.count}
                       </span>
                     )}
@@ -751,7 +747,7 @@ const getItemImage = (item: any): string => {
                               {order.items.slice(0, 2).map((item: any, idx: number) => {
                                 const itemColorName = getItemColorName(item);
                                 const itemColorCode = getItemColorCode(item);
-                                
+
                                 return (
                                   <div key={idx} className="flex items-center gap-3 sm:gap-4 p-3 border border-[#d97706]/10 rounded-lg hover:bg-[#d97706]/5 transition-colors">
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/10 flex-shrink-0">
@@ -773,6 +769,14 @@ const getItemImage = (item: any): string => {
                                             style={{ backgroundColor: itemColorCode }}
                                           />
                                           <span className="text-xs text-gray-600">{itemColorName}</span>
+                                        </div>
+                                      )}
+                                      {/* Display selected size/weight if available */}
+                                      {(item.selectedSize || item.selectedWeight) && (
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                          <span className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">
+                                            {item.selectedSize ? `Size: ${item.selectedSize}` : `Weight: ${item.selectedWeight}`}
+                                          </span>
                                         </div>
                                       )}
                                       <div className="flex items-center justify-between mt-1 sm:mt-2">

@@ -9,11 +9,17 @@ export interface ColorVariation {
   stock: number;
   price?: number;
   sku?: string;
+  variantType?: 'size' | 'weight' | 'none';
+  sizes?: { size: string; stock: number; price: number }[];
+  weights?: { weight: string; stock: number; price: number }[];
 }
 
 export interface ColorVariant {
   colorName: string;
   colorCode: string;
+  variantType: 'size' | 'weight' | 'none';
+  sizes?: { size: string; stock: number; price: number }[];
+  weights?: { weight: string; stock: number; price: number }[];
   stock: number;
   images: string[];
 }
@@ -79,7 +85,10 @@ export interface ICartItem {
   selectedColorCode?: string;
   variationId?: string;
   selectedImage?: string;
-  selectedImageIndex?: number;  // ✅ ADDED: Store selected image index
+  selectedImageIndex?: number;
+  selectedSize?: string;
+  selectedWeight?: string;
+  price: number;
 }
 
 export interface ICategory {
@@ -119,6 +128,8 @@ export interface IOrder {
     price: number;
     color?: string;
     variationId?: string;
+    selectedSize?: string;
+    selectedWeight?: string;
   }>;
   totalAmount: number;
   shippingAddress: {

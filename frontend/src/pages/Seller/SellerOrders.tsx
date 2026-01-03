@@ -13,11 +13,10 @@ export default function SellerOrders() {
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [viewDialogOpen, setViewDialogOpen] = useState(false);
     const [updateLoading, setUpdateLoading] = useState(false);
-    const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; orderId: string; productId: string; newStatus: string }>({ 
-        open: false, 
-        orderId: '', 
-        productId: '', 
-        newStatus: '' 
+    const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; orderId: string; newStatus: string }>({
+        open: false,
+        orderId: '',
+        newStatus: ''
     });
     const [searchParams] = useSearchParams();
 
@@ -49,35 +48,33 @@ export default function SellerOrders() {
         }
     }, [searchParams, orders]);
 
-    const handleUpdateItemStatus = async (orderId: string, productId: string, newStatus: string) => {
-        // Check if item is already delivered
+    const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
         const order = orders.find(o => o._id === orderId);
-        const item = order?.items.find((it: any) => it.product._id === productId);
-        
-        if (item?.status === 'delivered') {
-            alert('Cannot change status of delivered items!');
+
+        // Check if items are delivered
+        const allAlreadyDelivered = order?.items.every((it: any) => it.status === 'delivered');
+
+        if (allAlreadyDelivered && newStatus !== 'delivered') {
+            alert('Cannot change status of fully delivered orders!');
             return;
         }
 
-        // Show confirmation dialog
-        setConfirmDialog({ open: true, orderId, productId, newStatus });
+        setConfirmDialog({ open: true, orderId, newStatus });
     };
 
     const confirmStatusUpdate = async () => {
-        const { orderId, productId, newStatus } = confirmDialog;
+        const { orderId, newStatus } = confirmDialog;
         try {
             setUpdateLoading(true);
-            setConfirmDialog({ open: false, orderId: '', productId: '', newStatus: '' });
-            await api.put('/orders/item-status', { orderId, productId, status: newStatus });
+            setConfirmDialog({ open: false, orderId: '', newStatus: '' });
+            await api.put('/orders/seller/status', { orderId, status: newStatus });
 
-            // Update local state without fetching all again
+            // Update local state by updating all items in that order
             setOrders(prev => prev.map(o => {
                 if (o._id === orderId) {
                     return {
                         ...o,
-                        items: o.items.map((it: any) =>
-                            it.product._id === productId ? { ...it, status: newStatus } : it
-                        )
+                        items: o.items.map((it: any) => ({ ...it, status: newStatus }))
                     };
                 }
                 return o;
@@ -87,13 +84,11 @@ export default function SellerOrders() {
             if (selectedOrder && selectedOrder._id === orderId) {
                 setSelectedOrder((prev: any) => ({
                     ...prev,
-                    items: prev.items.map((it: any) =>
-                        it.product._id === productId ? { ...it, status: newStatus } : it
-                    )
+                    items: prev.items.map((it: any) => ({ ...it, status: newStatus }))
                 }));
             }
         } catch (error) {
-            console.error("Failed to update item status", error);
+            console.error("Failed to update order status", error);
             alert("Failed to update status");
         } finally {
             setUpdateLoading(false);
@@ -288,14 +283,10 @@ export default function SellerOrders() {
                                         </span>
                                     </td>
                                     <td className="px-8 py-6">
-                                        {/* Status of the first item as a summary or show multi-status badge */}
                                         <div className="flex flex-col gap-1">
-                                            {order.items.slice(0, 1).map((it: any, i: number) => (
-                                                <span key={i} className={`px-3 py-1 rounded-full text-xs font-semibold capitalize border w-fit ${getStatusBadge(it.status)}`}>
-                                                    {it.status}
-                                                </span>
-                                            ))}
-                                            {order.items.length > 1 && <span className="text-xs text-gray-500">+{order.items.length - 1} more</span>}
+                                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize border w-fit shadow-sm ${getStatusBadge(order.items[0]?.status || 'pending')}`}>
+                                                {order.items[0]?.status || 'pending'}
+                                            </span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-center">
@@ -348,7 +339,44 @@ export default function SellerOrders() {
                                 {/* Left Side: Order Items and Information */}
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-6">Fulfillment Items</h4>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h4 className="text-sm font-semibold text-gray-700">Fulfillment Items</h4>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(selectedOrder.items[0]?.status)}`}>
+                                                    {selectedOrder.items[0]?.status}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-8 p-6 rounded-3xl bg-orange-50/50 border border-orange-100/50">
+                                            <p className="text-xs font-bold text-gray-700 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                                <FiSettings className="text-orange-600" />
+                                                Update Order Status
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['pending', 'processed', 'shipped', 'delivered', 'cancelled'].map(s => (
+                                                    <button
+                                                        key={s}
+                                                        disabled={updateLoading || selectedOrder.items[0]?.status === 'delivered'}
+                                                        onClick={() => handleUpdateOrderStatus(selectedOrder._id, s)}
+                                                        className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all ${selectedOrder.items[0]?.status === s
+                                                            ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/30'
+                                                            : selectedOrder.items[0]?.status === 'delivered'
+                                                                ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-white border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600 hover:shadow-md'
+                                                            }`}
+                                                    >
+                                                        {s}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {selectedOrder.items[0]?.status === 'delivered' && (
+                                                <p className="text-[10px] text-red-500 font-bold mt-3 flex items-center gap-1.5 tracking-tight uppercase">
+                                                    <FiAlertCircle /> Cannot change status of delivered orders
+                                                </p>
+                                            )}
+                                        </div>
+
                                         <div className="space-y-6">
                                             {selectedOrder.items.map((item: any) => (
                                                 <div key={item._id} className="space-y-4 p-4 rounded-[1.5rem] border border-gray-50 bg-gray-50/50">
@@ -365,6 +393,11 @@ export default function SellerOrders() {
                                                                         style={{ backgroundColor: item.colorCode || '#000' }}
                                                                     />
                                                                     <span className="text-xs text-gray-500">{item.color}</span>
+                                                                </div>
+                                                            )}
+                                                            {(item.selectedSize || item.selectedWeight) && (
+                                                                <div className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider mt-1">
+                                                                    {item.selectedSize ? `Size: ${item.selectedSize}` : `Weight: ${item.selectedWeight}`}
                                                                 </div>
                                                             )}
                                                             <p className="text-xs text-gray-500">
@@ -384,30 +417,6 @@ export default function SellerOrders() {
                                                         </div>
                                                     </div>
 
-                                                    <div className="pt-4 border-t border-gray-200">
-                                                        <p className="text-xs font-semibold text-gray-600 mb-3">Update This Item's Status</p>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {['pending', 'processed', 'shipped', 'delivered', 'cancelled'].map(s => (
-                                                                <button
-                                                                    key={s}
-                                                                    disabled={updateLoading || item.status === 'delivered'}
-                                                                    onClick={() => handleUpdateItemStatus(selectedOrder._id, item.product?._id, s)}
-                                                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
-                                                                        item.status === s 
-                                                                            ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' 
-                                                                            : item.status === 'delivered'
-                                                                            ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
-                                                                            : 'bg-white border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600'
-                                                                    }`}
-                                                                >
-                                                                    {s}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                        {item.status === 'delivered' && (
-                                                            <p className="text-xs text-red-500 font-medium mt-2">⚠️ Cannot change status of delivered items</p>
-                                                        )}
-                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -503,16 +512,16 @@ export default function SellerOrders() {
                         </div>
                         <div className="p-6 space-y-4">
                             <p className="text-gray-700">
-                                Are you sure you want to change the item status to{' '}
+                                Are you sure you want to change the order status to{' '}
                                 <span className="font-bold text-primary1 capitalize">{confirmDialog.newStatus}</span>?
                             </p>
                             <p className="text-sm text-gray-500">
-                                This action will update the item status and notify the customer about the change.
+                                This action will update all items in this order and notify the customer about the change.
                             </p>
                         </div>
                         <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
                             <button
-                                onClick={() => setConfirmDialog({ open: false, orderId: '', productId: '', newStatus: '' })}
+                                onClick={() => setConfirmDialog({ open: false, orderId: '', newStatus: '' })}
                                 className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"
                                 disabled={updateLoading}
                             >
@@ -617,7 +626,7 @@ const handlePrintLabel = (order: any) => {
              <div class="items-list">
                 ${order.items.map((item: any) => `
                   <div class="item">
-                    <span>${item.product?.name.toUpperCase()} (x${item.quantity}) ${item.color ? `[${item.color.toUpperCase()}]` : ''}</span>
+                    <span>${item.product?.name.toUpperCase()} (x${item.quantity}) ${item.color ? `[${item.color.toUpperCase()}]` : ''} ${item.selectedSize ? `[SIZE: ${item.selectedSize.toUpperCase()}]` : ''} ${item.selectedWeight ? `[WEIGHT: ${item.selectedWeight.toUpperCase()}]` : ''}</span>
                     <span>$ ${(item.price * item.quantity).toLocaleString()} ${item.shippingFee > 0 ? ` (+ $ ${item.shippingFee})` : ''}</span>
                   </div>
                 `).join('')}
