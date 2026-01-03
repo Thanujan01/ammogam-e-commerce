@@ -18,14 +18,6 @@ const countries = [
     { name: 'UAE', code: 'AE', dialCode: '+971', flag: '🇦🇪', example: '501234567', digits: 9 },
 ];
 
-// Sri Lankan cities
-const sriLankanCities = [
-    'Colombo', 'Kandy', 'Galle', 'Jaffna', 'Negombo', 'Kurunegala',
-    'Anuradhapura', 'Polonnaruwa', 'Matara', 'Ratnapura', 'Badulla',
-    'Trincomalee', 'Batticaloa', 'Matale', 'Kalutara', 'Gampaha',
-    'Hambantota', 'Puttalam', 'Vavuniya', 'Mannar', 'Kilinochchi', 'Mullaitivu'
-];
-
 export default function SellerRegisterForm({ onSuccess, onError }: SellerRegisterFormProps) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -40,7 +32,6 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
     const [loading, setLoading] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-    const [showCityDropdown, setShowCityDropdown] = useState(false);
     
     const [errors, setErrors] = useState<{[key: string]: string}>({});
     const [touched, setTouched] = useState<{[key: string]: boolean}>({});
@@ -51,11 +42,26 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
     const validateName = (value: string) => {
         if (!value.trim()) return 'Owner name is required';
         if (value.trim().length < 2) return 'Name must be at least 2 characters';
+        
+        // Check if name starts with space
+        if (value.startsWith(' ')) return 'Name should not start with a space';
+        
+        // Check if name contains only letters and spaces
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!nameRegex.test(value)) return 'Name can only contain letters and spaces';
+        
         return '';
     };
 
     const validateEmail = (value: string) => {
         if (!value) return 'Email is required';
+        
+        // Check if email starts with space
+        if (value.startsWith(' ')) return 'Email should not start with a space';
+        
+        // Check if email contains spaces anywhere
+        if (/\s/.test(value)) return 'Email should not contain any spaces';
+        
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) return 'Please enter a valid email address';
         return '';
@@ -97,6 +103,14 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
     const validateBusinessName = (value: string) => {
         if (!value.trim()) return 'Business name is required';
         if (value.trim().length < 2) return 'Business name must be at least 2 characters';
+        
+        // Check if business name starts with space
+        if (value.startsWith(' ')) return 'Business name should not start with a space';
+        
+        // Check if business name contains only letters, numbers, underscores, and spaces
+        const businessNameRegex = /^[A-Za-z0-9_\s]+$/;
+        if (!businessNameRegex.test(value)) return 'Business name can only contain letters, numbers, underscores, and spaces';
+        
         return '';
     };
 
@@ -108,9 +122,15 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
 
     const validateCity = (value: string) => {
         if (!value.trim()) return 'City is required';
-        if (selectedCountry.code === 'LK' && !sriLankanCities.includes(value)) {
-            return 'Please select a valid Sri Lankan city';
-        }
+        if (value.trim().length < 2) return 'City must be at least 2 characters';
+        
+        // Check if city starts with space
+        if (value.startsWith(' ')) return 'City should not start with a space';
+        
+        // Check if city contains only letters, numbers, and spaces
+        const cityRegex = /^[A-Za-z0-9\s]+$/;
+        if (!cityRegex.test(value)) return 'City can only contain letters, numbers, and spaces';
+        
         return '';
     };
 
@@ -231,6 +251,34 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
         setter(limitedDigits);
     };
 
+    // Handle name change - prevent non-letter characters except spaces
+    const handleNameChange = (value: string) => {
+        // Only allow letters and spaces
+        const filteredValue = value.replace(/[^A-Za-z\s]/g, '');
+        setName(filteredValue);
+    };
+
+    // Handle business name change - allow letters, numbers, underscores, and spaces
+    const handleBusinessNameChange = (value: string) => {
+        // Allow letters, numbers, underscores, and spaces
+        const filteredValue = value.replace(/[^A-Za-z0-9_\s]/g, '');
+        setBusinessName(filteredValue);
+    };
+
+    // Handle city change - allow letters, numbers, and spaces
+    const handleCityChange = (value: string) => {
+        // Allow letters, numbers, and spaces
+        const filteredValue = value.replace(/[^A-Za-z0-9\s]/g, '');
+        setCity(filteredValue);
+    };
+
+    // Handle email change - prevent ANY spaces in email
+    // const handleEmailChange = (value: string) => {
+    //     // Remove ALL spaces from email
+    //     const noSpacesValue = value.replace(/\s/g, '');
+    //     setEmail(noSpacesValue);
+    // };
+
     // Handle country selection
     const handleCountrySelect = (country: any) => {
         setSelectedCountry(country);
@@ -240,12 +288,6 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
         setLocalPhone(''); // Clear phone numbers when country changes
         setLocalBusinessPhone('');
         setCity(''); // Clear city when country changes
-    };
-
-    // Handle city selection
-    const handleCitySelect = (selectedCity: string) => {
-        setCity(selectedCity);
-        setShowCityDropdown(false);
     };
 
     async function handleSubmit(e: React.FormEvent) {
@@ -332,7 +374,7 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                                 }`}
                                 placeholder="Official business name"
                                 value={businessName}
-                                onChange={e => setBusinessName(e.target.value)}
+                                onChange={e => handleBusinessNameChange(e.target.value)}
                                 onBlur={() => handleBlur('businessName')}
                                 disabled={loading}
                             />
@@ -343,6 +385,9 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                                 {errors.businessName}
                             </p>
                         )}
+                        <p className="mt-1 text-xs text-gray-500">
+                            Only letters, numbers, underscores, and spaces are allowed
+                        </p>
                     </div>
 
                     {/* Country Code Display */}
@@ -353,9 +398,6 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                                 <div className="text-sm font-medium text-gray-700">
                                     {selectedCountry.dialCode} ({selectedCountry.name}) {selectedCountry.flag}
                                 </div>
-                                {/* <div className="text-xs text-gray-500">
-                                    Country code is automatically added to phone numbers
-                                </div> */}
                             </div>
                             <button
                                 type="button"
@@ -451,83 +493,36 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                         )}
                     </div>
 
-                    {/* City Field with Dropdown for Sri Lanka */}
-                    {selectedCountry.code === 'LK' && (
-                        <div className="relative md:col-span-2">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">City *</label>
-                            <div className="relative">
-                                <FaMapMarkerAlt className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    required
-                                    className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all ${
-                                        touched.city && errors.city 
-                                            ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
-                                            : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:bg-white'
-                                    }`}
-                                    placeholder="Select your city"
-                                    value={city}
-                                    onChange={e => setCity(e.target.value)}
-                                    onFocus={() => setShowCityDropdown(true)}
-                                    onBlur={() => {
-                                        setTimeout(() => setShowCityDropdown(false), 200);
-                                        handleBlur('city');
-                                    }}
-                                    disabled={loading}
-                                />
-                                {showCityDropdown && (
-                                    <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
-                                        {sriLankanCities.map((cityName) => (
-                                            <button
-                                                key={cityName}
-                                                type="button"
-                                                onClick={() => handleCitySelect(cityName)}
-                                                className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b last:border-b-0 transition-colors"
-                                            >
-                                                {cityName}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            {touched.city && errors.city && (
-                                <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                                    <FaTimes className="text-xs" />
-                                    {errors.city}
-                                </p>
-                            )}
+                    {/* City Field */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">City *</label>
+                        <div className="relative">
+                            <FaMapMarkerAlt className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                required
+                                className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all ${
+                                    touched.city && errors.city 
+                                        ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
+                                        : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:bg-white'
+                                }`}
+                                placeholder="Enter your city"
+                                value={city}
+                                onChange={e => handleCityChange(e.target.value)}
+                                onBlur={() => handleBlur('city')}
+                                disabled={loading}
+                            />
                         </div>
-                    )}
-
-                    {/* City Field for other countries */}
-                    {selectedCountry.code !== 'LK' && (
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">City *</label>
-                            <div className="relative">
-                                <FaMapMarkerAlt className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    required
-                                    className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all ${
-                                        touched.city && errors.city 
-                                            ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
-                                            : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:bg-white'
-                                    }`}
-                                    placeholder="Enter your city"
-                                    value={city}
-                                    onChange={e => setCity(e.target.value)}
-                                    onBlur={() => handleBlur('city')}
-                                    disabled={loading}
-                                />
-                            </div>
-                            {touched.city && errors.city && (
-                                <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                                    <FaTimes className="text-xs" />
-                                    {errors.city}
-                                </p>
-                            )}
-                        </div>
-                    )}
+                        {touched.city && errors.city && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                <FaTimes className="text-xs" />
+                                {errors.city}
+                            </p>
+                        )}
+                        <p className="mt-1 text-xs text-gray-500">
+                            Only letters, numbers, and spaces are allowed
+                        </p>
+                    </div>
 
                     <div className="md:col-span-2">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Business Address *</label>
@@ -575,7 +570,7 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                                 }`}
                                 placeholder="Full name of the primary contact"
                                 value={name}
-                                onChange={e => setName(e.target.value)}
+                                onChange={e => handleNameChange(e.target.value)}
                                 onBlur={() => handleBlur('name')}
                                 disabled={loading}
                             />
@@ -586,6 +581,9 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                                 {errors.name}
                             </p>
                         )}
+                        <p className="mt-1 text-xs text-gray-500">
+                            Only letters and spaces are allowed
+                        </p>
                     </div>
 
                     <div>
@@ -602,7 +600,32 @@ export default function SellerRegisterForm({ onSuccess, onError }: SellerRegiste
                                 }`}
                                 placeholder="email@example.com"
                                 value={email}
-                                onChange={e => setEmail(e.target.value)}
+                                onChange={e => {
+                                    // Prevent space at the beginning completely
+                                    const newValue = e.target.value;
+                                    
+                                    // If user tries to type a space at the beginning, ignore it
+                                    if (newValue.startsWith(' ')) {
+                                        return;
+                                    }
+                                    
+                                    // Remove all spaces from the email
+                                    const noSpacesValue = newValue.replace(/\s/g, '');
+                                    setEmail(noSpacesValue);
+                                }}
+                                onKeyDown={(e) => {
+                                    // Prevent space key when cursor is at the beginning
+                                    if (e.key === ' ' && email.length === 0) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    // Prevent pasting content that starts with space
+                                    const pastedText = e.clipboardData.getData('text');
+                                    if (pastedText.startsWith(' ')) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 onBlur={() => handleBlur('email')}
                                 disabled={loading}
                             />

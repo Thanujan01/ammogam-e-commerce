@@ -125,10 +125,22 @@ export default function Checkout() {
 
   // Validation functions
   const validateName = (value: string) => {
-    if (!value.trim()) return 'Name is required';
-    if (value.trim().length < 2) return 'Name must be at least 2 characters';
-    return '';
-  };
+  if (!value.trim()) return 'Name is required';
+  if (value.trim().length < 2) return 'Name must be at least 2 characters';
+  
+  // Only allow letters and spaces, not starting with space
+  const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
+  if (!nameRegex.test(value.trim())) {
+    return 'Name can only contain letters and spaces, and cannot start with space';
+  }
+  
+  // Check for multiple consecutive spaces
+  if (/\s{2,}/.test(value)) {
+    return 'Name cannot have multiple consecutive spaces';
+  }
+  
+  return '';
+};
 
   const validateAddress = (value: string) => {
     if (!value.trim()) return 'Address is required';
@@ -170,10 +182,19 @@ export default function Checkout() {
   };
 
   const validatePostalCode = (value: string) => {
-    if (!value.trim()) return '';
-    if (value.trim().length < 3) return 'Postal code is too short';
-    return '';
-  };
+  if (!value.trim()) return '';
+  
+  // Only allow letters and numbers (alphanumeric)
+  const postalCodeRegex = /^[A-Za-z0-9]+$/;
+  if (!postalCodeRegex.test(value)) {
+    return 'Postal code can only contain letters and numbers';
+  }
+  
+  if (value.trim().length < 3) return 'Postal code is too short';
+  if (value.trim().length > 10) return 'Postal code is too long';
+  
+  return '';
+};
 
   const validateForm = () => {
     const errors = {
@@ -214,34 +235,55 @@ export default function Checkout() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    // Special handling for city field - only allow letters, spaces, and hyphens
-    if (name === 'city') {
-      // Allow only letters, spaces, and hyphens
-      const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
-      setFormData({ ...formData, [name]: filteredValue });
+  // Special handling for city field - only allow letters, spaces, and hyphens
+  if (name === 'city') {
+    // Allow only letters, spaces, and hyphens
+    const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // Special handling for name field - only allow letters and spaces, cannot start with space
+  else if (name === 'name') {
+    // Remove any non-letter characters except spaces
+    let filteredValue = value.replace(/[^A-Za-z\s]/g, '');
+    
+    // Remove multiple consecutive spaces
+    filteredValue = filteredValue.replace(/\s{2,}/g, ' ');
+    
+    // Trim if starting with space
+    if (filteredValue.startsWith(' ')) {
+      filteredValue = filteredValue.trimStart();
     }
-    // Special handling for phone field - only allow digits
-    else if (name === 'phone') {
-      // Allow only digits
-      const filteredValue = value.replace(/\D/g, '');
-      setFormData({ ...formData, [name]: filteredValue });
-    }
-    // When country changes, clear phone validation
-    else if (name === 'countryCode') {
-      setFormData({ ...formData, [name]: value, phone: '' });
-      setFormErrors({ ...formErrors, phone: '' });
-    }
-    else {
-      setFormData({ ...formData, [name]: value });
-    }
+    
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // Special handling for postal code field - only allow letters and numbers
+  else if (name === 'postalCode') {
+    // Allow only letters and numbers
+    const filteredValue = value.replace(/[^A-Za-z0-9]/g, '');
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // Special handling for phone field - only allow digits
+  else if (name === 'phone') {
+    // Allow only digits
+    const filteredValue = value.replace(/\D/g, '');
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // When country changes, clear phone validation
+  else if (name === 'countryCode') {
+    setFormData({ ...formData, [name]: value, phone: '' });
+    setFormErrors({ ...formErrors, phone: '' });
+  }
+  else {
+    setFormData({ ...formData, [name]: value });
+  }
 
-    // Clear error when user starts typing
-    if (formErrors[name]) {
-      setFormErrors({ ...formErrors, [name]: '' });
-    }
-  };
+  // Clear error when user starts typing
+  if (formErrors[name]) {
+    setFormErrors({ ...formErrors, [name]: '' });
+  }
+};
 
   const handleBlur = (field: string) => {
     setTouchedFields({ ...touchedFields, [field]: true });
@@ -523,33 +565,38 @@ export default function Checkout() {
                 <div className="p-4 sm:p-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {/* Name Field */}
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <div className="flex items-center gap-2">
-                          <FaUser className="text-[#d97706]" />
-                          <span className="text-xs sm:text-sm">Recipient's Full Name *</span>
-                        </div>
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        onBlur={() => handleBlur('name')}
-                        placeholder="Enter your full name"
-                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.name && formErrors.name
-                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
-                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                          }`}
-                        aria-label="Recipient's full name"
-                      />
-                      {touchedFields.name && formErrors.name && (
-                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                          <FaTimes className="text-xs" />
-                          {formErrors.name}
-                        </p>
-                      )}
-                    </div>
+<div className="md:col-span-2">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    <div className="flex items-center gap-2">
+      <FaUser className="text-[#d97706]" />
+      <span className="text-xs sm:text-sm">Recipient's Full Name *</span>
+    </div>
+  </label>
+  <input
+    type="text"
+    name="name"
+    value={formData.name}
+    onChange={handleChange}
+    onBlur={() => handleBlur('name')}
+    placeholder="Enter your full name"
+    className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.name && formErrors.name
+      ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+      : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+      }`}
+    aria-label="Recipient's full name"
+  />
+  {touchedFields.name && formErrors.name && (
+    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+      <FaTimes className="text-xs" />
+      {formErrors.name}
+    </p>
+  )}
+  {!touchedFields.name && !formErrors.name && (
+    <p className="mt-1 text-xs text-gray-500">
+      Only letters and spaces, cannot start with space
+    </p>
+  )}
+</div>
 
                     {/* Address Field */}
                     <div className="md:col-span-2">
@@ -613,30 +660,36 @@ export default function Checkout() {
                     </div>
 
                     {/* Postal Code Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-xs sm:text-sm">Postal Code</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleChange}
-                        onBlur={() => handleBlur('postalCode')}
-                        placeholder="e.g., 10100"
-                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.postalCode && formErrors.postalCode
-                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
-                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                          }`}
-                        aria-label="Postal code"
-                      />
-                      {touchedFields.postalCode && formErrors.postalCode && (
-                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                          <FaTimes className="text-xs" />
-                          {formErrors.postalCode}
-                        </p>
-                      )}
-                    </div>
+                    {/* Postal Code Field */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    <span className="text-xs sm:text-sm">Postal Code</span>
+  </label>
+  <input
+    type="text"
+    name="postalCode"
+    value={formData.postalCode}
+    onChange={handleChange}
+    onBlur={() => handleBlur('postalCode')}
+    placeholder="e.g., 10100 or ABC123"
+    className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.postalCode && formErrors.postalCode
+      ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+      : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+      }`}
+    aria-label="Postal code"
+    maxLength={10} // Add maxLength to prevent too long input
+  />
+  {touchedFields.postalCode && formErrors.postalCode ? (
+    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+      <FaTimes className="text-xs" />
+      {formErrors.postalCode}
+    </p>
+  ) : (
+    <p className="mt-1 text-xs text-gray-500">
+      Letters and numbers only (3-10 characters)
+    </p>
+  )}
+</div>
 
                     {/* Phone Number Section */}
                     <div className="md:col-span-2">
