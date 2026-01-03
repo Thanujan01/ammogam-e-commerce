@@ -145,7 +145,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           variationId,
           selectedColor: color,
           selectedColorCode: colorCode,
-          selectedImage: selectedVariation?.images?.[0] || product.images?.[0]
+          selectedImage: selectedVariation?.images?.[0] || product.images?.[0],
+          price: Number(product.price) || 0
         };
         return [...prev, newItem];
       }

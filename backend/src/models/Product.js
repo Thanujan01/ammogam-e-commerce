@@ -28,11 +28,22 @@ const ProductSchema = new mongoose.Schema(
     isCertified: { type: Boolean, default: false },
     isChoice: { type: Boolean, default: false },
     
-    // Color Variants with multiple images
+    // Color Variants with weight or size options
     colorVariants: [{
       colorName: String,
       colorCode: String,
-      stock: { type: Number, default: 0 },
+      variantType: { type: String, enum: ['size', 'weight', 'none'], default: 'none' },
+      sizes: [{
+        size: String,
+        stock: { type: Number, default: 0 },
+        price: { type: Number, default: 0 }
+      }],
+      weights: [{
+        weight: String,
+        stock: { type: Number, default: 0 },
+        price: { type: Number, default: 0 }
+      }],
+      stock: { type: Number, default: 0 }, // fallback stock if no size/weight
       images: [String] // Array of image URLs (max 5 enforced in frontend/controller)
     }]
   },

@@ -12,7 +12,7 @@ import {
   FaStar, FaPlus, FaMinus,
   FaCheckCircle, FaPalette,
   FaChevronRight, FaChevronLeft as FaChevronLeftIcon,
-   FaWhatsapp, FaFacebook, FaLink,
+  FaWhatsapp, FaFacebook, FaLink,
   FaTruck, FaArrowRight
 } from 'react-icons/fa';
 
@@ -25,6 +25,9 @@ interface ProductVariation {
   stock: number;
   price?: number;
   sku?: string;
+  variantType?: 'size' | 'weight' | 'none';
+  sizes?: { size: string; stock: number; price: number }[];
+  weights?: { weight: string; stock: number; price: number }[];
 }
 
 interface EnhancedProduct extends IProduct {
@@ -47,6 +50,8 @@ export default function ProductDetail() {
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedWeight, setSelectedWeight] = useState<string>('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -59,13 +64,13 @@ export default function ProductDetail() {
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     const handlePopState = () => {
       window.scrollTo(0, 0);
     };
-    
+
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -128,6 +133,13 @@ export default function ProductDetail() {
           setSelectedVariation(defaultVariation);
           setSelectedColor(defaultVariation.color);
           setSelectedImageIndex(0); // Start with first image
+
+          if (defaultVariation.variantType === 'size' && defaultVariation.sizes?.length) {
+            setSelectedSize(defaultVariation.sizes[0].size);
+          }
+          if (defaultVariation.variantType === 'weight' && defaultVariation.weights?.length) {
+            setSelectedWeight(defaultVariation.weights[0].weight);
+          }
         }
       })
       .catch(err => {
@@ -152,9 +164,9 @@ export default function ProductDetail() {
     const currentPrice = discountPercent > 0 ? (basePrice * (1 - discountPercent / 100)) : basePrice;
     const subtotal = currentPrice * quantity;
     const shippingFee = product?.shippingFee || 0;
-    
+
     const totalShipping = shippingFee > 0 ? shippingFee : 0;
-    
+
     return {
       subtotal,
       shipping: totalShipping,
@@ -166,12 +178,15 @@ export default function ProductDetail() {
     if (product && selectedVariation) {
       // ✅ FIXED: Pass the selected image index to cart
       cart.addToCart(
-        product, 
-        quantity, 
-        selectedVariation._id, 
-        selectedVariation.colorName, 
+        product,
+        quantity,
+        selectedVariation._id,
+        selectedVariation.colorName,
         selectedVariation.colorCode,
-        selectedImageIndex // Pass the selected image index
+        selectedImageIndex, // Pass the selected image index
+        selectedSize,
+        selectedWeight,
+        basePrice
       );
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 3000);
@@ -199,18 +214,48 @@ export default function ProductDetail() {
       setSelectedVariation(variation);
       setSelectedColor(color);
       setSelectedImageIndex(0); // Reset to first image when color changes
+
+      // Reset or set default size/weight for new variant
+      if (variation.variantType === 'size' && variation.sizes?.length) {
+        setSelectedSize(variation.sizes[0].size);
+        setSelectedWeight('');
+      } else if (variation.variantType === 'weight' && variation.weights?.length) {
+        setSelectedWeight(variation.weights[0].weight);
+        setSelectedSize('');
+      } else {
+        setSelectedSize('');
+        setSelectedWeight('');
+      }
     }
   };
 
   const getCurrentPrice = () => {
+    let price = product?.price || 0;
     if (selectedVariation?.price) {
-      return selectedVariation.price;
+      price = selectedVariation.price;
     }
-    return product?.price || 0;
+
+    // Add size/weight add-on
+    if (selectedVariation?.variantType === 'size' && selectedSize) {
+      const sizeOpt = selectedVariation.sizes?.find(s => s.size === selectedSize);
+      if (sizeOpt) price += sizeOpt.price;
+    } else if (selectedVariation?.variantType === 'weight' && selectedWeight) {
+      const weightOpt = selectedVariation.weights?.find(w => w.weight === selectedWeight);
+      if (weightOpt) price += weightOpt.price;
+    }
+
+    return price;
   };
 
   const getCurrentStock = () => {
-    if (selectedVariation?.stock !== undefined) {
+    if (selectedVariation) {
+      if (selectedVariation.variantType === 'size' && selectedSize) {
+        const sizeOpt = selectedVariation.sizes?.find(s => s.size === selectedSize);
+        return sizeOpt?.stock ?? 0;
+      } else if (selectedVariation.variantType === 'weight' && selectedWeight) {
+        const weightOpt = selectedVariation.weights?.find(w => w.weight === selectedWeight);
+        return weightOpt?.stock ?? 0;
+      }
       return selectedVariation.stock;
     }
     return product?.stock || 0;
@@ -298,38 +343,44 @@ export default function ProductDetail() {
     if (currentStock > 0 && product) {
       // Clear all existing cart items and selections first
       cart.clearCart();
-      
+
       // Add the current product to cart with selected image
       if (selectedVariation) {
         cart.addToCart(
-          product, 
-          quantity, 
-          selectedVariation._id, 
-          selectedVariation.colorName, 
+          product,
+          quantity,
+          selectedVariation._id,
+          selectedVariation.colorName,
           selectedVariation.colorCode,
-          selectedImageIndex // Pass the selected image index
+          selectedImageIndex, // Pass the selected image index
+          selectedSize,
+          selectedWeight,
+          basePrice
         );
       } else {
         cart.addToCart(product, quantity);
       }
-      
+
       // Create a new Set with only this item selected
       const newSelected = new Set<string>();
-      
+
       // Get the item key for the product we just added
       const itemKey = cart.getItemKey({
         product,
         quantity,
         variationId: selectedVariation?._id,
         selectedColor: selectedVariation?.colorName,
-        selectedColorCode: selectedVariation?.colorCode
-      });
-      
+        selectedColorCode: selectedVariation?.colorCode,
+        selectedSize,
+        selectedWeight,
+        price: basePrice
+      } as any);
+
       newSelected.add(itemKey);
-      
+
       // Update selected items in cart context
       cart.updateSelectedItems(newSelected);
-      
+
       // Navigate to checkout
       window.scrollTo(0, 0);
       setTimeout(() => navigate('/checkout'), 100);
@@ -529,12 +580,12 @@ export default function ProductDetail() {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Product Title */}
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">
                   {product.name}
                 </h1>
-                
+
                 {/* Rating */}
                 <div className="flex items-center gap-3 mt-1">
                   <div className="flex items-center">
@@ -591,7 +642,7 @@ export default function ProductDetail() {
                   </div>
                   <span className="text-sm text-gray-500">{availableColors.length} colors available</span>
                 </div>
-                
+
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                   {availableColors.map((color) => (
                     <button
@@ -607,6 +658,66 @@ export default function ProductDetail() {
                       <span className="text-xs text-gray-700 truncate w-full text-center">
                         {color.name}
                       </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size Options UI */}
+            {selectedVariation?.variantType === 'size' && selectedVariation.sizes && selectedVariation.sizes.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900">Select Size:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVariation.sizes.map((s, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedSize(s.size);
+                        setQuantity(1);
+                      }}
+                      disabled={s.stock === 0}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${selectedSize === s.size
+                        ? 'border-amber-600 bg-amber-50 text-amber-700'
+                        : s.stock === 0
+                          ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                          : 'border-gray-200 hover:border-amber-200 text-gray-700'
+                        }`}
+                    >
+                      {s.size}
+                      {s.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+${s.price})</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Weight Options UI */}
+            {selectedVariation?.variantType === 'weight' && selectedVariation.weights && selectedVariation.weights.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900">Select Weight:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVariation.weights.map((w, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedWeight(w.weight);
+                        setQuantity(1);
+                      }}
+                      disabled={w.stock === 0}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${selectedWeight === w.weight
+                        ? 'border-amber-600 bg-amber-50 text-amber-700'
+                        : w.stock === 0
+                          ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                          : 'border-gray-200 hover:border-amber-200 text-gray-700'
+                        }`}
+                    >
+                      {w.weight}
+                      {w.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+${w.price})</span>}
                     </button>
                   ))}
                 </div>
@@ -640,7 +751,7 @@ export default function ProductDetail() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <span className="font-medium text-gray-900">Shipping:</span>
                 <div className="flex items-center gap-2 text-gray-700">
@@ -695,7 +806,7 @@ export default function ProductDetail() {
                   </>
                 )}
               </button>
-              
+
               <button
                 onClick={handleBuyNow}
                 disabled={currentStock === 0}

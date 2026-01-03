@@ -60,7 +60,7 @@ export default function CartPage() {
         }
       }
     }
-    
+
     // If no selected image index or variation not found, use the old logic
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: any) => v._id === item.variationId);
@@ -71,7 +71,7 @@ export default function CartPage() {
         return variation.image;
       }
     }
-    
+
     // If product has variations but no specific variation selected
     if (item.product.variations && item.product.variations.length > 0) {
       const firstVariation = item.product.variations[0];
@@ -82,7 +82,7 @@ export default function CartPage() {
         return firstVariation.image;
       }
     }
-    
+
     // Fall back to main product image
     return item.product.image;
   };
@@ -90,29 +90,43 @@ export default function CartPage() {
   // ✅ FIX: Get variation color name
   const getItemColorName = (item: any) => {
     if (item.selectedColor) return item.selectedColor;
-    
+
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: any) => v._id === item.variationId);
       if (variation) {
         return variation.colorName || variation.color;
       }
     }
-    
+
     return '';
   };
 
   // ✅ FIX: Get variation color code
   const getItemColorCode = (item: any) => {
     if (item.selectedColorCode) return item.selectedColorCode;
-    
+
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: any) => v._id === item.variationId);
       if (variation) {
         return variation.colorCode;
       }
     }
-    
+
     return '#000000';
+  };
+
+  const getAddonPrice = (item: any) => {
+    if (!item.variationId || (!item.selectedSize && !item.selectedWeight)) return 0;
+    const variation = item.product.variations?.find((v: any) => v._id === item.variationId);
+    if (!variation) return 0;
+
+    if (item.selectedSize) {
+      return variation.sizes?.find((s: any) => s.size === item.selectedSize)?.price || 0;
+    }
+    if (item.selectedWeight) {
+      return variation.weights?.find((w: any) => w.weight === item.selectedWeight)?.price || 0;
+    }
+    return 0;
   };
 
   // Use getItemKey from CartContext
@@ -163,8 +177,8 @@ export default function CartPage() {
     cart.toggleSelectItem(item);
   };
 
-  const handleQuantityUpdate = (productId: string, newQty: number, variationId?: string) => {
-    cart.updateQty(productId, newQty, variationId);
+  const handleQuantityUpdate = (productId: string, newQty: number, variationId?: string, selectedSize?: string, selectedWeight?: string) => {
+    cart.updateQty(productId, newQty, variationId, selectedSize, selectedWeight);
   };
 
   // Show delete confirmation modal
@@ -188,14 +202,14 @@ export default function CartPage() {
         selectedItems.forEach((key) => {
           const item = cart.items.find((i: any) => getItemKey(i) === key);
           if (item) {
-            cart.removeFromCart(item.product._id, item.variationId);
+            cart.removeFromCart(item.product._id, item.variationId, item.selectedSize, item.selectedWeight);
           }
         });
         break;
 
       case 'item':
         if (deleteAction.item) {
-          cart.removeFromCart(deleteAction.item.product._id, deleteAction.item.variationId);
+          cart.removeFromCart(deleteAction.item.product._id, deleteAction.item.variationId, deleteAction.item.selectedSize, deleteAction.item.selectedWeight);
         }
         break;
 
@@ -239,7 +253,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (selectedCartItems.length === 0) return;
-    window.location.href = '/checkout';
+    navigate('/checkout');
   };
 
   return (
@@ -469,9 +483,9 @@ export default function CartPage() {
                       const itemImage = getItemImage(it);
                       const itemColorName = getItemColorName(it);
                       const itemColorCode = getItemColorCode(it);
-                      
+
                       return (
-                        <div key={it.product._id + (it.variationId || '')} className="p-6 hover:bg-[#d97706]/5 transition-colors">
+                        <div key={getItemKey(it)} className="p-6 hover:bg-[#d97706]/5 transition-colors">
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                             {/* Checkbox */}
                             <div className="md:col-span-1 flex items-center justify-center">
@@ -515,6 +529,18 @@ export default function CartPage() {
                                     </div>
                                   </div>
                                 )}
+                                {/* Display selected size/weight if available */}
+                                {(it.selectedSize || it.selectedWeight) && (
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-xs text-gray-500">{it.selectedSize ? 'Size:' : 'Weight:'}</span>
+                                    <div className="bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 flex items-center gap-1">
+                                      <span className="text-xs font-medium text-indigo-700">{it.selectedSize || it.selectedWeight}</span>
+                                      {getAddonPrice(it) > 0 && (
+                                        <span className="text-[10px] text-indigo-500 opacity-80">(+${getAddonPrice(it)})</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
                                 <button
                                   onClick={() => confirmDelete('item', it)}
                                   className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-2 transition-colors"
@@ -528,11 +554,11 @@ export default function CartPage() {
                             {/* Price (Desktop) */}
                             <div className="hidden md:block col-span-2 text-center">
                               <div className="text-lg font-bold text-gray-900">
-                                ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()}
+                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()}
                               </div>
                               {it.product.discount > 0 && (
                                 <div className="text-xs text-gray-400 line-through">
-                                  ${it.product.price.toLocaleString()}
+                                  ${(it.price || it.product.price).toLocaleString()}
                                 </div>
                               )}
                               <div className="text-sm text-[#d97706]">per unit</div>
@@ -545,7 +571,7 @@ export default function CartPage() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleQuantityUpdate(it.product._id, Math.max(1, it.quantity - 1), it.variationId);
+                                      handleQuantityUpdate(it.product._id, Math.max(1, it.quantity - 1), it.variationId, it.selectedSize, it.selectedWeight);
                                     }}
                                     className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-l-lg transition-colors"
                                   >
@@ -557,7 +583,7 @@ export default function CartPage() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleQuantityUpdate(it.product._id, it.quantity + 1, it.variationId);
+                                      handleQuantityUpdate(it.product._id, it.quantity + 1, it.variationId, it.selectedSize, it.selectedWeight);
                                     }}
                                     className="w-10 h-10 flex items-center justify-center text-[#d97706] hover:bg-[#d97706]/10 rounded-r-lg transition-colors"
                                   >
@@ -570,10 +596,10 @@ export default function CartPage() {
                             {/* Item Total */}
                             <div className="col-span-2 text-right">
                               <div className="text-xl font-bold text-gray-900 mb-1">
-                                ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+                                ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                               </div>
                               <div className="text-sm text-[#d97706]">
-                                ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} × {it.quantity}
+                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()} × {it.quantity}
                               </div>
                             </div>
                           </div>
@@ -610,9 +636,9 @@ export default function CartPage() {
                         const itemImage = getItemImage(it);
                         const itemColorName = getItemColorName(it);
                         const itemColorCode = getItemColorCode(it);
-                        
+
                         return (
-                          <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-3">
+                          <div key={getItemKey(it)} className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20 overflow-hidden flex-shrink-0">
                               <img
                                 src={getImageUrl(itemImage)}
@@ -631,10 +657,17 @@ export default function CartPage() {
                                   <span className="text-xs text-gray-500">{itemColorName}</span>
                                 </div>
                               )}
+                              {(it.selectedSize || it.selectedWeight) && (
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <span className="text-xs text-indigo-500 font-medium">
+                                    {it.selectedSize ? `Size: ${it.selectedSize}` : `Weight: ${it.selectedWeight}`}
+                                  </span>
+                                </div>
+                              )}
                               <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
                             </div>
                             <div className="text-sm font-medium text-gray-900">
-                              ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+                              ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                             </div>
                           </div>
                         );
@@ -696,7 +729,15 @@ export default function CartPage() {
 
                   {/* Checkout Buttons */}
                   <div className="space-y-4">
-                    {!auth.user ? (
+                    {auth.loading ? (
+                      <button
+                        disabled
+                        className="w-full py-3.5 rounded-lg font-medium bg-gray-100 text-gray-400 flex items-center justify-center gap-2"
+                      >
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
+                        Checking Auth...
+                      </button>
+                    ) : !auth.user ? (
                       <button
                         onClick={() => handleNavigate('/login?redirect=/cart')}
                         disabled={selectedCartItems.length === 0}

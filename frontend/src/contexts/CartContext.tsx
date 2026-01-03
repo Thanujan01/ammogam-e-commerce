@@ -8,9 +8,9 @@ type CartContextType = {
   items: ICartItem[];
   selectedItems: Set<string>;
   selectedCartItems: ICartItem[];
-  addToCart: (product: IProduct, qty?: number, variationId?: string, color?: string, colorCode?: string, selectedImageIndex?: number) => string;
-  removeFromCart: (productId: string, variationId?: string) => void;
-  updateQty: (productId: string, qty: number, variationId?: string) => void;
+  addToCart: (product: IProduct, qty?: number, variationId?: string, color?: string, colorCode?: string, selectedImageIndex?: number, selectedSize?: string, selectedWeight?: string, price?: number) => string;
+  removeFromCart: (productId: string, variationId?: string, selectedSize?: string, selectedWeight?: string) => void;
+  updateQty: (productId: string, qty: number, variationId?: string, selectedSize?: string, selectedWeight?: string) => void;
   clearCart: () => void;
   updateSelectedItems: (itemIds: Set<string>) => void;
   toggleSelectItem: (item: ICartItem) => void;
@@ -101,7 +101,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Helper function to get item key
   const getItemKey = (item: ICartItem) => {
-    return `${item.product._id}-${item.variationId || 'default'}`;
+    return `${item.product._id}-${item.variationId || 'default'}-${item.selectedSize || ''}-${item.selectedWeight || ''}`;
   };
 
   // Get selected cart items
@@ -109,10 +109,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Calculate selected totals
   const selectedTotalAmount = selectedCartItems.reduce((s, it) => {
-    const price = it.product.discount && it.product.discount > 0
-      ? Math.round(it.product.price * (100 - it.product.discount) / 100)
-      : it.product.price;
-    return s + (price || 0) * it.quantity;
+    const basePrice = it.price || it.product.price;
+    const finalPrice = it.product.discount && it.product.discount > 0
+      ? Math.round(basePrice * (100 - it.product.discount) / 100)
+      : basePrice;
+    return s + (finalPrice || 0) * it.quantity;
   }, 0);
 
   const selectedShippingFee = selectedCartItems.reduce((acc, it, idx) => {
@@ -129,29 +130,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     variationId?: string,
     color?: string,
     colorCode?: string,
-    selectedImageIndex?: number  // ✅ ADDED: Selected image index parameter
+    selectedImageIndex?: number,
+    selectedSize?: string,
+    selectedWeight?: string,
+    price?: number
   ): string {
     if (!product) return '';
 
     const pid = product._id || (product as any).id;
     if (!pid) return '';
 
-    const itemKey = `${pid}-${variationId || 'default'}`;
+    const itemKey = `${pid}-${variationId || 'default'}-${selectedSize || ''}-${selectedWeight || ''}`;
 
     setItems(prev => {
       const exist = prev.find(it =>
         it.product._id === pid &&
-        it.variationId === variationId
+        it.variationId === variationId &&
+        it.selectedSize === selectedSize &&
+        it.selectedWeight === selectedWeight
       );
 
       if (exist) {
         return prev.map(it =>
-          it.product._id === pid && it.variationId === variationId
-            ? { 
-                ...it, 
-                quantity: it.quantity + qty,
-                selectedImageIndex: selectedImageIndex !== undefined ? selectedImageIndex : it.selectedImageIndex  // ✅ UPDATE: Keep or update image index
-              }
+          it.product._id === pid && it.variationId === variationId && it.selectedSize === selectedSize && it.selectedWeight === selectedWeight
+            ? {
+              ...it,
+              quantity: it.quantity + qty,
+              selectedImageIndex: selectedImageIndex !== undefined ? selectedImageIndex : it.selectedImageIndex
+            }
             : it
         );
       }
@@ -164,7 +170,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           variationId,
           selectedColor: color,
           selectedColorCode: colorCode,
-          selectedImageIndex: selectedImageIndex !== undefined ? selectedImageIndex : 0  // ✅ ADDED: Store selected image index
+          selectedImageIndex: selectedImageIndex !== undefined ? selectedImageIndex : 0,
+          selectedSize,
+          selectedWeight,
+          price: price !== undefined ? price : Number(product.price) || 0
         }
       ];
     });
@@ -179,8 +188,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return itemKey;
   }
 
-  function removeFromCart(productId: string, variationId?: string) {
-    const itemKey = `${productId}-${variationId || 'default'}`;
+  function removeFromCart(productId: string, variationId?: string, selectedSize?: string, selectedWeight?: string) {
+    const itemKey = `${productId}-${variationId || 'default'}-${selectedSize || ''}-${selectedWeight || ''}`;
 
     setItems(prev =>
       prev.filter(it => getItemKey(it) !== itemKey)
@@ -193,9 +202,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   }
 
-  function updateQty(productId: string, qty: number, variationId?: string) {
+  function updateQty(productId: string, qty: number, variationId?: string, selectedSize?: string, selectedWeight?: string) {
     setItems(prev => prev.map(it =>
-      it.product._id === productId && it.variationId === variationId
+      it.product._id === productId &&
+        it.variationId === variationId &&
+        it.selectedSize === selectedSize &&
+        it.selectedWeight === selectedWeight
         ? { ...it, quantity: qty }
         : it
     ));
@@ -233,10 +245,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const totalAmount = items.reduce((s, it) => {
-    const price = it.product.discount && it.product.discount > 0
-      ? Math.round(it.product.price * (100 - it.product.discount) / 100)
-      : it.product.price;
-    return s + (price || 0) * it.quantity;
+    const basePrice = it.price || it.product.price;
+    const finalPrice = it.product.discount && it.product.discount > 0
+      ? Math.round(basePrice * (100 - it.product.discount) / 100)
+      : basePrice;
+    return s + (finalPrice || 0) * it.quantity;
   }, 0);
 
   const totalItems = items.reduce((s, it) => s + it.quantity, 0);

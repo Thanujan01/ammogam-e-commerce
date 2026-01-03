@@ -7,7 +7,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTruck, FaCreditCard, FaCheckCircle,
-  FaMapMarkerAlt, FaPhoneAlt, FaLock, 
+  FaMapMarkerAlt, FaPhoneAlt, FaLock,
   FaHome, FaUser, FaShoppingBag,
   FaList, FaReceipt, FaArrowRight, FaArrowLeft,
   FaRegCreditCard, FaTimes,
@@ -41,7 +41,10 @@ interface CartItem {
   quantity: number;
   selectedColor?: string;
   selectedColorCode?: string;
-  selectedImageIndex?: number;  // ✅ ADDED: Selected image index
+  selectedImageIndex?: number;
+  selectedSize?: string;
+  selectedWeight?: string;
+  price?: number;
 }
 
 // Country data with validation rules
@@ -68,8 +71,8 @@ export default function Checkout() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
-  const [touchedFields, setTouchedFields] = useState<{[key: string]: boolean}>({});
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const [formData, setFormData] = useState({
     name: auth.user?.name || '',
@@ -87,13 +90,13 @@ export default function Checkout() {
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    
+
     const handlePopState = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     };
-    
+
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -135,34 +138,34 @@ export default function Checkout() {
 
   const validateCity = (value: string) => {
     if (!value.trim()) return 'City is required';
-    
+
     // Only allow letters, spaces, and hyphens
     const cityRegex = /^[A-Za-z\s\-]+$/;
     if (!cityRegex.test(value)) return 'City can only contain letters, spaces, and hyphens';
-    
+
     if (value.trim().length < 2) return 'City must be at least 2 characters';
     return '';
   };
 
   const validatePhone = (value: string, countryCode: string) => {
     if (!value.trim()) return 'Phone number is required';
-    
+
     // Remove any non-digit characters
     const digitsOnly = value.replace(/\D/g, '');
-    
+
     const country = countries.find(c => c.code === countryCode);
     if (!country) return 'Please select a valid country';
-    
+
     // Check digit length
     if (digitsOnly.length !== country.digits) {
       return `${country.name} numbers should be ${country.digits} digits`;
     }
-    
+
     // Check pattern
     if (!country.pattern.test(digitsOnly)) {
       return `Invalid ${country.name} phone number`;
     }
-    
+
     return '';
   };
 
@@ -180,7 +183,7 @@ export default function Checkout() {
       phone: validatePhone(formData.phone, formData.countryCode),
       postalCode: validatePostalCode(formData.postalCode),
     };
-    
+
     setFormErrors(errors);
     setTouchedFields({
       name: true,
@@ -189,7 +192,7 @@ export default function Checkout() {
       phone: true,
       postalCode: true,
     });
-    
+
     return !Object.values(errors).some(error => error);
   };
 
@@ -205,44 +208,44 @@ export default function Checkout() {
         return;
       }
     }
-    
+
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => setStep(newStep), 150);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     // Special handling for city field - only allow letters, spaces, and hyphens
     if (name === 'city') {
       // Allow only letters, spaces, and hyphens
       const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
       setFormData({ ...formData, [name]: filteredValue });
-    } 
+    }
     // Special handling for phone field - only allow digits
     else if (name === 'phone') {
       // Allow only digits
       const filteredValue = value.replace(/\D/g, '');
       setFormData({ ...formData, [name]: filteredValue });
-    } 
+    }
     // When country changes, clear phone validation
     else if (name === 'countryCode') {
       setFormData({ ...formData, [name]: value, phone: '' });
-      setFormErrors({...formErrors, phone: ''});
+      setFormErrors({ ...formErrors, phone: '' });
     }
     else {
       setFormData({ ...formData, [name]: value });
     }
-    
+
     // Clear error when user starts typing
     if (formErrors[name]) {
-      setFormErrors({...formErrors, [name]: ''});
+      setFormErrors({ ...formErrors, [name]: '' });
     }
   };
 
   const handleBlur = (field: string) => {
-    setTouchedFields({...touchedFields, [field]: true});
-    
+    setTouchedFields({ ...touchedFields, [field]: true });
+
     // Validate the field
     let error = '';
     switch (field) {
@@ -262,14 +265,14 @@ export default function Checkout() {
         error = validatePostalCode(formData.postalCode);
         break;
     }
-    
-    setFormErrors({...formErrors, [field]: error});
+
+    setFormErrors({ ...formErrors, [field]: error });
   };
 
   // ✅ FIX: Get variation image for cart items with selectedImageIndex
   const getItemImage = (item: CartItem) => {
     if (!item?.product) return '';
-    
+
     // ✅ FIXED: First check if we have a selected image index
     if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
       if (item.product.variations && item.variationId && item.product.variations.length > 0) {
@@ -284,7 +287,7 @@ export default function Checkout() {
         }
       }
     }
-    
+
     // If no selected image index or variation not found, use the old logic
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
@@ -295,7 +298,7 @@ export default function Checkout() {
         return variation.image;
       }
     }
-    
+
     if (item.product.variations && item.product.variations.length > 0) {
       const firstVariation = item.product.variations[0];
       if (firstVariation.images && firstVariation.images.length > 0) {
@@ -305,36 +308,50 @@ export default function Checkout() {
         return firstVariation.image;
       }
     }
-    
+
     return item.product.image || '';
   };
 
   // ✅ FIX: Get variation color name with defensive checks
   const getItemColorName = (item: CartItem) => {
     if (item.selectedColor) return item.selectedColor;
-    
+
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
       if (variation) {
         return variation.colorName || variation.color || '';
       }
     }
-    
+
     return '';
   };
 
   // ✅ FIX: Get variation color code with defensive checks
   const getItemColorCode = (item: CartItem) => {
     if (item.selectedColorCode) return item.selectedColorCode;
-    
+
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
       const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
       if (variation && variation.colorCode) {
         return variation.colorCode;
       }
     }
-    
+
     return '#000000';
+  };
+
+  const getAddonPrice = (item: CartItem) => {
+    if (!item.variationId || (!item.selectedSize && !item.selectedWeight)) return 0;
+    const variation = item.product.variations?.find((v: CartItemVariation) => v._id === item.variationId);
+    if (!variation) return 0;
+
+    if (item.selectedSize) {
+      return (variation as any).sizes?.find((s: any) => s.size === item.selectedSize)?.price || 0;
+    }
+    if (item.selectedWeight) {
+      return (variation as any).weights?.find((w: any) => w.weight === item.selectedWeight)?.price || 0;
+    }
+    return 0;
   };
 
   async function handlePlaceOrder() {
@@ -352,9 +369,10 @@ export default function Checkout() {
 
       // Use selectedCartItems
       const items = selectedCartItems.map(it => {
+        const basePrice = it.price || it.product.price;
         const itemPrice = it.product.discount && it.product.discount > 0
-          ? Math.round(it.product.price * (1 - it.product.discount / 100))
-          : it.product.price;
+          ? Math.round(basePrice * (1 - it.product.discount / 100))
+          : basePrice;
 
         const itemColorName = getItemColorName(it);
         const itemColorCode = getItemColorCode(it);
@@ -366,8 +384,10 @@ export default function Checkout() {
           color: itemColorName || undefined,
           colorCode: itemColorCode || undefined,
           variationId: it.variationId || undefined,
+          selectedSize: it.selectedSize || undefined,
+          selectedWeight: it.selectedWeight || undefined,
           shippingFee: it.product.shippingFee || 0,
-          selectedImageIndex: it.selectedImageIndex || 0  // ✅ ADDED: Include selected image index in order
+          selectedImageIndex: it.selectedImageIndex || 0
         };
       });
 
@@ -391,7 +411,7 @@ export default function Checkout() {
 
       const res = await api.post('/orders', orderData);
       const orderId = res.data._id;
-      
+
       // Clear only selected items from cart after successful order creation
       selectedCartItems.forEach(it => {
         cart.removeFromCart(it.product._id, it.variationId);
@@ -517,11 +537,10 @@ export default function Checkout() {
                         onChange={handleChange}
                         onBlur={() => handleBlur('name')}
                         placeholder="Enter your full name"
-                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${
-                          touchedFields.name && formErrors.name 
-                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
-                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                        }`}
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.name && formErrors.name
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
                         aria-label="Recipient's full name"
                       />
                       {touchedFields.name && formErrors.name && (
@@ -547,11 +566,10 @@ export default function Checkout() {
                         onBlur={() => handleBlur('address')}
                         placeholder="House number, street name, apartment/suite"
                         rows={3}
-                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all resize-none ${
-                          touchedFields.address && formErrors.address 
-                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
-                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                        }`}
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all resize-none ${touchedFields.address && formErrors.address
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
                         aria-label="Complete shipping address"
                       />
                       {touchedFields.address && formErrors.address && (
@@ -577,11 +595,10 @@ export default function Checkout() {
                         onChange={handleChange}
                         onBlur={() => handleBlur('city')}
                         placeholder="e.g., Colombo or New York"
-                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${
-                          touchedFields.city && formErrors.city 
-                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
-                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                        }`}
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.city && formErrors.city
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
                         aria-label="City or state"
                       />
                       {touchedFields.city && formErrors.city && (
@@ -607,11 +624,10 @@ export default function Checkout() {
                         onChange={handleChange}
                         onBlur={() => handleBlur('postalCode')}
                         placeholder="e.g., 10100"
-                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${
-                          touchedFields.postalCode && formErrors.postalCode 
-                            ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
-                            : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                        }`}
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.postalCode && formErrors.postalCode
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
                         aria-label="Postal code"
                       />
                       {touchedFields.postalCode && formErrors.postalCode && (
@@ -652,7 +668,7 @@ export default function Checkout() {
                             </svg>
                           </div>
                         </div>
-                        
+
                         {/* Phone Number Input */}
                         <div className="flex-1">
                           <input
@@ -662,11 +678,10 @@ export default function Checkout() {
                             onChange={handleChange}
                             onBlur={() => handleBlur('phone')}
                             placeholder={`e.g., ${currentCountry.example}`}
-                            className={`w-full text-sm sm:text-base px-4 py-3 rounded-lg border focus:outline-none transition-all ${
-                              touchedFields.phone && formErrors.phone 
-                                ? 'border-red-500 focus:ring-2 focus:ring-red-100' 
-                                : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-                            }`}
+                            className={`w-full text-sm sm:text-base px-4 py-3 rounded-lg border focus:outline-none transition-all ${touchedFields.phone && formErrors.phone
+                              ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                              : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                              }`}
                             aria-label="Phone number"
                           />
                           {touchedFields.phone && formErrors.phone ? (
@@ -686,7 +701,7 @@ export default function Checkout() {
                           )}
                         </div>
                       </div>
-                      
+
                       {/* Country Information */}
                       <div className="mt-2 p-2 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20">
                         <div className="text-xs text-gray-600 flex items-center gap-2">
@@ -738,14 +753,15 @@ export default function Checkout() {
 
               {step === 2 && (
                 <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
-                  <div className="space-y-4">
-                    {selectedCartItems.map(it => {
+                  <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto scrollbar-hide pr-2">
+                    {selectedCartItems.map((it) => {
                       const itemImage = getItemImage(it);
                       const itemColorName = getItemColorName(it);
                       const itemColorCode = getItemColorCode(it);
-                      
+                      const itemKey = cart.getItemKey(it as any);
+
                       return (
-                        <div key={it.product._id + (it.variationId || '')} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 border border-[#d97706]/20 rounded-lg hover:bg-[#d97706]/5 transition-colors">
+                        <div key={itemKey} className="py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center gap-4 group">
                           {/* Product Image - Mobile: Full width, Desktop: Fixed */}
                           <div className="flex items-center gap-3 sm:gap-4 sm:flex-shrink-0">
                             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-2">
@@ -756,7 +772,7 @@ export default function Checkout() {
                                 loading="lazy"
                               />
                             </div>
-                            
+
                             {/* Product Info - Mobile: Stacked, Desktop: Inline */}
                             <div className="flex-1 sm:hidden">
                               <h4 className="font-medium text-gray-900 text-sm sm:text-base mb-1">{it.product.name}</h4>
@@ -775,7 +791,7 @@ export default function Checkout() {
                               <p className="text-xs sm:text-sm text-[#d97706]">Quantity: {it.quantity}</p>
                             </div>
                           </div>
-                          
+
                           {/* Desktop Product Info */}
                           <div className="hidden sm:block flex-1 min-w-0">
                             <h4 className="font-medium text-gray-900 text-base mb-1">{it.product.name}</h4>
@@ -792,8 +808,18 @@ export default function Checkout() {
                               </div>
                             )}
                             <p className="text-sm text-[#d97706]">Quantity: {it.quantity}</p>
+                            {(it.selectedSize || it.selectedWeight) && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="text-xs text-indigo-600 font-medium whitespace-nowrap">
+                                  {it.selectedSize ? `Size: ${it.selectedSize}` : `Weight: ${it.selectedWeight}`}
+                                </span>
+                                {getAddonPrice(it) > 0 && (
+                                  <span className="text-[10px] text-indigo-400 font-medium opacity-80">(+${getAddonPrice(it)})</span>
+                                )}
+                              </div>
+                            )}
                           </div>
-                          
+
                           {/* Price Section - Mobile: Full width with flex, Desktop: Fixed */}
                           <div className="flex justify-between items-center sm:block sm:text-right mt-2 sm:mt-0">
                             <div className="sm:hidden">
@@ -801,10 +827,10 @@ export default function Checkout() {
                             </div>
                             <div>
                               <div className="font-bold text-gray-900 text-sm sm:text-base">
-                                ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+                                ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                               </div>
                               <div className="text-xs sm:text-sm text-[#d97706]">
-                                ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} each
+                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()} each
                               </div>
                             </div>
                           </div>
@@ -989,9 +1015,9 @@ export default function Checkout() {
                     const itemImage = getItemImage(it);
                     const itemColorName = getItemColorName(it);
                     const itemColorCode = getItemColorCode(it);
-                    
+
                     return (
-                      <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-3">
+                      <div key={cart.getItemKey(it as any)} className="flex items-center gap-3">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-1 flex-shrink-0">
                           <img
                             src={getImageUrl(itemImage)}
@@ -1012,9 +1038,19 @@ export default function Checkout() {
                             </div>
                           )}
                           <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
+                          {(it.selectedSize || it.selectedWeight) && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[10px] text-indigo-600 font-medium">
+                                {it.selectedSize || it.selectedWeight}
+                              </span>
+                              {getAddonPrice(it) > 0 && (
+                                <span className="text-[9px] text-indigo-400 opacity-70">(+${getAddonPrice(it)})</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-900">
-                          ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+                          ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                         </div>
                       </div>
                     );
@@ -1032,7 +1068,7 @@ export default function Checkout() {
                   <div className="flex flex-col">
                     <span className="text-sm sm:text-base text-gray-600">Shipping</span>
                     <div className="mt-1 space-y-1">
-                      {Array.from(new Set(selectedCartItems.map(it => it.product._id))).map(productId => {                        
+                      {Array.from(new Set(selectedCartItems.map(it => it.product._id))).map(productId => {
                         const item = selectedCartItems.find(it => it.product._id === productId);
                         if (!item) return null;
                         return (

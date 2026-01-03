@@ -135,6 +135,8 @@ export default function AdminOrders() {
                   <td>
                     <strong>${item.product?.name || 'Product'}</strong>
                     ${item.color ? `<br><span style="font-size: 11px; color: #64748b;">Color: <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${item.colorCode || '#000'}; border: 1px solid #ccc; vertical-align: middle;"></span> ${item.color}</span>` : ''}
+                    ${item.selectedSize ? `<br><span style="font-size: 11px; color: #4338ca;">Size: ${item.selectedSize}</span>` : ''}
+                    ${item.selectedWeight ? `<br><span style="font-size: 11px; color: #4338ca;">Weight: ${item.selectedWeight}</span>` : ''}
                     ${item.product?.seller ? `<br><span style="font-size: 11px; color: #64748b;">Seller: ${item.product.seller.businessName || item.product.seller.name}</span>` : ''}
                   </td>
                   <td style="text-align: center;">${item.quantity}</td>
@@ -206,14 +208,23 @@ export default function AdminOrders() {
     try {
       setUpdateLoading(true);
       setConfirmDialog({ open: false, orderId: '', newStatus: '' });
-      await api.put(`/orders/${orderId}/status`, { status: newStatus });
+      const response = await api.put(`/orders/${orderId}/status`, { status: newStatus });
+
+      // Show success message from backend
+      if (response.data.message) {
+        alert(response.data.message);
+      }
+
       await fetchOrders(); // Refresh list
       if (selectedOrder && selectedOrder._id === orderId) {
-        setSelectedOrder((prev: any) => ({ ...prev, status: newStatus }));
+        // Update the selected order with the new data from backend
+        const updatedOrder = response.data.order;
+        setSelectedOrder(updatedOrder);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update status", error);
-      alert("Failed to update status");
+      const errorMessage = error?.response?.data?.message || "Failed to update status";
+      alert(errorMessage);
     } finally {
       setUpdateLoading(false);
     }
@@ -451,11 +462,24 @@ export default function AdminOrders() {
                     <h4 className="text-xs font-semibold text-gray-500 mb-4">Order Logic</h4>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-slate-500">Current Status</span>
+                        <span className="text-xs font-semibold text-slate-500">Overall Order Status</span>
                         <span className={`px-4 py-1.5 rounded-full text-xs font-semibold capitalize border ${getStatusBadge(selectedOrder.status)}`}>
                           {selectedOrder.status}
                         </span>
                       </div>
+
+                      {/* Admin-specific fulfillment status */}
+                      {selectedOrder.items.some((item: any) => !item.product?.seller) && (
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-200/50">
+                          <span className="text-xs font-semibold text-slate-500">Admin Fulfillment Status</span>
+                          <span className={`px-4 py-1.5 rounded-full text-xs font-semibold capitalize border ${getStatusBadge(
+                            selectedOrder.items.find((item: any) => !item.product?.seller).status
+                          )}`}>
+                            {selectedOrder.items.find((item: any) => !item.product?.seller).status}
+                          </span>
+                        </div>
+                      )}
+
                       <div className="pt-4 space-y-2">
                         <label className="text-xs font-semibold text-gray-500">Change Status</label>
                         <div className="flex flex-wrap gap-2">
@@ -464,13 +488,12 @@ export default function AdminOrders() {
                               key={s}
                               disabled={updateLoading || selectedOrder.status === 'delivered'}
                               onClick={() => handleUpdateStatus(selectedOrder._id, s)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
-                                selectedOrder.status === s 
-                                  ? 'bg-orange-600 text-white shadow-lg' 
-                                  : selectedOrder.status === 'delivered'
+                              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${selectedOrder.status === s
+                                ? 'bg-orange-600 text-white shadow-lg'
+                                : selectedOrder.status === 'delivered'
                                   ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
                                   : 'bg-white border border-slate-200 text-slate-500 hover:border-orange-500 hover:text-orange-600'
-                              }`}
+                                }`}
                             >
                               {s}
                             </button>
@@ -489,7 +512,7 @@ export default function AdminOrders() {
                     <h4 className="text-xs font-semibold text-gray-500 mb-6">Cart Items</h4>
                     <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                       {selectedOrder.items.map((item: any) => (
-                        <div key={item._id} className="flex items-center gap-4 group">
+                        <div key={item._id} className="flex items-center gap-4 group p-3 rounded-xl hover:bg-slate-50 transition-colors">
                           <div className="w-16 h-16 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 group-hover:border-orange-200 transition-colors">
                             <img src={getImageUrl(item.product?.image)} className="w-full h-full object-contain p-2" alt={item.product?.name} />
                           </div>
@@ -504,18 +527,32 @@ export default function AdminOrders() {
                                 <span className="text-xs text-gray-500">{item.color}</span>
                               </div>
                             )}
-                            {item.product?.seller && (
+                            {(item.selectedSize || item.selectedWeight) && (
+                              <div className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider mt-1">
+                                {item.selectedSize ? `Size: ${item.selectedSize}` : `Weight: ${item.selectedWeight}`}
+                              </div>
+                            )}
+                            {item.product?.seller ? (
                               <div className="text-[10px] text-blue-600 font-bold uppercase tracking-wider mt-1">
                                 Seller: {item.product.seller.businessName || item.product.seller.name}
                               </div>
+                            ) : (
+                              <div className="text-[10px] text-green-600 font-bold uppercase tracking-wider mt-1">
+                                Admin Product
+                              </div>
                             )}
-                            <div className="text-xs text-slate-400">
-                              {item.quantity} × $ {item.price.toLocaleString()}
-                              {item.shippingFee > 0 && (
-                                <span className="ml-1 text-[#d97706] font-medium">
-                                  (+ $ {item.shippingFee.toLocaleString()} Shipping)
-                                </span>
-                              )}
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="text-xs text-slate-400">
+                                {item.quantity} × $ {item.price.toLocaleString()}
+                                {item.shippingFee > 0 && (
+                                  <span className="ml-1 text-[#d97706] font-medium">
+                                    (+ $ {item.shippingFee.toLocaleString()} Shipping)
+                                  </span>
+                                )}
+                              </div>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize border ${getStatusBadge(item.status)}`}>
+                                {item.status}
+                              </span>
                             </div>
                           </div>
                           <div className="text-right font-bold text-slate-900 text-sm">
@@ -573,11 +610,11 @@ export default function AdminOrders() {
             </div>
             <div className="p-6 space-y-4">
               <p className="text-gray-700">
-                Are you sure you want to change the order status to{' '}
+                Are you sure you want to change the status to{' '}
                 <span className="font-bold text-primary1 capitalize">{confirmDialog.newStatus}</span>?
               </p>
               <p className="text-sm text-gray-500">
-                This action will update the order status and notify the customer.
+                This will update the status of <strong>admin-owned products only</strong> (items without a seller) in this order and notify the customer.
               </p>
             </div>
             <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">

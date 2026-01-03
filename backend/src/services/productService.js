@@ -24,13 +24,36 @@ exports.handleOrderPayment = async (order) => {
         );
         
         if (targetVariant) {
-          targetVariant.stock = Math.max(0, targetVariant.stock - item.quantity);
+          if (targetVariant.variantType === 'size' && item.selectedSize) {
+            const sizeOpt = targetVariant.sizes.find(s => s.size === item.selectedSize);
+            if (sizeOpt) sizeOpt.stock = Math.max(0, sizeOpt.stock - item.quantity);
+          } else if (targetVariant.variantType === 'weight' && item.selectedWeight) {
+            const weightOpt = targetVariant.weights.find(w => w.weight === item.selectedWeight);
+            if (weightOpt) weightOpt.stock = Math.max(0, weightOpt.stock - item.quantity);
+          } else {
+            targetVariant.stock = Math.max(0, targetVariant.stock - item.quantity);
+          }
           variantFound = true;
         }
       }
       
-      // Update overall product stock and sales count
-      product.stock = Math.max(0, product.stock - item.quantity);
+      // Recalculate overall product stock
+      let totalStock = 0;
+      if (product.colorVariants && product.colorVariants.length > 0) {
+        totalStock = product.colorVariants.reduce((sum, variant) => {
+          if (variant.variantType === 'size' && variant.sizes) {
+            return sum + variant.sizes.reduce((s, size) => s + (Number(size.stock) || 0), 0);
+          } else if (variant.variantType === 'weight' && variant.weights) {
+            return sum + variant.weights.reduce((w, weight) => w + (Number(weight.stock) || 0), 0);
+          } else {
+            return sum + (Number(variant.stock) || 0);
+          }
+        }, 0);
+      } else {
+        totalStock = Math.max(0, product.stock - item.quantity);
+      }
+      
+      product.stock = totalStock;
       product.sold = (product.sold || 0) + item.quantity;
       
       await product.save();

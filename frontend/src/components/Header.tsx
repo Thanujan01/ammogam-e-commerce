@@ -130,7 +130,7 @@ export default function Header() {
       // Check both desktop and mobile search refs
       const isOutsideDesktopSearch = searchRef.current && !searchRef.current.contains(event.target as Node);
       const isOutsideMobileSearch = mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node);
-      
+
       if (isOutsideDesktopSearch && isOutsideMobileSearch) {
         setShowSuggestions(false);
       }
@@ -291,7 +291,7 @@ export default function Header() {
   const handleSuggestionClick = (suggestion: any) => {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
+
     if (suggestion.type === 'category') {
       navigate(`/products?category=${suggestion.id}`);
     } else if (suggestion.type === 'subcategory') {
@@ -299,7 +299,7 @@ export default function Header() {
     } else if (suggestion.type === 'product') {
       navigate(`/products/${suggestion.id}`);
     }
-    
+
     // Clean up UI states
     setSearchQuery('');
     setShowSuggestions(false);
@@ -322,7 +322,7 @@ export default function Header() {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}`);
-    
+
     // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -336,7 +336,7 @@ export default function Header() {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}&subcategory=${encodeURIComponent(subcategory)}`);
-    
+
     // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -350,7 +350,7 @@ export default function Header() {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}`);
-    
+
     // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -676,7 +676,12 @@ export default function Header() {
               </Link>
 
               {/* Desktop User Profile */}
-              {auth.user ? (
+              {auth.loading ? (
+                <div className="hidden lg:flex items-center gap-2 p-2">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse"></div>
+                  <div className="w-20 h-4 bg-gray-100 animate-pulse rounded"></div>
+                </div>
+              ) : auth.user ? (
                 <div className="hidden lg:block relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
@@ -1216,9 +1221,9 @@ export default function Header() {
                 <div className="mt-6 pt-4 border-t">
                   <div className="text-xs font-bold text-gray-500 uppercase mb-3 px-3">My Account</div>
                   <div className="space-y-0">
-                    <Link 
-                      to="/dashboard" 
-                      className="mobile-nav-link" 
+                    <Link
+                      to="/dashboard"
+                      className="mobile-nav-link"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setIsMenuOpen(false);
@@ -1226,9 +1231,9 @@ export default function Header() {
                     >
                       Dashboard
                     </Link>
-                    <Link 
-                      to="/wishlist" 
-                      className="mobile-nav-link" 
+                    <Link
+                      to="/wishlist"
+                      className="mobile-nav-link"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setIsMenuOpen(false);
@@ -1236,9 +1241,9 @@ export default function Header() {
                     >
                       Wishlist
                     </Link>
-                    <Link 
-                      to="/notifications" 
-                      className="mobile-nav-link" 
+                    <Link
+                      to="/notifications"
+                      className="mobile-nav-link"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setIsMenuOpen(false);
