@@ -42,11 +42,26 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
     const validateName = (value: string) => {
         if (!value.trim()) return 'Name is required';
         if (value.trim().length < 2) return 'Name must be at least 2 characters';
+        
+        // Check if name starts with space
+        if (value.startsWith(' ')) return 'Name should not start with a space';
+        
+        // Check if name contains only letters and spaces
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!nameRegex.test(value)) return 'Name can only contain letters and spaces';
+        
         return '';
     };
 
     const validateEmail = (value: string) => {
         if (!value) return 'Email is required';
+        
+        // Check if email starts with space
+        if (value.startsWith(' ')) return 'Email should not start with a space';
+        
+        // Check if email contains spaces anywhere (not just at start)
+        if (/\s/.test(value)) return 'Email should not contain any spaces';
+        
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) return 'Please enter a valid email address';
         return '';
@@ -166,6 +181,20 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
         setLocalPhone(limitedDigits);
     };
 
+    // Handle name change - prevent non-letter characters except spaces
+    const handleNameChange = (value: string) => {
+        // Only allow letters and spaces
+        const filteredValue = value.replace(/[^A-Za-z\s]/g, '');
+        setName(filteredValue);
+    };
+
+    // Handle email change - prevent ANY spaces in email
+    const handleEmailChange = (value: string) => {
+        // Remove ALL spaces from email (not just leading spaces)
+        const noSpacesValue = value.replace(/\s/g, '');
+        setEmail(noSpacesValue);
+    };
+
     // Handle country selection
     const handleCountrySelect = (country: any) => {
         setSelectedCountry(country);
@@ -272,7 +301,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                             }`}
                             placeholder="Enter your full name"
                             value={name}
-                            onChange={e => setName(e.target.value)}
+                            onChange={e => handleNameChange(e.target.value)}
                             onBlur={() => handleBlur('name')}
                             disabled={loading}
                         />
@@ -302,7 +331,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                             }`}
                             placeholder="Enter your email"
                             value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            onChange={e => handleEmailChange(e.target.value)}
                             onBlur={() => handleBlur('email')}
                             disabled={loading}
                         />
@@ -329,9 +358,6 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                                 <div className="text-sm font-medium text-gray-700">
                                     {selectedCountry.dialCode} ({selectedCountry.name}) {selectedCountry.flag}
                                 </div>
-                                {/* <div className="text-xs text-gray-500">
-                                    Country code is automatically added to your number
-                                </div> */}
                             </div>
                             <button
                                 type="button"
