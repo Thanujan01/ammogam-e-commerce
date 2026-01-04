@@ -18,6 +18,7 @@ import PaymentFailed from './pages/PaymentFailed';
 import OrderDetails from './pages/OrderDetails';
 import Notifications from './pages/Notifications';
 import Wishlist from './pages/Wishlist';
+import AboutUs from './pages/AboutUs'; // Fixed import
 
 // Legal/Policy Pages
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -47,6 +48,7 @@ import SellerProfile from './pages/Seller/SellerProfile';
 import SellerNotifications from './pages/Seller/SellerNotifications';
 
 import { Toaster } from 'react-hot-toast';
+import { Link } from 'react-router-dom'; // Moved import to top
 
 function App() {
   const location = useLocation();
@@ -64,6 +66,7 @@ function App() {
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/about" element={<AboutUs />} /> {/* About Us route */}
 
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
@@ -230,8 +233,5 @@ function App() {
     </div>
   );
 }
-
-// Add this import if not already present
-import { Link } from 'react-router-dom';
 
 export default App;

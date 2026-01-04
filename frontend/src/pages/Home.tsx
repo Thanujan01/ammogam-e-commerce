@@ -11,10 +11,10 @@ import {
   FaGem, FaGlobeAsia, FaTools,
   FaLaptop, FaPrint,
   FaTag,
-  FaRuler, FaCheckCircle,
+   FaCheckCircle,
   FaFire, FaCrown, FaCartPlus,
   FaChevronRight as FaChevronRightIcon, FaWallet,
-  FaTshirt as FaTShirt, FaPalette as FaPaletteIcon, FaHome,
+  FaTshirt as FaTShirt, FaPalette as  FaHome,
   FaImages, FaCreditCard, FaClock, FaCloudSun,
   FaPaw, FaBaby as FaBabyIcon, FaShoppingBag,
   FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid
@@ -746,20 +746,22 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Category Filter - Horizontal scrolling with hidden scrollbar */}
-          <div className="flex gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 sm:pb-3 px-1 justify-center sm:justify-start scrollbar-hide">
-            {categoryFilters.map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full whitespace-nowrap transition-all duration-300 text-xs sm:text-sm ${activeCategory === category
-                  ? 'bg-[#8B4513] text-white shadow-lg'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
-                  }`}
-              >
-                {category}
-              </button>
-            ))}
+          {/* Category Filter - Horizontal scrolling with hidden scrollbar - FIXED */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 scrollbar-hide">
+              {categoryFilters.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full whitespace-nowrap transition-all duration-300 text-xs sm:text-sm flex-shrink-0 ${activeCategory === category
+                    ? 'bg-[#8B4513] text-white shadow-lg'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
+                    }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
 
           {loading ? (
@@ -805,14 +807,14 @@ export default function Home() {
                         />
 
                         {/* Brand Badge */}
-                        {product.badge && (
+                        {/* {product.badge && (
                           <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2">
                             <div className="bg-amber-600 text-white text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1">
                               {product.badgeIcon}
                               <span className="text-xs">{product.badge}</span>
                             </div>
                           </div>
-                        )}
+                        )} */}
 
                         {/* Discount Badge */}
                         {product.discountPercent && (
@@ -855,7 +857,7 @@ export default function Home() {
                         </h3>
 
                         {/* Color and Size Options */}
-                        <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
+                        {/* <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
                           {product.colorOptions && (
                             <div className="flex items-center gap-0.5">
                               <FaPaletteIcon className="text-xs text-gray-500" />
@@ -868,7 +870,7 @@ export default function Home() {
                               <span className="text-xs text-gray-600">Size</span>
                             </div>
                           )}
-                        </div>
+                        </div> */}
 
                         {/* Price Section */}
                         <div className="mb-1.5 sm:mb-2">
