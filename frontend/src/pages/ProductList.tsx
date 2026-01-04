@@ -54,14 +54,14 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
       {/* Brand Badge - Mobile: smaller, Desktop: regular */}
-      {product.badge && !showCategoryBadge && !isOutOfStock && (
+      {/* {product.badge && !showCategoryBadge && !isOutOfStock && (
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
           <div className="bg-amber-600 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1">
             {product.badgeIcon && <span className="hidden sm:inline">{product.badgeIcon}</span>}
             <span>{product.badge}</span>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Quick Add Icon - Gray for out of stock, amber for in stock */}
       <button
@@ -414,7 +414,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
         <div className="sm:hidden absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
           <button
             onClick={scrollLeft}
-            className="w-8 h-8 bg-white/90 shadow-md rounded-full flex items-center justify-center"
+            className="w-4 h-4 bg-white/90 shadow-md rounded-full flex items-center justify-center"
           >
             <FaAngleLeft className="text-gray-600 text-sm" />
           </button>
@@ -423,7 +423,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
         <div className="sm:hidden absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
           <button
             onClick={scrollRight}
-            className="w-8 h-8 bg-white/90 shadow-md rounded-full flex items-center justify-center"
+            className="w-4 h-4 bg-white/90 shadow-md rounded-full flex items-center justify-center"
           >
             <FaAngleRight className="text-gray-600 text-sm" />
           </button>

@@ -11,7 +11,7 @@ import {
   FaUsers, FaShieldAlt, FaCreditCard, FaFire,
   FaRegHeart, FaHeart, FaBell, FaAngleRight,
   FaChevronRight, FaArrowRight,
-  FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,
+  FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,FaInfoCircle,
   FaTools, FaPrint, FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet
 } from 'react-icons/fa';
 import { api } from '../api/api';
@@ -373,6 +373,8 @@ export default function Header() {
     { name: 'Home', path: '/', icon: <FaHome className="text-lg" /> },
     { name: 'Products', path: '/products', icon: <FaShoppingBag className="text-lg" /> },
     { name: 'Wishlist', path: '/wishlist', icon: <FaHeart className="text-lg text-red-500" /> },
+    { name: 'About Us', path: '/about', icon: <FaInfoCircle className="text-lg" /> },
+    
   ];
 
   const adminFeatures = [
