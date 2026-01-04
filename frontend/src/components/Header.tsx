@@ -43,7 +43,7 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
   return <IconComponent className={className} />;
 };
 
-import logoImage from '../assets/logo.jpeg';
+import logoImage from '../assets/logo.png';
 
 export default function Header() {
   const auth = useContext(AuthContext)!;
