@@ -47,7 +47,7 @@ const AboutUs = () => {
               <FaUserShield className="text-white text-2xl sm:text-3xl" />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 tracking-tight">
-              AMMOGAM E WORLD
+              AMMOGAM E WORLD & COMPANY INC
             </h1>
             {/* <p className="text-lg sm:text-xl text-amber-100 max-w-3xl mx-auto">
               Your Premier Destination for Quality Products & Secure Shopping Experience
