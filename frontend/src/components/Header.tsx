@@ -460,7 +460,7 @@ export default function Header() {
       <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white border-b'}`}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Mobile Logo & Menu Button - UPDATED WITH ROUND BACKGROUND */}
+            {/* Mobile Logo & Menu Button */}
             <div className="flex items-center gap-3 lg:hidden">
               <button
                 className="p-2 rounded-lg hover:bg-amber-50 transition-colors"
@@ -470,39 +470,31 @@ export default function Header() {
                 {isMenuOpen ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
               </button>
 
-              <Link 
-                to="/" 
-                className="flex items-center justify-center" 
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              >
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-[#8B4513] to-[#A0522D] flex items-center justify-center overflow-hidden shadow-md">
-                  <img
-                    src={logoImage}
-                    alt="AMMOGAM Logo"
-                    className="h-10 w-10 object-contain"
-                  />
-                </div>
-              </Link>
-            </div>
-
-            {/* Desktop Logo - UPDATED WITH ROUND BACKGROUND */}
-            <Link 
-              to="/" 
-              className="hidden lg:flex items-center gap-4 group" 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              <div className="h-14 w-14 rounded-full bg-gradient-to-r from-[#8B4513] to-[#A0522D] flex items-center justify-center overflow-hidden shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+              <Link to="/" className="flex items-center gap-3 w-164" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <img
                   src={logoImage}
                   alt="AMMOGAM Logo"
-                  className="h-18 w-18 object-contain"
+                  className="h-10 w-164 object-contain"
                 />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-gray-900">AMMOGAM</span>
-                {/* <span className="text-xs text-gray-600">Discover amazing deals</span> */}
-              </div>
-            </Link>
+              </Link>
+            </div>
+
+            {/* Desktop Logo */}
+           <Link
+  to="/"
+  className="hidden lg:flex items-center gap-1 group"
+  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+>
+  <img
+    src={logoImage}
+    alt="AMMOGAM Logo"
+    className="h-14 w-auto object-contain"
+  />
+  <span className="text-lg font-bold text-amber-500">
+    AMMOGAM
+  </span>
+</Link>
+
 
             {/* Desktop Search Bar with Suggestions */}
             <div className="hidden lg:flex flex-1 max-w-2xl mx-4 xl:mx-8" ref={searchRef}>
@@ -1035,14 +1027,12 @@ export default function Header() {
           <div className="p-4 bg-gradient-to-b from-amber-50 to-white border-b">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-[#8B4513] to-[#A0522D] flex items-center justify-center overflow-hidden">
-                  <img
-                    src={logoImage}
-                    alt="AMMOGAM Logo"
-                    className="h-8 w-8 object-contain"
-                  />
-                </div>
-                <span className="text-lg font-bold text-gray-900">AMMOGAM</span>
+                {/* <img
+                  src={logoImage}
+                  alt="AMMOGAM Logo"
+                  className="h-8 w-auto object-contain"
+                /> */}
+                {/* <span className="text-xl font-bold text-amber-900">AMMOGAM</span> */}
               </div>
               <button
                 onClick={() => setIsMenuOpen(false)}
@@ -1051,6 +1041,54 @@ export default function Header() {
                 <FaTimes className="text-lg" />
               </button>
             </div>
+
+            {/* Mobile Search in Menu */}
+            {/* <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full pl-10 pr-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
+                />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500" />
+
+                
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border max-h-64 overflow-y-auto z-50">
+                    {searchSuggestions.map((suggestion, index) => (
+                      <button
+                        key={`mobile-${suggestion.type}-${suggestion.id}-${index}`}
+                        type='button'
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3"
+                      >
+                        {suggestion.type === 'category' && (
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${suggestion.color} flex items-center justify-center`}>
+                            <CategoryIcon name={suggestion.icon} className="text-white text-sm" />
+                          </div>
+                        )}
+                        {suggestion.type === 'subcategory' && (
+                          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <FaChevronRight className="text-amber-600 text-xs" />
+                          </div>
+                        )}
+                        {suggestion.type === 'product' && (
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                            <FaShoppingBag className="text-gray-600 text-sm" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-800 text-sm">{suggestion.displayName}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </form> */}
 
             {/* User Info */}
             {auth.user ? (
