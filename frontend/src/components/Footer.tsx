@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom';
 import {
   FaFacebook, FaInstagram,
-  FaShieldAlt, FaTruck, FaHeadset, FaShoppingBag,
-  FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcAmex
+  FaShieldAlt, FaTruck, FaHeadset, FaShoppingBag
 } from 'react-icons/fa';
 import { FaTiktok } from 'react-icons/fa6';
+
+// Assuming you have these images in your project:
+// visa-logo.png, mastercard-logo.png, amex-logo.png, discover-logo.png
+import visaLogo from '../assets/visa-logo.png';
+import mastercardLogo from '../assets/mastercard-logo.png';
+import amexLogo from '../assets/amex-logo.png';
+import discoverLogo from '../assets/discover-logo.png';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -22,10 +28,22 @@ export default function Footer() {
   ];
 
   const paymentMethods = [
-    { icon: <FaCcVisa className="text-2xl" />, name: 'Visa', color: 'text-blue-600' },
-    { icon: <FaCcMastercard className="text-2xl" />, name: 'Mastercard', color: 'text-red-600' },
-    { icon: <FaCcAmex className="text-2xl" />, name: 'American Express', color: 'text-blue-800' },
-    { icon: <FaCcPaypal className="text-2xl" />, name: 'PayPal', color: 'text-blue-500' },
+    { 
+      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
+      name: 'Visa' 
+    },
+    { 
+      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
+      name: 'Mastercard' 
+    },
+    { 
+      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
+      name: 'American Express' 
+    },
+    { 
+      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
+      name: 'Discover' 
+    },
   ];
 
   return (
@@ -133,11 +151,11 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+              <div className="flex flex-nowrap gap-2 justify-start items-center overflow-x-auto pb-2">
                 {paymentMethods.map((method, index) => (
                   <div
                     key={index}
-                    className={`p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 ${method.color} flex items-center justify-center`}
+                    className="p-2 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
                     title={method.name}
                   >
                     {method.icon}
