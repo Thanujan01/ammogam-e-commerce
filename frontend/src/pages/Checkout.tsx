@@ -13,7 +13,7 @@ import {
   FaRegCreditCard, FaTimes,
 } from 'react-icons/fa';
 // import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
-// import { RiSecurePaymentLine } from 'react-icons/ri';
+ //import { RiSecurePaymentLine } from 'react-icons/ri';
 
 
 // Import the same image logos as in the footer
@@ -992,31 +992,50 @@ export default function Checkout() {
               {step === 3 && (
                 <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                   {/* Online Payment Option - Only Option */}
-                  <div className="border border-[#FAF7F4] bg-[#FDDDB6]/10 rounded-xl p-4 sm:p-6 ring-2 ring-[#F4F1EE] ring-offset-2">
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className="p-2 sm:p-3 bg-white text-[#d97706] rounded-lg flex-shrink-0">
-                        <FaCreditCard className="text-lg sm:text-xl" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 text-base sm:text-lg mb-2">Secure Online Payment</h4>
-                       <div className="space-y-4">
-    <div className="flex flex-nowrap gap-0 justify-start items-center overflow-x-auto pb-2">
-      {paymentMethods.map((method, index) => (
-        <div
-          key={index}
-          className="p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
-          title={method.name}
-        >
-          {method.icon}
-        </div>
-      ))}
+                 {/* Online Payment Option - Only Option - MOBILE RESPONSIVE */}
+<div className="border border-[#FAF7F4] bg-[#FDDDB6]/10 rounded-xl p-3 sm:p-4 md:p-6 ring-2 ring-[#F4F1EE] ring-offset-1 sm:ring-offset-2">
+  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+    <div className="flex items-start gap-3 w-full sm:w-auto">
+      <div className="p-2 sm:p-3 bg-white text-[#d97706] rounded-lg flex-shrink-0">
+        <FaCreditCard className="text-base sm:text-lg md:text-xl" />
+      </div>
+      <div className="flex-1 sm:hidden">
+        <h4 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Secure Online Payment</h4>
+      </div>
     </div>
-             
+    
+    <div className="flex-1 w-full">
+      {/* Hidden on mobile, shown on sm+ */}
+      <h4 className="hidden sm:block font-bold text-gray-900 text-base md:text-lg mb-2">Secure Online Payment</h4>
+      
+      {/* Payment Methods - Improved mobile responsiveness */}
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start items-center">
+          {paymentMethods.map((method, index) => (
+            <div
+              key={index}
+              className="p-1.5 sm:p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10"
+              title={method.name}
+            >
+              {method.icon}
             </div>
-                      </div>
-                      <FaCheckCircle className="text-[#d97706] text-lg sm:text-xl flex-shrink-0" />
-                    </div>
-                  </div>
+          ))}
+        </div>
+        
+        {/* Secure SSL Badge - Mobile responsive */}
+        <div className="flex justify-center sm:justify-start">
+          {/* <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#d97706] to-[#b45309] px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded shadow-sm w-fit">
+            <RiSecurePaymentLine className="text-white text-xs sm:text-sm md:text-base" />
+            <span className="text-white text-xs sm:text-xs md:text-sm font-medium">Secure SSL Payment</span>
+          </div> */}
+        </div>
+      </div>
+    </div>
+    
+    {/* Checkmark - Hidden on mobile, shown on sm+ */}
+    <FaCheckCircle className="hidden sm:block text-[#d97706] text-lg sm:text-xl flex-shrink-0" />
+  </div>
+</div>
 
                   {/* Security Notice */}
                   <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-4 sm:p-6">
