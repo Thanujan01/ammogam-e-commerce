@@ -857,7 +857,7 @@ export default function ProductDetail() {
            <div className="mt-8 pt-8 border-t border-gray-200">
   <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
   <div className="space-y-4">
-    <div className="flex flex-nowrap gap-2 justify-start items-center overflow-x-auto pb-2">
+    <div className="flex flex-nowrap gap-0 justify-start items-center overflow-x-auto pb-2">
       {paymentMethods.map((method, index) => (
         <div
           key={index}
