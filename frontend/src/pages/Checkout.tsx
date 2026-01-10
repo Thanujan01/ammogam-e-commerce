@@ -12,8 +12,15 @@ import {
   FaList, FaReceipt, FaArrowRight, FaArrowLeft,
   FaRegCreditCard, FaTimes,
 } from 'react-icons/fa';
-import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
-import { RiSecurePaymentLine } from 'react-icons/ri';
+// import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
+// import { RiSecurePaymentLine } from 'react-icons/ri';
+
+
+// Import the same image logos as in the footer
+import visaLogo from '../assets/visa-logo.png';
+import mastercardLogo from '../assets/mastercard-logo.png';
+import amexLogo from '../assets/amex-logo.png';
+import discoverLogo from '../assets/discover-logo.png';
 
 // Use the actual CartItem type from CartContext instead of redefining
 interface CartItemVariation {
@@ -55,7 +62,24 @@ const countries = [
   { code: 'GB', name: 'UK', dialCode: '+44', digits: 10, example: '2079460958', pattern: /^[1-9][0-9]{9}$/ },
   { code: 'AU', name: 'Australia', dialCode: '+61', digits: 9, example: '412345678', pattern: /^[4-5][0-9]{8}$/ },
 ];
-
+const paymentMethods = [
+    { 
+      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
+      name: 'Visa' 
+    },
+    { 
+      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
+      name: 'Mastercard' 
+    },
+    { 
+      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
+      name: 'American Express' 
+    },
+    { 
+      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
+      name: 'Discover' 
+    },
+  ];
 export default function Checkout() {
   const cart = useContext(CartContext)!;
   const auth = useContext(AuthContext)!;
@@ -968,30 +992,27 @@ export default function Checkout() {
               {step === 3 && (
                 <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                   {/* Online Payment Option - Only Option */}
-                  <div className="border border-[#d97706] bg-[#d97706]/10 rounded-xl p-4 sm:p-6 ring-2 ring-[#d97706] ring-offset-2">
+                  <div className="border border-[#FAF7F4] bg-[#FDDDB6]/10 rounded-xl p-4 sm:p-6 ring-2 ring-[#F4F1EE] ring-offset-2">
                     <div className="flex items-start gap-3 sm:gap-4">
                       <div className="p-2 sm:p-3 bg-white text-[#d97706] rounded-lg flex-shrink-0">
                         <FaCreditCard className="text-lg sm:text-xl" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-900 text-base sm:text-lg mb-2">Secure Online Payment</h4>
-                        <div className="flex items-center flex-wrap gap-2 sm:gap-3 mt-2">
-                          <div className="flex items-center gap-1 bg-white p-1 sm:p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiVisa className="text-blue-800 text-sm sm:text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-white p-1 sm:p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiMastercard className="text-red-600 text-sm sm:text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-white p-1 sm:p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiAmericanexpress className="text-blue-600 text-sm sm:text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-white p-1 sm:p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiDiscover className="text-orange-500 text-sm sm:text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-gradient-to-r from-[#d97706] to-[#b45309] p-1 sm:p-1.5 rounded shadow-sm">
-                            <RiSecurePaymentLine className="text-white text-sm sm:text-base" />
-                          </div>
-                        </div>
+                       <div className="space-y-4">
+    <div className="flex flex-nowrap gap-0 justify-start items-center overflow-x-auto pb-2">
+      {paymentMethods.map((method, index) => (
+        <div
+          key={index}
+          className="p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
+          title={method.name}
+        >
+          {method.icon}
+        </div>
+      ))}
+    </div>
+             
+            </div>
                       </div>
                       <FaCheckCircle className="text-[#d97706] text-lg sm:text-xl flex-shrink-0" />
                     </div>
