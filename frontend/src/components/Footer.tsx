@@ -147,15 +147,16 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Payment Methods Section */}
+          {/* Payment Methods Section - IMPROVED MOBILE VIEW */}
           <div className="text-center md:text-left">
             <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
             <div className="space-y-4">
-              <div className="flex flex-nowrap gap-2 justify-start items-center overflow-x-auto pb-2">
+              {/* Payment Icons - Improved mobile responsiveness */}
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 pb-2">
                 {paymentMethods.map((method, index) => (
                   <div
                     key={index}
-                    className="p-2 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
+                    className="p-2 bg-gray-800/50 rounded-lg hover:bg-gray-800/80 transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-14 h-9 sm:w-16 sm:h-10"
                     title={method.name}
                   >
                     {method.icon}
@@ -163,7 +164,7 @@ export default function Footer() {
                 ))}
               </div>
               <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-3 md:p-4 border border-amber-800/30">
-                <p className="text-xs md:text-sm text-gray-300">
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                   All transactions are secured with SSL encryption. Your payment information is protected with the highest security standards.
                 </p>
               </div>
