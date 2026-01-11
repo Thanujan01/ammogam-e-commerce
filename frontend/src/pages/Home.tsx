@@ -106,7 +106,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeCategory, setActiveCategory] = useState('All');
+  //const [activeCategory, setActiveCategory] = useState('All');
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
   const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
@@ -117,6 +117,7 @@ export default function Home() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [hoveredRecentlyViewed, setHoveredRecentlyViewed] = useState<string | null>(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const filteredFeaturedProducts = products.slice(0, 12);
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
@@ -459,36 +460,36 @@ export default function Home() {
   };
 
   // Get first 12 products for featured section
-  const featuredProducts = products.slice(0, 12);
+  // const featuredProducts = products.slice(0, 12);
 
   // Filter featured products by category when category is selected
-  const filteredFeaturedProducts = activeCategory === 'All'
-    ? featuredProducts
-    : featuredProducts.filter(product => product.category === activeCategory);
+  // const filteredFeaturedProducts = activeCategory === 'All'
+  //   ? featuredProducts
+  //   : featuredProducts.filter(product => product.category === activeCategory);
 
-  // Categories from your WhatsApp image with item counts from your design
-  const categoryFilters = [
-    'All',
-    'Mobile accessories',
-    'Security cameras',
-    'Men fashion',
-    'Women fashion',
-    'Wallets',
-    'Fashion jewelry',
-    'Pet friendly products',
-    'Baby fashion & toys',
-    'Watches',
-    'Srilankan products',
-    'Indian products',
-    'Climate dress',
-    'Shoes',
-    'Electrical tool & hard ware',
-    'Electronics products',
-    'T. Shirts',
-    'Home kitchen products',
-    'Photo editing',
-    'Print out services'
-  ];
+  // // Categories from your WhatsApp image with item counts from your design
+  // const categoryFilters = [
+  //   'All',
+  //   'Mobile accessories',
+  //   'Security cameras',
+  //   'Men fashion',
+  //   'Women fashion',
+  //   'Wallets',
+  //   'Fashion jewelry',
+  //   'Pet friendly products',
+  //   'Baby fashion & toys',
+  //   'Watches',
+  //   'Srilankan products',
+  //   'Indian products',
+  //   'Climate dress',
+  //   'Shoes',
+  //   'Electrical tool & hard ware',
+  //   'Electronics products',
+  //   'T. Shirts',
+  //   'Home kitchen products',
+  //   'Photo editing',
+  //   'Print out services'
+  // ];
 
   return (
     <div className="min-h-screen w-screen bg-gray-50">
@@ -734,9 +735,9 @@ export default function Home() {
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
-              <p className="text-gray-600 text-sm mt-1">
+              {/* <p className="text-gray-600 text-sm mt-1">
                 Showing {filteredFeaturedProducts.length} of {products.length}+  products
-              </p>
+              </p> */}
             </div>
             <button
               onClick={handleViewAllProducts}
@@ -749,7 +750,7 @@ export default function Home() {
           {/* Category Filter - Horizontal scrolling with hidden scrollbar - FIXED */}
           <div className="mb-6 sm:mb-8">
             <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 scrollbar-hide">
-              {categoryFilters.map((category) => (
+              {/* {categoryFilters.map((category) => (
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
@@ -760,7 +761,7 @@ export default function Home() {
                 >
                   {category}
                 </button>
-              ))}
+              ))} */}
             </div>
           </div>
 
@@ -772,7 +773,7 @@ export default function Home() {
             <>
               {/* Products Grid - Only shows first 12 products */}
               <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
-                {filteredFeaturedProducts.map((product) => {
+                {filteredFeaturedProducts.map((product:any) => {
                   const isOutOfStock = product.stock <= 0;
                   
                   return (
