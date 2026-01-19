@@ -84,9 +84,13 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
         onClick={() => openProductModal(product)}
       >
         <img
-          src={product.image}
+          src={product.image || '/placeholder.png'}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.png';
+          }}
         />
 
         {/* Discount Badge - Mobile: smaller - Only show if not out of stock */}
@@ -743,22 +747,33 @@ export default function ProductList() {
         }));
         setCategories(mergedCategories);
 
-        const dbProducts = productsRes.data.map((p: any) => ({
-          ...p,
-          id: p._id,
-          currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
-          originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
-          discountPercent: p.discount || 0,
-          badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
-          badge: p.badge,
-          categoryName: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
-          categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
-          image: getImageUrl(p.image),
-          rating: p.rating || 0,
-          sold: p.sold || 0,
-          stock: p.stock || 0,
-          subCategory: p.subCategory || ''
-        }));
+        const dbProducts = productsRes.data.map((p: any) => {
+          // Determine the image to use: main image or first color variant image
+          let productImage = p.image;
+          if (!productImage && p.colorVariants && p.colorVariants.length > 0) {
+            const firstVariant = p.colorVariants[0];
+            if (firstVariant.images && firstVariant.images.length > 0) {
+              productImage = firstVariant.images[0];
+            }
+          }
+          
+          return {
+            ...p,
+            id: p._id,
+            currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
+            originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
+            discountPercent: p.discount || 0,
+            badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
+            badge: p.badge,
+            categoryName: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
+            categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
+            image: getImageUrl(productImage),
+            rating: p.rating || 0,
+            sold: p.sold || 0,
+            stock: p.stock || 0,
+            subCategory: p.subCategory || ''
+          };
+        });
         setAllProducts(dbProducts);
       } catch (error) {
         console.error("Failed to fetch data", error);

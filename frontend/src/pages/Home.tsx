@@ -251,7 +251,7 @@ export default function Home() {
           category: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
           categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
           subCategory: p.subCategory || '',
-          image: getImageUrl(p.image),
+          image: getImageUrl(p.image || (p.colorVariants?.[0]?.images?.[0])),
           discountPercent: p.discount,
           colorOptions: true,
           sizeOptions: true,
@@ -802,9 +802,13 @@ export default function Home() {
                         onClick={() => handleProductClick(product.id)}
                       >
                         <img
-                          src={product.image}
+                          src={product.image || '/placeholder.png'}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.png';
+                          }}
                         />
 
                         {/* Brand Badge */}

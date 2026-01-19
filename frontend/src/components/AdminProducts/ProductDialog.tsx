@@ -73,6 +73,8 @@ export default function ProductDialog({
   const [showSectionDropdown, setShowSectionDropdown] = useState(false);
   const [subCategorySearch, setSubCategorySearch] = useState('');
   const [showSubCategoryDropdown, setShowSubCategoryDropdown] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+  const [uploading, setUploading] = useState<{ [key: string]: boolean }>({});
 
   // Maintain local references for file inputs to reset them
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -152,7 +154,26 @@ export default function ProductDialog({
 
   const handleColorVariantChange = (index: number, field: keyof ColorVariant, value: any) => {
     const updated = [...colorVariants];
+    // Ensure the variant exists and has all required properties
+    if (!updated[index]) {
+      updated[index] = {
+        colorName: '',
+        colorCode: '#000000',
+        variantType: 'none',
+        sizes: [],
+        weights: [],
+        stock: 0,
+        images: []
+      };
+    }
+    // Create a new object with the updated field
     updated[index] = { ...updated[index], [field]: value };
+    
+    if (field === 'images') {
+      console.log(`Updating images for variant ${index}:`, value);
+      console.log('Current colorVariants before update:', colorVariants);
+      console.log('Updated variant will be:', updated[index]);
+    }
 
     // If variantType changes, reset specific options
     if (field === 'variantType') {
@@ -172,8 +193,13 @@ export default function ProductDialog({
       }
     }
 
+    console.log('Setting colorVariants to:', updated);
     setColorVariants(updated);
     onChange('colorVariants', updated);
+    
+    if (field === 'images') {
+      console.log('State updated, new colorVariants:', updated);
+    }
   };
 
   const handleAddSizeOption = (variantIndex: number) => {
@@ -230,19 +256,83 @@ export default function ProductDialog({
       return;
     }
 
+    const uploadKey = `${index}-${Date.now()}`;
+    console.log('Starting upload for variant', index, 'file:', file.name, 'key:', uploadKey);
+    setUploading(prev => ({ ...prev, [uploadKey]: true }));
+    setUploadProgress(prev => ({ ...prev, [uploadKey]: 0 }));
+
     const uploadData = new FormData();
     uploadData.append('file', file);
 
     try {
-      const response = await api.post('/uploads/image', uploadData);
+      const response = await api.post('/uploads/image', uploadData, {
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`Upload progress: ${percentCompleted}%`);
+            setUploadProgress(prev => ({ ...prev, [uploadKey]: percentCompleted }));
+          } else {
+            // If total is not available, show indeterminate progress
+            setUploadProgress(prev => ({ ...prev, [uploadKey]: 50 }));
+          }
+        },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 60000, // 60 second timeout for large files
+      });
 
       if (response.data && response.data.url) {
-        const updatedImages = [...colorVariants[index].images, response.data.url];
+        console.log('Upload successful, received URL:', response.data.url);
+        console.log('Current variant images before update:', colorVariants[index].images);
+        setUploadProgress(prev => ({ ...prev, [uploadKey]: 100 }));
+        
+        // Add image to preview immediately
+        const currentImages = colorVariants[index]?.images || [];
+        const updatedImages = [...currentImages, response.data.url];
+        console.log('Updated images array:', updatedImages);
+        console.log('Current variant before update:', colorVariants[index]);
+        
+        // Force state update with a new object reference
         handleColorVariantChange(index, 'images', updatedImages);
+        
+        // Use setTimeout to check state after React has updated
+        setTimeout(() => {
+          console.log('State after update (checking):', colorVariants);
+        }, 100);
+        showToast('Image uploaded successfully!', 'success');
+        
+        // Clear upload state after a short delay
+        setTimeout(() => {
+          setUploading(prev => {
+            const newState = { ...prev };
+            delete newState[uploadKey];
+            return newState;
+          });
+          setUploadProgress(prev => {
+            const newState = { ...prev };
+            delete newState[uploadKey];
+            return newState;
+          });
+        }, 1000);
+      } else {
+        throw new Error('Invalid response: missing URL');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Image upload failed', error);
-      showToast('Failed to upload image. Please check your connection and try again.', 'error');
+      showToast(error.response?.data?.message || 'Failed to upload image. Please check your connection and try again.', 'error');
+      
+      // Clear upload state on error
+      setUploading(prev => {
+        const newState = { ...prev };
+        delete newState[uploadKey];
+        return newState;
+      });
+      setUploadProgress(prev => {
+        const newState = { ...prev };
+        delete newState[uploadKey];
+        return newState;
+      });
     }
   };
 
@@ -881,42 +971,112 @@ export default function ProductDialog({
                               }}
                               className="hidden"
                               id={`color-image-${index}`}
+                              disabled={Object.values(uploading).some(v => v)}
                             />
                             <label
                               htmlFor={`color-image-${index}`}
-                              className="cursor-pointer flex items-center justify-center gap-2 w-full text-xs bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 px-3 py-2.5 rounded-lg font-medium hover:bg-gray-100 hover:border-primary1 hover:text-primary1 transition-all"
+                              className={`cursor-pointer flex items-center justify-center gap-2 w-full text-xs bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 px-3 py-2.5 rounded-lg font-medium hover:bg-gray-100 hover:border-primary1 hover:text-primary1 transition-all ${
+                                Object.values(uploading).some(v => v) ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                             >
                               <FiImage className="w-4 h-4" />
-                              Upload Image File
+                              {Object.values(uploading).some(v => v) ? 'Uploading...' : 'Upload Image File'}
                             </label>
+                            {/* Upload Progress Bar */}
+                            {Object.entries(uploadProgress).map(([key, progress]) => {
+                              const [variantIdx] = key.split('-');
+                              const isUploading = uploading[key];
+                              const variantIndexMatch = parseInt(variantIdx) === index;
+                              
+                              if (variantIndexMatch && (isUploading || progress > 0)) {
+                                return (
+                                  <div key={key} className="mt-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                      <div
+                                        className={`h-2 rounded-full transition-all duration-300 ${
+                                          progress >= 100 ? 'bg-green-500' : 'bg-primary1'
+                                        }`}
+                                        style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+                                      ></div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 text-center">
+                                      {progress < 100 ? `Uploading... ${progress}%` : 'Upload complete!'}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })}
+                            {/* Show uploading indicator even if progress hasn't started */}
+                            {Object.entries(uploading).map(([key, isUploading]) => {
+                              const [variantIdx] = key.split('-');
+                              const variantIndexMatch = parseInt(variantIdx) === index;
+                              const hasProgress = uploadProgress[key] !== undefined;
+                              
+                              if (variantIndexMatch && isUploading && !hasProgress) {
+                                return (
+                                  <div key={`indicator-${key}`} className="mt-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                      <div className="bg-primary1 h-2 rounded-full animate-pulse" style={{ width: '30%' }}></div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 text-center">Preparing upload...</p>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })}
                           </div>
                         )}
 
                         {/* Image Preview Grid */}
-                        {variant.images.length > 0 ? (
-                          <div className="flex gap-3 overflow-x-auto pb-2">
-                            {variant.images.map((imgUrl, imgIndex) => (
-                              <div key={imgIndex} className="relative w-20 h-20 flex-shrink-0 group">
-                                <img
-                                  src={getImageUrl(imgUrl)}
-                                  alt={`Var ${imgIndex}`}
-                                  className="w-full h-full object-cover rounded-lg border border-gray-200 shadow-sm"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveVariantImage(index, imgIndex)}
-                                  className="absolute -top-1.5 -right-1.5 bg-white text-red-500 rounded-full p-0.5 shadow-md border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <FiX className="w-3 h-3" />
-                                </button>
+                        {(() => {
+                          const variantImages = variant.images || [];
+                          console.log(`Rendering preview for variant ${index}, images:`, variantImages);
+                          
+                          if (variantImages.length > 0) {
+                            return (
+                              <div className="flex gap-3 overflow-x-auto pb-2 mt-3">
+                                {variantImages.map((imgUrl, imgIndex) => {
+                                  const imageUrl = getImageUrl(imgUrl);
+                                  console.log(`Rendering image ${imgIndex}:`, imageUrl);
+                                  return (
+                                    <div key={`${index}-${imgIndex}-${imgUrl}`} className="relative w-20 h-20 flex-shrink-0 group">
+                                      <div className="w-full h-full bg-gray-100 rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                        <img
+                                          src={imageUrl}
+                                          alt={`Color variant ${imgIndex + 1}`}
+                                          className="w-full h-full object-cover"
+                                          onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/placeholder.png';
+                                            console.error('Failed to load image:', imageUrl);
+                                          }}
+                                          onLoad={() => {
+                                            console.log('Image loaded successfully:', imageUrl);
+                                          }}
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveVariantImage(index, imgIndex)}
+                                        className="absolute -top-1.5 -right-1.5 bg-white text-red-500 rounded-full p-0.5 shadow-md border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-50"
+                                        title="Remove image"
+                                      >
+                                        <FiX className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-4 bg-gray-50 rounded border border-dashed border-gray-200">
-                            <p className="text-xs text-gray-400">No images added for this color yet.</p>
-                          </div>
-                        )}
+                            );
+                          } else {
+                            return (
+                              <div className="text-center py-4 bg-gray-50 rounded border border-dashed border-gray-200 mt-3">
+                                <p className="text-xs text-gray-400">No images added for this color yet.</p>
+                              </div>
+                            );
+                          }
+                        })()}
                       </div>
                     </div>
                   ))}
