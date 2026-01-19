@@ -5,55 +5,63 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
 exports.register = async (req, res) => {
-  console.log("BACKEND DEBUG: authController register HIT with data:", req.body.email);
-  const { name, email, password, phone, address } = req.body;
+  try {
+    console.log("BACKEND DEBUG: authController register HIT with data:", req.body.email);
+    const { name, email, password, phone, address } = req.body;
 
-  const exists = await User.findOne({ email });
-  if (exists) return res.status(400).json({ message: "Email exists" });
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ message: "Email exists" });
 
-  const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 10);
 
-  const user = await User.create({
-    name,
-    email,
-    password: hash,
-    phone,
-    address,
-    role: "customer",
-  });
+    const user = await User.create({
+      name,
+      email,
+      password: hash,
+      phone,
+      address,
+      role: "customer",
+    });
 
-  res.json(user);
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-  // Check if seller account is approved
-  if (user.role === 'seller' && user.isApproved === false) {
-    return res.status(403).json({ 
-      message: "Your seller account is pending approval. Please wait for admin confirmation." 
-    });
+    // Check if seller account is approved
+    if (user.role === 'seller' && user.isApproved === false) {
+      return res.status(403).json({ 
+        message: "Your seller account is pending approval. Please wait for admin confirmation." 
+      });
+    }
+
+    const ok = await bcrypt.compare(password, user.password).catch(() => false);
+    if (!ok) return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = signToken({ id: user._id, role: user.role });
+
+    // Don't send password to frontend
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      address: user.address
+    };
+
+    res.json({ token, user: userResponse });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  const ok = await bcrypt.compare(password, user.password).catch(() => false);
-  if (!ok) return res.status(400).json({ message: "Invalid credentials" });
-
-  const token = signToken({ id: user._id, role: user.role });
-
-  // Don't send password to frontend
-  const userResponse = {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    phone: user.phone,
-    address: user.address
-  };
-
-  res.json({ token, user: userResponse });
 };
 
 exports.updateProfile = async (req, res) => {

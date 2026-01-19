@@ -11,7 +11,7 @@ import {
   FaUsers, FaShieldAlt, FaCreditCard, FaFire,
   FaRegHeart, FaHeart, FaBell, FaAngleRight,
   FaChevronRight, FaArrowRight,
-  FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,
+  FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,FaInfoCircle,
   FaTools, FaPrint, FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet
 } from 'react-icons/fa';
 import { api } from '../api/api';
@@ -43,7 +43,7 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
   return <IconComponent className={className} />;
 };
 
-import logoImage from '../assets/logo.jpeg';
+import logoImage from '../assets/logo.png';
 
 export default function Header() {
   const auth = useContext(AuthContext)!;
@@ -67,6 +67,7 @@ export default function Header() {
   const [products, setProducts] = useState<any[]>([]);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
 
@@ -126,7 +127,11 @@ export default function Header() {
       if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
         setShowCategoryMenu(false);
       }
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      // Check both desktop and mobile search refs
+      const isOutsideDesktopSearch = searchRef.current && !searchRef.current.contains(event.target as Node);
+      const isOutsideMobileSearch = mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node);
+
+      if (isOutsideDesktopSearch && isOutsideMobileSearch) {
         setShowSuggestions(false);
       }
     };
@@ -286,7 +291,7 @@ export default function Header() {
   const handleSuggestionClick = (suggestion: any) => {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
+
     if (suggestion.type === 'category') {
       navigate(`/products?category=${suggestion.id}`);
     } else if (suggestion.type === 'subcategory') {
@@ -294,7 +299,7 @@ export default function Header() {
     } else if (suggestion.type === 'product') {
       navigate(`/products/${suggestion.id}`);
     }
-    
+
     // Clean up UI states
     setSearchQuery('');
     setShowSuggestions(false);
@@ -317,7 +322,7 @@ export default function Header() {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}`);
-    
+
     // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -331,7 +336,7 @@ export default function Header() {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}&subcategory=${encodeURIComponent(subcategory)}`);
-    
+
     // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -345,7 +350,7 @@ export default function Header() {
     // Scroll to top before navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/products?category=${category.id}`);
-    
+
     // Clean up all UI states
     setShowCategoryMenu(false);
     setIsMenuOpen(false);
@@ -368,6 +373,8 @@ export default function Header() {
     { name: 'Home', path: '/', icon: <FaHome className="text-lg" /> },
     { name: 'Products', path: '/products', icon: <FaShoppingBag className="text-lg" /> },
     { name: 'Wishlist', path: '/wishlist', icon: <FaHeart className="text-lg text-red-500" /> },
+    { name: 'About Us', path: '/about', icon: <FaInfoCircle className="text-lg" /> },
+    
   ];
 
   const adminFeatures = [
@@ -383,7 +390,7 @@ export default function Header() {
 
   // Mobile search bar component
   const MobileSearchBar = () => (
-    <div className="lg:hidden w-full bg-white px-4 py-3 border-b">
+    <div ref={mobileSearchRef} className="lg:hidden w-full bg-white px-4 py-3 border-b">
       <form onSubmit={handleSearch} className="flex items-center gap-2">
         <div className="flex-1 relative">
           <input
@@ -393,6 +400,7 @@ export default function Header() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setShowSuggestions(searchQuery.trim().length > 0)}
+            autoFocus // This ensures keyboard opens immediately on mobile
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 text-sm" />
 
@@ -402,6 +410,7 @@ export default function Header() {
               {searchSuggestions.map((suggestion, index) => (
                 <button
                   key={`${suggestion.type}-${suggestion.id}-${index}`}
+                  type='button' // FIXED: Add type="button" to prevent form submission
                   onClick={() => handleSuggestionClick(suggestion)}
                   className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3"
                 >
@@ -433,7 +442,10 @@ export default function Header() {
         </div>
         <button
           type="button"
-          onClick={() => setSearchActive(false)}
+          onClick={() => {
+            setSearchActive(false);
+            setShowSuggestions(false);
+          }}
           className="px-3 py-2.5 text-gray-600 hover:text-gray-800"
         >
           <FaTimes className="text-lg" />
@@ -468,13 +480,21 @@ export default function Header() {
             </div>
 
             {/* Desktop Logo */}
-            <Link to="/" className="hidden lg:flex items-center gap-4 group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <img
-                src={logoImage}
-                alt="AMMOGAM Logo"
-                className="h-14 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
+           <Link
+  to="/"
+  className="hidden lg:flex items-center gap-1 group"
+  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+>
+  <img
+    src={logoImage}
+    alt="AMMOGAM Logo"
+    className="h-14 w-auto object-contain"
+  />
+  <span className="text-lg font-bold text-amber-500">
+    AMMOGAM
+  </span>
+</Link>
+
 
             {/* Desktop Search Bar with Suggestions */}
             <div className="hidden lg:flex flex-1 max-w-2xl mx-4 xl:mx-8" ref={searchRef}>
@@ -508,6 +528,7 @@ export default function Header() {
                       {searchSuggestions.map((suggestion, index) => (
                         <button
                           key={`${suggestion.type}-${suggestion.id}-${index}`}
+                          type='button' // FIXED: Add type="button" to prevent form submission
                           onClick={() => handleSuggestionClick(suggestion)}
                           className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3 group"
                         >
@@ -568,14 +589,21 @@ export default function Header() {
 
             {/* User Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Mobile Search Button */}
-              <button
-                className="lg:hidden p-2 rounded-lg hover:bg-amber-50 transition-colors"
-                onClick={() => setSearchActive(!searchActive)}
-                aria-label="Search"
-              >
-                <FaSearch className="text-lg text-gray-600" />
-              </button>
+              {/* Mobile Search Button - Always show when not in search mode */}
+              {!searchActive && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchActive(true);
+                    // REMOVED: setSearchQuery(''); // Don't clear the search query when opening search
+                    setShowSuggestions(false);
+                  }}
+                  className="lg:hidden p-2 hover:bg-amber-50 rounded-lg transition-colors"
+                  aria-label="Search"
+                >
+                  <FaSearch className="text-lg text-gray-600" />
+                </button>
+              )}
 
               {/* Mobile Cart */}
               <Link
@@ -658,7 +686,12 @@ export default function Header() {
               </Link>
 
               {/* Desktop User Profile */}
-              {auth.user ? (
+              {auth.loading ? (
+                <div className="hidden lg:flex items-center gap-2 p-2">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse"></div>
+                  <div className="w-20 h-4 bg-gray-100 animate-pulse rounded"></div>
+                </div>
+              ) : auth.user ? (
                 <div className="hidden lg:block relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
@@ -791,8 +824,8 @@ export default function Header() {
               )}
 
               {/* Mobile Auth Buttons */}
-              {!auth.user && !isMobile && (
-                <div className="lg:hidden flex items-center gap-1">
+              {!auth.user && (
+                <div className="lg:hidden flex items-center gap-2">
                   <Link
                     to="/login"
                     className="px-3 py-1.5 border border-[#8B4513] text-[#8B4513] rounded-lg text-xs font-medium"
@@ -800,6 +833,13 @@ export default function Header() {
                   >
                     Sign In
                   </Link>
+                  {/* <Link
+                    to="/register"
+                    className="px-3 py-1.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg text-xs font-medium"
+                    onClick={handleQuickLinkClick}
+                  >
+                    Register
+                  </Link> */}
                 </div>
               )}
             </div>
@@ -908,13 +948,8 @@ export default function Header() {
                   <div className="flex items-start justify-between mb-8">
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900">{activeCategoryData?.name}</h2>
-                      {/* <p className="text-gray-600 mt-1">Explore thousands of products with premium quality</p> */}
                     </div>
                     <div className="flex items-center gap-3">
-                      {/* <div className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-medium rounded-full flex items-center gap-2">
-                        <FaCheck className="text-xs" />
-                        Up to 50% OFF on {activeCategoryData?.name.toLowerCase()}
-                      </div> */}
                       <button
                         onClick={() => handleViewAllCategory(activeCategoryData)}
                         className="px-5 py-2.5 bg-gradient-to-r from-[#8B4513] to-[#A0522D] text-white rounded-lg hover:opacity-90 font-medium text-sm flex items-center gap-2 shadow-lg"
@@ -953,31 +988,6 @@ export default function Header() {
                           </div>
                         ))}
                       </div>
-
-                      {/* Quick Links Section */}
-                      {/* <div className="mt-8 pt-6 border-t border-gray-200">
-                        <h4 className="font-bold text-gray-900 text-lg mb-4">More Available</h4>
-                        <div className="flex gap-4">
-                          <button
-                            onClick={() => handleMainCategoryClick(activeCategoryData)}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-                          >
-                            All Products
-                          </button>
-                          <button
-                            onClick={() => handleMainCategoryClick(activeCategoryData)}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-                          >
-                            Best Sellers
-                          </button>
-                          <button
-                            onClick={() => handleMainCategoryClick(activeCategoryData)}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-                          >
-                            New Arrivals
-                          </button>
-                        </div>
-                      </div> */}
                     </div>
 
                     {/* Category Image and Promotions */}
@@ -997,46 +1007,6 @@ export default function Header() {
                           </div>
                         </div>
                       )}
-
-                      {/* Quick Links */}
-                      {/* <div className="p-4 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl">
-                        <h5 className="font-bold text-gray-900 mb-3">Quick Links</h5>
-                        <div className="space-y-2">
-                          <button
-                            onClick={() => handleMainCategoryClick(activeCategoryData)}
-                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
-                          >
-                            <span className="text-sm text-gray-700 group-hover:text-amber-700">All Products</span>
-                            <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
-                          </button>
-                          <button
-                            onClick={() => handleMainCategoryClick(activeCategoryData)}
-                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
-                          >
-                            <span className="text-sm text-gray-700 group-hover:text-amber-700">Best Sellers</span>
-                            <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
-                          </button>
-                          <button
-                            onClick={() => handleMainCategoryClick(activeCategoryData)}
-                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
-                          >
-                            <span className="text-sm text-gray-700 group-hover:text-amber-700">New Arrivals</span>
-                            <FaChevronRight className="text-xs text-gray-400 group-hover:text-amber-600" />
-                          </button>
-                        </div>
-                      </div> */}
-
-                      {/* Service Badges */}
-                      {/* <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
-                          <FaShippingFast className="text-green-600 text-lg mx-auto mb-1" />
-                          <div className="text-xs font-medium text-gray-800">Safe Delivery</div>
-                        </div>
-                        <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg text-center">
-                          <FaShieldAlt className="text-blue-600 text-lg mx-auto mb-1" />
-                          <div className="text-xs font-medium text-gray-800">1 Year Warranty</div>
-                        </div>
-                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -1057,12 +1027,12 @@ export default function Header() {
           <div className="p-4 bg-gradient-to-b from-amber-50 to-white border-b">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <img
+                {/* <img
                   src={logoImage}
                   alt="AMMOGAM Logo"
                   className="h-8 w-auto object-contain"
-                />
-                <span className="text-xl font-bold text-amber-900">AMMOGAM</span>
+                /> */}
+                {/* <span className="text-xl font-bold text-amber-900">AMMOGAM</span> */}
               </div>
               <button
                 onClick={() => setIsMenuOpen(false)}
@@ -1073,7 +1043,7 @@ export default function Header() {
             </div>
 
             {/* Mobile Search in Menu */}
-            <form onSubmit={handleSearch} className="mb-4">
+            {/* <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
                 <input
                   type="text"
@@ -1085,12 +1055,13 @@ export default function Header() {
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500" />
 
-                {/* Mobile Search Suggestions in Menu */}
+                
                 {showSuggestions && searchSuggestions.length > 0 && (
                   <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border max-h-64 overflow-y-auto z-50">
                     {searchSuggestions.map((suggestion, index) => (
                       <button
                         key={`mobile-${suggestion.type}-${suggestion.id}-${index}`}
+                        type='button'
                         onClick={() => handleSuggestionClick(suggestion)}
                         className="w-full text-left p-3 hover:bg-amber-50 border-b last:border-b-0 flex items-center gap-3"
                       >
@@ -1117,7 +1088,7 @@ export default function Header() {
                   </div>
                 )}
               </div>
-            </form>
+            </form> */}
 
             {/* User Info */}
             {auth.user ? (
@@ -1232,19 +1203,6 @@ export default function Header() {
                   <FaRegHeart className="text-amber-500" />
                   Wishlist
                 </Link>
-
-                <Link
-                  to="/download"
-                  className="flex items-center gap-3 px-3 py-3.5 text-gray-700 hover:text-[#8B4513] hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <FaMobileAlt className="text-amber-500" />
-                  Download App
-                  <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">NEW</span>
-                </Link>
               </div>
 
               {/* Categories Section */}
@@ -1273,9 +1231,9 @@ export default function Header() {
                 <div className="mt-6 pt-4 border-t">
                   <div className="text-xs font-bold text-gray-500 uppercase mb-3 px-3">My Account</div>
                   <div className="space-y-0">
-                    <Link 
-                      to="/dashboard" 
-                      className="mobile-nav-link" 
+                    <Link
+                      to="/dashboard"
+                      className="mobile-nav-link"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setIsMenuOpen(false);
@@ -1283,9 +1241,9 @@ export default function Header() {
                     >
                       Dashboard
                     </Link>
-                    <Link 
-                      to="/wishlist" 
-                      className="mobile-nav-link" 
+                    <Link
+                      to="/wishlist"
+                      className="mobile-nav-link"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setIsMenuOpen(false);
@@ -1293,16 +1251,16 @@ export default function Header() {
                     >
                       Wishlist
                     </Link>
-                    <Link 
-                      to="/notifications" 
-                      className="mobile-nav-link" 
+                    <Link
+                      to="/notifications"
+                      className="mobile-nav-link"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setIsMenuOpen(false);
                       }}
                     >
                       Notifications
-                      <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                      <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{unreadCount}</span>
                     </Link>
 
                     {auth.user.role === 'admin' && (
@@ -1337,28 +1295,6 @@ export default function Header() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Footer Section */}
-          <div className="mt-auto p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-t">
-            <div className="text-center text-xs text-gray-600">
-              <div className="font-bold mb-2">Secure Shopping</div>
-              <div className="flex items-center justify-center gap-4 mb-2">
-                <div className="flex flex-col items-center">
-                  <FaShieldAlt className="text-green-600 text-lg mb-1" />
-                  <span className="text-xs">100% Secure</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaCreditCard className="text-blue-600 text-lg mb-1" />
-                  <span className="text-xs">Safe Payment</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaTruck className="text-amber-600 text-lg mb-1" />
-                  <span className="text-xs">Safe Delivery</span>
-                </div>
-              </div>
-              <p className="text-[10px]">© 2025 AMMOGAM. All rights reserved.</p>
             </div>
           </div>
         </div>

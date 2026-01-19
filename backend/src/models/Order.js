@@ -11,6 +11,8 @@ const OrderSchema = new mongoose.Schema(
         color: { type: String }, // Selected color name
         colorCode: { type: String }, // Selected color hex code
         variationId: { type: String }, // Color variant ID
+        selectedSize: { type: String },
+        selectedWeight: { type: String },
         shippingFee: { type: Number, default: 0 },
         status: {
           type: String,

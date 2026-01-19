@@ -5,53 +5,29 @@ const initGCS = require("../config/storage");
 const gcsBucket = initGCS();
 
 exports.upload = async (file, destPath) => {
-  // GCS - PRIMARY STORAGE METHOD
-  if (process.env.STORAGE_DRIVER === "gcs") {
-    if (!gcsBucket) {
-      console.error("CRITICAL: STORAGE_DRIVER is set to 'gcs' but GCS bucket is not initialized.");
-      console.error("Please check: GCS_BUCKET, GCS_PROJECT_ID, and GCS_KEY_JSON environment variables.");
-      throw new Error("Google Cloud Storage is not properly configured. Check your environment variables.");
-    }
-
-    try {
-      // Upload to GCS bucket
-      await gcsBucket.upload(file.path, { destination: destPath });
-      // Clean up temporary file
-      await fs.promises.unlink(file.path);
-      
-      const bucketName = process.env.GCS_BUCKET;
-      return {
-        url: `https://storage.googleapis.com/${bucketName}/${destPath}`,
-      };
-    } catch (error) {
-      console.error("GCS Upload Error:", error.message);
-      // Clean up temp file even on error
-      try {
-        await fs.promises.unlink(file.path);
-      } catch (unlinkErr) {
-        // Ignore cleanup errors
-      }
-      throw new Error(`Failed to upload to Google Cloud Storage: ${error.message}`);
-    }
+  // GCS
+  if (process.env.STORAGE_DRIVER === "gcs" && gcsBucket) {
+    await gcsBucket.upload(file.path, { destination: destPath });
+    await fs.promises.unlink(file.path);
+    return {
+      url: `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${destPath}`,
+    };
   }
 
-  // LOCAL STORAGE - ONLY FOR DEVELOPMENT
-  // In production (Vercel), this will fail which is expected
-  if (process.env.NODE_ENV === "production") {
-    console.error("CRITICAL: Local storage is not supported on Vercel.");
-    console.error("Please set STORAGE_DRIVER=gcs and configure GCS environment variables.");
-    throw new Error("Local storage not supported in production environment. Configure GCS instead.");
+  // LOCAL STORAGE
+  if (process.env.NODE_ENV === "production" && process.env.STORAGE_DRIVER !== "gcs") {
+    console.error("CRITICAL: Local storage is not supported on Vercel. Please configure GCS.");
+    throw new Error("Local storage not supported in production environment");
   }
 
-  // Local development fallback
   const uploadsDir = path.join(__dirname, "../../uploads");
   try {
     if (!fs.existsSync(uploadsDir)) {
+      // On Vercel this will fail, which is expected if GCS isn't used
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
   } catch (err) {
     console.error("Failed to create uploads directory:", err.message);
-    throw new Error(`Failed to create local uploads directory: ${err.message}`);
   }
 
   const finalPath = path.join(uploadsDir, path.basename(destPath));

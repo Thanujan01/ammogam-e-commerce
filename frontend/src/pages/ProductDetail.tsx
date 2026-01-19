@@ -12,9 +12,15 @@ import {
   FaStar, FaPlus, FaMinus,
   FaCheckCircle, FaPalette,
   FaChevronRight, FaChevronLeft as FaChevronLeftIcon,
-   FaWhatsapp, FaFacebook, FaLink,
+  FaWhatsapp, FaFacebook, FaLink,
   FaTruck, FaArrowRight
 } from 'react-icons/fa';
+
+// Import the same image logos as in the footer
+import visaLogo from '../assets/visa-logo.png';
+import mastercardLogo from '../assets/mastercard-logo.png';
+import amexLogo from '../assets/amex-logo.png';
+import discoverLogo from '../assets/discover-logo.png';
 
 interface ProductVariation {
   _id: string;
@@ -25,6 +31,9 @@ interface ProductVariation {
   stock: number;
   price?: number;
   sku?: string;
+  variantType?: 'size' | 'weight' | 'none';
+  sizes?: { size: string; stock: number; price: number }[];
+  weights?: { weight: string; stock: number; price: number }[];
 }
 
 interface EnhancedProduct extends IProduct {
@@ -32,8 +41,9 @@ interface EnhancedProduct extends IProduct {
   hasVariations: boolean;
   defaultColor?: string;
   categoryName?: string;
+  categoryId?: string; // ✅ Added categoryId
   shippingFee?: number;
-  reviewCount?: number; // ✅ Added missing property
+  reviewCount?: number;
 }
 
 export default function ProductDetail() {
@@ -46,6 +56,8 @@ export default function ProductDetail() {
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedWeight, setSelectedWeight] = useState<string>('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -55,18 +67,36 @@ export default function ProductDetail() {
   const { user } = useContext(AuthContext)!;
   const { isInWishlist, toggleWishlist: contextToggle } = useContext(WishlistContext)!;
 
+  // Payment methods data - matching footer style with image logos
+  const paymentMethods = [
+    { 
+      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
+      name: 'Visa' 
+    },
+    { 
+      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
+      name: 'Mastercard' 
+    },
+    { 
+      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
+      name: 'American Express' 
+    },
+    { 
+      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
+      name: 'Discover' 
+    },
+  ];
+
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
-    // Scroll to top on initial load
     window.scrollTo(0, 0);
-    
-    // Also handle browser back/forward navigation
+
     const handlePopState = () => {
       window.scrollTo(0, 0);
     };
-    
+
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -100,14 +130,25 @@ export default function ProductDetail() {
           images: v.images || (v.image ? [v.image] : []),
         }));
 
+        // Extract category ID from the product data
+        let categoryId = '';
+        if (res.data.category) {
+          if (typeof res.data.category === 'string') {
+            categoryId = res.data.category;
+          } else if (res.data.category._id) {
+            categoryId = res.data.category._id;
+          }
+        }
+
         const productData: EnhancedProduct = {
           ...res.data,
           hasVariations: normalizedVariations.length > 0,
           variations: normalizedVariations,
           categoryName: res.data.category?.name ||
             (typeof res.data.category === 'string' ? res.data.category : 'Category'),
+          categoryId: categoryId, // ✅ Store categoryId
           shippingFee: res.data.shippingFee || 0,
-          reviewCount: res.data.reviewCount || 0 // ✅ Ensure reviewCount is included
+          reviewCount: res.data.reviewCount || 0
         };
 
         setProduct(productData);
@@ -117,6 +158,14 @@ export default function ProductDetail() {
           const defaultVariation = productData.variations.find(v => v.color === productData.defaultColor) || productData.variations[0];
           setSelectedVariation(defaultVariation);
           setSelectedColor(defaultVariation.color);
+          setSelectedImageIndex(0); // Start with first image
+
+          if (defaultVariation.variantType === 'size' && defaultVariation.sizes?.length) {
+            setSelectedSize(defaultVariation.sizes[0].size);
+          }
+          if (defaultVariation.variantType === 'weight' && defaultVariation.weights?.length) {
+            setSelectedWeight(defaultVariation.weights[0].weight);
+          }
         }
       })
       .catch(err => {
@@ -141,9 +190,9 @@ export default function ProductDetail() {
     const currentPrice = discountPercent > 0 ? (basePrice * (1 - discountPercent / 100)) : basePrice;
     const subtotal = currentPrice * quantity;
     const shippingFee = product?.shippingFee || 0;
-    
+
     const totalShipping = shippingFee > 0 ? shippingFee : 0;
-    
+
     return {
       subtotal,
       shipping: totalShipping,
@@ -153,7 +202,18 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (product && selectedVariation) {
-      cart.addToCart(product, quantity, selectedVariation._id, selectedVariation.colorName, selectedVariation.colorCode);
+      // ✅ FIXED: Pass the selected image index to cart
+      cart.addToCart(
+        product,
+        quantity,
+        selectedVariation._id,
+        selectedVariation.colorName,
+        selectedVariation.colorCode,
+        selectedImageIndex, // Pass the selected image index
+        selectedSize,
+        selectedWeight,
+        basePrice
+      );
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 3000);
     } else if (product) {
@@ -179,19 +239,49 @@ export default function ProductDetail() {
     if (variation) {
       setSelectedVariation(variation);
       setSelectedColor(color);
-      setSelectedImageIndex(0);
+      setSelectedImageIndex(0); // Reset to first image when color changes
+
+      // Reset or set default size/weight for new variant
+      if (variation.variantType === 'size' && variation.sizes?.length) {
+        setSelectedSize(variation.sizes[0].size);
+        setSelectedWeight('');
+      } else if (variation.variantType === 'weight' && variation.weights?.length) {
+        setSelectedWeight(variation.weights[0].weight);
+        setSelectedSize('');
+      } else {
+        setSelectedSize('');
+        setSelectedWeight('');
+      }
     }
   };
 
   const getCurrentPrice = () => {
+    let price = product?.price || 0;
     if (selectedVariation?.price) {
-      return selectedVariation.price;
+      price = selectedVariation.price;
     }
-    return product?.price || 0;
+
+    // Add size/weight add-on
+    if (selectedVariation?.variantType === 'size' && selectedSize) {
+      const sizeOpt = selectedVariation.sizes?.find(s => s.size === selectedSize);
+      if (sizeOpt) price += sizeOpt.price;
+    } else if (selectedVariation?.variantType === 'weight' && selectedWeight) {
+      const weightOpt = selectedVariation.weights?.find(w => w.weight === selectedWeight);
+      if (weightOpt) price += weightOpt.price;
+    }
+
+    return price;
   };
 
   const getCurrentStock = () => {
-    if (selectedVariation?.stock !== undefined) {
+    if (selectedVariation) {
+      if (selectedVariation.variantType === 'size' && selectedSize) {
+        const sizeOpt = selectedVariation.sizes?.find(s => s.size === selectedSize);
+        return sizeOpt?.stock ?? 0;
+      } else if (selectedVariation.variantType === 'weight' && selectedWeight) {
+        const weightOpt = selectedVariation.weights?.find(w => w.weight === selectedWeight);
+        return weightOpt?.stock ?? 0;
+      }
       return selectedVariation.stock;
     }
     return product?.stock || 0;
@@ -236,8 +326,6 @@ export default function ProductDetail() {
     }));
   }, [product]);
 
-  // ✅ FIX: Removed unused displayedColors variable
-
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 flex justify-center items-center min-h-[60vh]">
@@ -274,6 +362,67 @@ export default function ProductDetail() {
     if (typeof product.category === 'string') return product.category;
     if (product.category?.name) return product.category.name;
     return 'Category';
+  };
+
+  // ✅ FIXED: Corrected Buy Now functionality - Clear existing items first
+  const handleBuyNow = () => {
+    if (currentStock > 0 && product) {
+      // Clear all existing cart items and selections first
+      cart.clearCart();
+
+      // Add the current product to cart with selected image
+      if (selectedVariation) {
+        cart.addToCart(
+          product,
+          quantity,
+          selectedVariation._id,
+          selectedVariation.colorName,
+          selectedVariation.colorCode,
+          selectedImageIndex, // Pass the selected image index
+          selectedSize,
+          selectedWeight,
+          basePrice
+        );
+      } else {
+        cart.addToCart(product, quantity);
+      }
+
+      // Create a new Set with only this item selected
+      const newSelected = new Set<string>();
+
+      // Get the item key for the product we just added
+      const itemKey = cart.getItemKey({
+        product,
+        quantity,
+        variationId: selectedVariation?._id,
+        selectedColor: selectedVariation?.colorName,
+        selectedColorCode: selectedVariation?.colorCode,
+        selectedSize,
+        selectedWeight,
+        price: basePrice
+      } as any);
+
+      newSelected.add(itemKey);
+
+      // Update selected items in cart context
+      cart.updateSelectedItems(newSelected);
+
+      // Navigate to checkout
+      window.scrollTo(0, 0);
+      setTimeout(() => navigate('/checkout'), 100);
+    }
+  };
+
+  // ✅ FIXED: Handle category click to navigate to products page with category filter
+  const handleCategoryClick = () => {
+    if (product.categoryId) {
+      window.scrollTo(0, 0);
+      navigate(`/products?category=${product.categoryId}`);
+    } else {
+      // Fallback if no categoryId, navigate to products page without filter
+      window.scrollTo(0, 0);
+      navigate('/products');
+    }
   };
 
   return (
@@ -339,14 +488,17 @@ export default function ProductDetail() {
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
         <button
-          onClick={() => navigate('/products')}
+          onClick={() => {
+            window.scrollTo(0, 0);
+            navigate('/products');
+          }}
           className="hover:text-amber-600 transition-colors"
         >
           Products
         </button>
         <FaChevronRight className="text-xs" />
         <button
-          onClick={() => navigate(`/products?category=${product.categoryId || ''}`)}
+          onClick={handleCategoryClick} // ✅ Fixed: Now navigates to /products?category=categoryId
           className="hover:text-amber-600 transition-colors"
         >
           {getCategoryName()}
@@ -435,10 +587,6 @@ export default function ProductDetail() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {/* Bestseller Badge */}
-                    {/* <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                      Bestseller
-                    </span> */}
                     <span className="text-sm text-gray-500">Ammogam Official</span>
                   </div>
                   <div className="flex gap-2">
@@ -458,12 +606,12 @@ export default function ProductDetail() {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Product Title */}
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">
                   {product.name}
                 </h1>
-                
+
                 {/* Rating */}
                 <div className="flex items-center gap-3 mt-1">
                   <div className="flex items-center">
@@ -520,7 +668,7 @@ export default function ProductDetail() {
                   </div>
                   <span className="text-sm text-gray-500">{availableColors.length} colors available</span>
                 </div>
-                
+
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                   {availableColors.map((color) => (
                     <button
@@ -536,6 +684,66 @@ export default function ProductDetail() {
                       <span className="text-xs text-gray-700 truncate w-full text-center">
                         {color.name}
                       </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size Options UI */}
+            {selectedVariation?.variantType === 'size' && selectedVariation.sizes && selectedVariation.sizes.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900">Select Size:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVariation.sizes.map((s, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedSize(s.size);
+                        setQuantity(1);
+                      }}
+                      disabled={s.stock === 0}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${selectedSize === s.size
+                        ? 'border-amber-600 bg-amber-50 text-amber-700'
+                        : s.stock === 0
+                          ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                          : 'border-gray-200 hover:border-amber-200 text-gray-700'
+                        }`}
+                    >
+                      {s.size}
+                      {s.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+${s.price})</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Weight Options UI */}
+            {selectedVariation?.variantType === 'weight' && selectedVariation.weights && selectedVariation.weights.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900">Select Weight:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVariation.weights.map((w, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedWeight(w.weight);
+                        setQuantity(1);
+                      }}
+                      disabled={w.stock === 0}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${selectedWeight === w.weight
+                        ? 'border-amber-600 bg-amber-50 text-amber-700'
+                        : w.stock === 0
+                          ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                          : 'border-gray-200 hover:border-amber-200 text-gray-700'
+                        }`}
+                    >
+                      {w.weight}
+                      {w.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+${w.price})</span>}
                     </button>
                   ))}
                 </div>
@@ -569,7 +777,7 @@ export default function ProductDetail() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <span className="font-medium text-gray-900">Shipping:</span>
                 <div className="flex items-center gap-2 text-gray-700">
@@ -624,18 +832,9 @@ export default function ProductDetail() {
                   </>
                 )}
               </button>
-              
+
               <button
-                onClick={() => {
-                  if (currentStock > 0 && product) {
-                    if (selectedVariation) {
-                      cart.addToCart(product, quantity, selectedVariation._id, selectedVariation.colorName, selectedVariation.colorCode);
-                    } else {
-                      cart.addToCart(product, quantity);
-                    }
-                    navigate('/cart');
-                  }
-                }}
+                onClick={handleBuyNow}
                 disabled={currentStock === 0}
                 className={`px-6 py-3 rounded-lg font-medium transition-all ${currentStock === 0
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -653,6 +852,29 @@ export default function ProductDetail() {
                 {product.description || "This premium product offers exceptional quality and style. Crafted with attention to detail, it combines functionality with elegant design for the ultimate user experience."}
               </p>
             </div>
+
+            {/* Payment Methods Section - Added after description, matching footer style with images */}
+           <div className="mt-8 pt-8 border-t border-gray-200">
+  <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
+  <div className="space-y-4">
+    <div className="flex flex-nowrap gap-0 justify-start items-center overflow-x-auto pb-2">
+      {paymentMethods.map((method, index) => (
+        <div
+          key={index}
+          className="p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
+          title={method.name}
+        >
+          {method.icon}
+        </div>
+      ))}
+    </div>
+    {/* <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-3 md:p-4 border border-amber-800/30">
+      <p className="text-xs md:text-sm text-gray-300">
+        All transactions are secured with SSL encryption. Your payment information is protected with the highest security standards.
+      </p>
+    </div> */}
+  </div>
+</div>
           </div>
         </div>
 
@@ -734,7 +956,6 @@ export default function ProductDetail() {
           <div className="text-center">
             <button
               onClick={() => {
-                // ✅ FIX: Scroll to top before navigating
                 window.scrollTo(0, 0);
                 navigate('/products');
               }}

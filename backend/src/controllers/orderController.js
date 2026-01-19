@@ -104,35 +104,60 @@ exports.updateOrderToPaid = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id)
+      .populate({
+        path: "items.product",
+        populate: { path: "seller", select: "name businessName email" }
+      })
+      .populate("user", "name email");
 
-    if (order) {
-      order.status = status;
-      // Sync all items to the same status when admin updates overall order
-      order.items.forEach(item => {
-        item.status = status;
-      });
-
-
-      const updatedOrder = await order.save();
-
-      // Create notification for customer
-      try {
-        await Notification.create({
-          recipient: order.user,
-          title: "Order Status Updated",
-          message: `Your order #${order._id.toString().slice(-8).toUpperCase()} is now ${status}.`,
-          type: "order_status",
-          orderId: order._id
-        });
-      } catch (notiErr) {
-        console.error("Notification Error:", notiErr);
-      }
-
-      res.json(updatedOrder);
-    } else {
-      res.status(404).json({ message: "Order not found" });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
+
+    // Admin can only update status for their own products (products without a seller)
+    let updatedCount = 0;
+    order.items.forEach(item => {
+      // Only update items that belong to admin (no seller or seller is null)
+      if (item.product && (!item.product.seller || item.product.seller === null)) {
+        item.status = status;
+        updatedCount++;
+      }
+    });
+
+    if (updatedCount === 0) {
+      return res.status(403).json({ message: "No admin-owned items found in this order" });
+    }
+
+    // Update overall order status only if ALL items (including seller items) have the same status
+    const allItemsHaveSameStatus = order.items.every(it => it.status === status);
+    if (allItemsHaveSameStatus) {
+      order.status = status;
+    }
+
+    const updatedOrder = await order.save();
+
+    // Re-populate after save to ensure we return complete data
+    await updatedOrder.populate({
+      path: "items.product",
+      populate: { path: "seller", select: "name businessName email" }
+    });
+    await updatedOrder.populate("user", "name email");
+
+    // Create notification for customer
+    try {
+      await Notification.create({
+        recipient: order.user,
+        title: "Order Status Updated",
+        message: `${updatedCount} item(s) in your order #${order._id.toString().slice(-8).toUpperCase()} ${updatedCount > 1 ? 'are' : 'is'} now ${status}.`,
+        type: "order_status",
+        orderId: order._id
+      });
+    } catch (notiErr) {
+      console.error("Notification Error:", notiErr);
+    }
+
+    res.json({ message: `Successfully updated ${updatedCount} admin-owned items to ${status}`, order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -224,6 +249,54 @@ exports.getSellerOrders = async (req, res) => {
   }
 };
 
+exports.updateSellerOrderStatus = async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+    const order = await Order.findById(orderId).populate("items.product");
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Update all items in this order that belong to this seller
+    let updatedCount = 0;
+    order.items.forEach(item => {
+      if (item.product && item.product.seller && String(item.product.seller) === String(req.user._id)) {
+        item.status = status;
+        updatedCount++;
+      }
+    });
+
+    if (updatedCount === 0) {
+      return res.status(403).json({ message: "Not authorized or no items for this seller in this order" });
+    }
+
+    // Check if ALL items in the order now have the same status (e.g. all delivered)
+    // If so, update the overall order status as well
+    const allItemsHaveSameStatus = order.items.every(it => it.status === status);
+    if (allItemsHaveSameStatus) {
+      order.status = status;
+    }
+
+    await order.save();
+
+    // Create notification for customer
+    try {
+      await Notification.create({
+        recipient: order.user,
+        title: "Order Update",
+        message: `Items from your order #${order._id.toString().slice(-8).toUpperCase()} have been ${status}.`,
+        type: "order_status",
+        orderId: order._id
+      });
+    } catch (notiErr) {
+      console.error("Notification Error:", notiErr);
+    }
+
+    res.json({ message: `Successfully updated ${updatedCount} items to ${status}`, order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.updateOrderItemStatus = async (req, res) => {
   try {
     const { orderId, productId, status } = req.body;
@@ -241,10 +314,6 @@ exports.updateOrderItemStatus = async (req, res) => {
     }
 
     item.status = status;
-    
-    // Auto-update overall order status based on items? 
-    // If all items are shipped, maybe order is shipped? 
-    // For now, let's keep them independent or let admin handle overall.
     
     await order.save();
 

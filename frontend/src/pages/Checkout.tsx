@@ -7,45 +7,120 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaTruck, FaCreditCard, FaCheckCircle,
-  FaMapMarkerAlt, FaPhoneAlt, FaLock, FaShieldAlt,
+  FaMapMarkerAlt, FaPhoneAlt, FaLock,
   FaHome, FaUser, FaShoppingBag,
   FaList, FaReceipt, FaArrowRight, FaArrowLeft,
-  FaRegCreditCard,
+  FaRegCreditCard, FaTimes,
 } from 'react-icons/fa';
-import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
-import { RiSecurePaymentLine } from 'react-icons/ri';
+// import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
+ //import { RiSecurePaymentLine } from 'react-icons/ri';
 
+
+// Import the same image logos as in the footer
+import visaLogo from '../assets/visa-logo.png';
+import mastercardLogo from '../assets/mastercard-logo.png';
+import amexLogo from '../assets/amex-logo.png';
+import discoverLogo from '../assets/discover-logo.png';
+
+// Use the actual CartItem type from CartContext instead of redefining
+interface CartItemVariation {
+  _id: string;
+  colorName?: string;
+  color?: string;
+  colorCode?: string;
+  images?: string[];
+  image?: string;
+}
+
+interface CartItemProduct {
+  _id: string;
+  name: string;
+  price: number;
+  discount?: number;
+  shippingFee?: number;
+  image?: string; // Changed to optional string
+  variations?: CartItemVariation[];
+}
+
+interface CartItem {
+  product: CartItemProduct;
+  variationId?: string;
+  quantity: number;
+  selectedColor?: string;
+  selectedColorCode?: string;
+  selectedImageIndex?: number;
+  selectedSize?: string;
+  selectedWeight?: string;
+  price?: number;
+}
+
+// Country data with validation rules
+const countries = [
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94', digits: 9, example: '745869521', pattern: /^[1-9][0-9]{8}$/ },
+  { code: 'IN', name: 'India', dialCode: '+91', digits: 10, example: '9876543210', pattern: /^[6-9][0-9]{9}$/ },
+  { code: 'US', name: 'USA/Canada', dialCode: '+1', digits: 10, example: '4112336985', pattern: /^[2-9][0-9]{9}$/ },
+  { code: 'GB', name: 'UK', dialCode: '+44', digits: 10, example: '2079460958', pattern: /^[1-9][0-9]{9}$/ },
+  { code: 'AU', name: 'Australia', dialCode: '+61', digits: 9, example: '412345678', pattern: /^[4-5][0-9]{8}$/ },
+];
+const paymentMethods = [
+    { 
+      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
+      name: 'Visa' 
+    },
+    { 
+      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
+      name: 'Mastercard' 
+    },
+    { 
+      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
+      name: 'American Express' 
+    },
+    { 
+      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
+      name: 'Discover' 
+    },
+  ];
 export default function Checkout() {
   const cart = useContext(CartContext)!;
   const auth = useContext(AuthContext)!;
   const navigate = useNavigate();
 
+  // Cast selectedCartItems to CartItem[] to fix type issues
+  const selectedCartItems = cart.selectedCartItems as unknown as CartItem[];
+  const subtotal = cart.selectedTotalAmount;
+  const itemCount = cart.selectedItemsCount;
+  const shipping = cart.selectedShippingFee;
+  const total = subtotal + shipping;
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const [formData, setFormData] = useState({
     name: auth.user?.name || '',
     address: auth.user?.address || '',
     city: '',
-    phone: auth.user?.phone || '',
+    phone: '',
     postalCode: '',
-    paymentMethod: 'Online Payment', // Set default to Online Payment only
-    countryCode: '94' // Default country code
+    paymentMethod: 'Online Payment',
+    countryCode: 'LK' // Default to Sri Lanka
   });
+
+  // Get current country object
+  const currentCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
-    // Scroll to top on initial load
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    
-    // Also handle browser back/forward navigation
+
     const handlePopState = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     };
-    
+
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -62,43 +137,226 @@ export default function Checkout() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [step]); // Runs when step changes
+  }, [step]);
 
-  // Redirect if cart is empty
+  // ✅ FIXED: Added loading dependency
   useEffect(() => {
-    if (cart.items.length === 0 && !loading) {
-      // Scroll to top before navigating
+    if (selectedCartItems.length === 0 && !loading) {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       setTimeout(() => navigate('/cart'), 150);
     }
-  }, [cart.items, navigate]);
+  }, [selectedCartItems.length, navigate, loading]);
 
-  // ✅ FIX: Handle back to cart with scroll
+  // Validation functions
+  const validateName = (value: string) => {
+  if (!value.trim()) return 'Name is required';
+  if (value.trim().length < 2) return 'Name must be at least 2 characters';
+  
+  // Only allow letters and spaces, not starting with space
+  const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
+  if (!nameRegex.test(value.trim())) {
+    return 'Name can only contain letters and spaces, and cannot start with space';
+  }
+  
+  // Check for multiple consecutive spaces
+  if (/\s{2,}/.test(value)) {
+    return 'Name cannot have multiple consecutive spaces';
+  }
+  
+  return '';
+};
+
+  const validateAddress = (value: string) => {
+    if (!value.trim()) return 'Address is required';
+    if (value.trim().length < 10) return 'Please enter a complete address';
+    return '';
+  };
+
+  const validateCity = (value: string) => {
+    if (!value.trim()) return 'City is required';
+
+    // Only allow letters, spaces, and hyphens
+    const cityRegex = /^[A-Za-z\s\-]+$/;
+    if (!cityRegex.test(value)) return 'City can only contain letters, spaces, and hyphens';
+
+    if (value.trim().length < 2) return 'City must be at least 2 characters';
+    return '';
+  };
+
+  const validatePhone = (value: string, countryCode: string) => {
+    if (!value.trim()) return 'Phone number is required';
+
+    // Remove any non-digit characters
+    const digitsOnly = value.replace(/\D/g, '');
+
+    const country = countries.find(c => c.code === countryCode);
+    if (!country) return 'Please select a valid country';
+
+    // Check digit length
+    if (digitsOnly.length !== country.digits) {
+      return `${country.name} numbers should be ${country.digits} digits`;
+    }
+
+    // Check pattern
+    if (!country.pattern.test(digitsOnly)) {
+      return `Invalid ${country.name} phone number`;
+    }
+
+    return '';
+  };
+
+  const validatePostalCode = (value: string) => {
+  if (!value.trim()) return '';
+  
+  // Only allow letters and numbers (alphanumeric)
+  const postalCodeRegex = /^[A-Za-z0-9]+$/;
+  if (!postalCodeRegex.test(value)) {
+    return 'Postal code can only contain letters and numbers';
+  }
+  
+  if (value.trim().length < 3) return 'Postal code is too short';
+  if (value.trim().length > 10) return 'Postal code is too long';
+  
+  return '';
+};
+
+  const validateForm = () => {
+    const errors = {
+      name: validateName(formData.name),
+      address: validateAddress(formData.address),
+      city: validateCity(formData.city),
+      phone: validatePhone(formData.phone, formData.countryCode),
+      postalCode: validatePostalCode(formData.postalCode),
+    };
+
+    setFormErrors(errors);
+    setTouchedFields({
+      name: true,
+      address: true,
+      city: true,
+      phone: true,
+      postalCode: true,
+    });
+
+    return !Object.values(errors).some(error => error);
+  };
+
   const handleBackToCart = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate('/cart'), 150);
   };
 
-  // ✅ FIX: Handle step navigation with scroll
   const handleStepChange = (newStep: number) => {
+    if (newStep === 2) {
+      if (!validateForm()) {
+        alert('Please fix the errors in the form before proceeding');
+        return;
+      }
+    }
+
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => setStep(newStep), 150);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const { name, value } = e.target;
+
+  // Special handling for city field - only allow letters, spaces, and hyphens
+  if (name === 'city') {
+    // Allow only letters, spaces, and hyphens
+    const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // Special handling for name field - only allow letters and spaces, cannot start with space
+  else if (name === 'name') {
+    // Remove any non-letter characters except spaces
+    let filteredValue = value.replace(/[^A-Za-z\s]/g, '');
+    
+    // Remove multiple consecutive spaces
+    filteredValue = filteredValue.replace(/\s{2,}/g, ' ');
+    
+    // Trim if starting with space
+    if (filteredValue.startsWith(' ')) {
+      filteredValue = filteredValue.trimStart();
+    }
+    
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // Special handling for postal code field - only allow letters and numbers
+  else if (name === 'postalCode') {
+    // Allow only letters and numbers
+    const filteredValue = value.replace(/[^A-Za-z0-9]/g, '');
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // Special handling for phone field - only allow digits
+  else if (name === 'phone') {
+    // Allow only digits
+    const filteredValue = value.replace(/\D/g, '');
+    setFormData({ ...formData, [name]: filteredValue });
+  }
+  // When country changes, clear phone validation
+  else if (name === 'countryCode') {
+    setFormData({ ...formData, [name]: value, phone: '' });
+    setFormErrors({ ...formErrors, phone: '' });
+  }
+  else {
+    setFormData({ ...formData, [name]: value });
+  }
+
+  // Clear error when user starts typing
+  if (formErrors[name]) {
+    setFormErrors({ ...formErrors, [name]: '' });
+  }
+};
+
+  const handleBlur = (field: string) => {
+    setTouchedFields({ ...touchedFields, [field]: true });
+
+    // Validate the field
+    let error = '';
+    switch (field) {
+      case 'name':
+        error = validateName(formData.name);
+        break;
+      case 'address':
+        error = validateAddress(formData.address);
+        break;
+      case 'city':
+        error = validateCity(formData.city);
+        break;
+      case 'phone':
+        error = validatePhone(formData.phone, formData.countryCode);
+        break;
+      case 'postalCode':
+        error = validatePostalCode(formData.postalCode);
+        break;
+    }
+
+    setFormErrors({ ...formErrors, [field]: error });
   };
 
-  const subtotal = cart.totalAmount;
-  const itemCount = cart.items.reduce((s: number, i: any) => s + i.quantity, 0);
-  const shipping = cart.shippingFee;
-  const total = subtotal + shipping;
+  // ✅ FIX: Get variation image for cart items with selectedImageIndex
+  const getItemImage = (item: CartItem) => {
+    if (!item?.product) return '';
 
-  // ✅ FIX: Get variation image for cart items
-  const getItemImage = (item: any) => {
-    // If product has variations and we have a variation ID
+    // ✅ FIXED: First check if we have a selected image index
+    if (item.selectedImageIndex !== undefined && item.selectedImageIndex !== null) {
+      if (item.product.variations && item.variationId && item.product.variations.length > 0) {
+        const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
+        if (variation && variation.images && variation.images.length > 0) {
+          // Use the selected image index, fallback to 0 if out of bounds
+          const index = Math.min(item.selectedImageIndex, variation.images.length - 1);
+          return variation.images[index];
+        }
+        if (variation && variation.image) {
+          return variation.image;
+        }
+      }
+    }
+
+    // If no selected image index or variation not found, use the old logic
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
-      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+      const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
       if (variation && variation.images && variation.images.length > 0) {
         return variation.images[0];
       }
@@ -106,10 +364,8 @@ export default function Checkout() {
         return variation.image;
       }
     }
-    
-    // If product has variations but no specific variation selected
+
     if (item.product.variations && item.product.variations.length > 0) {
-      // Try to get the first variation's image
       const firstVariation = item.product.variations[0];
       if (firstVariation.images && firstVariation.images.length > 0) {
         return firstVariation.images[0];
@@ -118,37 +374,50 @@ export default function Checkout() {
         return firstVariation.image;
       }
     }
-    
-    // Fall back to main product image
-    return item.product.image;
+
+    return item.product.image || '';
   };
 
-  // ✅ FIX: Get variation color name
-  const getItemColorName = (item: any) => {
+  // ✅ FIX: Get variation color name with defensive checks
+  const getItemColorName = (item: CartItem) => {
     if (item.selectedColor) return item.selectedColor;
-    
+
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
-      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
+      const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
       if (variation) {
-        return variation.colorName || variation.color;
+        return variation.colorName || variation.color || '';
       }
     }
-    
+
     return '';
   };
 
-  // ✅ FIX: Get variation color code
-  const getItemColorCode = (item: any) => {
+  // ✅ FIX: Get variation color code with defensive checks
+  const getItemColorCode = (item: CartItem) => {
     if (item.selectedColorCode) return item.selectedColorCode;
-    
+
     if (item.product.variations && item.variationId && item.product.variations.length > 0) {
-      const variation = item.product.variations.find((v: any) => v._id === item.variationId);
-      if (variation) {
+      const variation = item.product.variations.find((v: CartItemVariation) => v._id === item.variationId);
+      if (variation && variation.colorCode) {
         return variation.colorCode;
       }
     }
-    
+
     return '#000000';
+  };
+
+  const getAddonPrice = (item: CartItem) => {
+    if (!item.variationId || (!item.selectedSize && !item.selectedWeight)) return 0;
+    const variation = item.product.variations?.find((v: CartItemVariation) => v._id === item.variationId);
+    if (!variation) return 0;
+
+    if (item.selectedSize) {
+      return (variation as any).sizes?.find((s: any) => s.size === item.selectedSize)?.price || 0;
+    }
+    if (item.selectedWeight) {
+      return (variation as any).weights?.find((w: any) => w.weight === item.selectedWeight)?.price || 0;
+    }
+    return 0;
   };
 
   async function handlePlaceOrder() {
@@ -156,10 +425,20 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      const items = cart.items.map(it => {
+      // Final validation before API call
+      if (!validateForm()) {
+        alert('Please fix the errors in the form before placing your order');
+        setIsProcessing(false);
+        setLoading(false);
+        return;
+      }
+
+      // Use selectedCartItems
+      const items = selectedCartItems.map(it => {
+        const basePrice = it.price || it.product.price;
         const itemPrice = it.product.discount && it.product.discount > 0
-          ? Math.round(it.product.price * (1 - it.product.discount / 100))
-          : it.product.price;
+          ? Math.round(basePrice * (1 - it.product.discount / 100))
+          : basePrice;
 
         const itemColorName = getItemColorName(it);
         const itemColorCode = getItemColorCode(it);
@@ -171,12 +450,14 @@ export default function Checkout() {
           color: itemColorName || undefined,
           colorCode: itemColorCode || undefined,
           variationId: it.variationId || undefined,
-          shippingFee: it.product.shippingFee || 0
+          selectedSize: it.selectedSize || undefined,
+          selectedWeight: it.selectedWeight || undefined,
+          shippingFee: it.product.shippingFee || 0,
+          selectedImageIndex: it.selectedImageIndex || 0
         };
       });
 
-      // Combine country code and phone number
-      const fullPhoneNumber = `+${formData.countryCode} ${formData.phone}`;
+      const fullPhoneNumber = `${currentCountry.dialCode}${formData.phone}`;
 
       const orderData = {
         items,
@@ -186,8 +467,10 @@ export default function Checkout() {
           name: formData.name,
           address: formData.address,
           city: formData.city,
-          phone: fullPhoneNumber, // Use combined phone number
-          postalCode: formData.postalCode
+          phone: fullPhoneNumber,
+          postalCode: formData.postalCode,
+          country: currentCountry.name,
+          countryCode: currentCountry.dialCode
         },
         paymentMethod: formData.paymentMethod
       };
@@ -195,13 +478,17 @@ export default function Checkout() {
       const res = await api.post('/orders', orderData);
       const orderId = res.data._id;
 
-      // Since only Online Payment is available, always redirect to Stripe
+      // Clear only selected items from cart after successful order creation
+      selectedCartItems.forEach(it => {
+        cart.removeFromCart(it.product._id, it.variationId);
+      });
+
       const sessionRes = await api.post('/payments/create-checkout-session', { orderId });
       const { url } = sessionRes.data;
       window.location.href = url;
     } catch (err: any) {
       console.error(err);
-      alert(err?.response?.data?.message || err.message);
+      alert(err?.response?.data?.message || err.message || 'An error occurred while placing your order');
     } finally {
       setLoading(false);
       setIsProcessing(false);
@@ -212,29 +499,6 @@ export default function Checkout() {
     { number: 1, title: 'Shipping', icon: <FaTruck /> },
     { number: 2, title: 'Review', icon: <FaList /> },
     { number: 3, title: 'Payment', icon: <FaRegCreditCard /> }
-  ];
-
-  // Common country codes for a worldwide website
-  const countryCodes = [
-    { code: '1', name: 'US/Canada' },
-    { code: '44', name: 'UK' },
-    { code: '61', name: 'Australia' },
-    { code: '64', name: 'New Zealand' },
-    { code: '81', name: 'Japan' },
-    { code: '82', name: 'South Korea' },
-    { code: '86', name: 'China' },
-    { code: '91', name: 'India' },
-    { code: '94', name: 'Sri Lanka' },
-    { code: '971', name: 'UAE' },
-    { code: '65', name: 'Singapore' },
-    { code: '60', name: 'Malaysia' },
-    { code: '33', name: 'France' },
-    { code: '49', name: 'Germany' },
-    { code: '34', name: 'Spain' },
-    { code: '39', name: 'Italy' },
-    { code: '7', name: 'Russia' },
-    { code: '55', name: 'Brazil' },
-    { code: '52', name: 'Mexico' },
   ];
 
   return (
@@ -258,15 +522,6 @@ export default function Checkout() {
                 </div>
               </Link>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#d97706]/10 rounded-lg">
-                <FaShieldAlt className="text-[#d97706]" />
-              </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">Secure Checkout</p>
-                <p className="text-xs text-gray-500">256-bit SSL encryption</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -275,7 +530,6 @@ export default function Checkout() {
       <div className="bg-white border-b border-[#d97706]/20 py-6">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between relative">
-            {/* Progress Line */}
             <div className="absolute top-4 left-0 right-0 h-1 bg-[#d97706]/20 -z-10">
               <div
                 className="h-1 bg-gradient-to-r from-[#d97706] to-[#b45309] transition-all duration-500"
@@ -309,21 +563,21 @@ export default function Checkout() {
           <div className="lg:w-2/3 space-y-8">
             {/* Step 1: Shipping Information */}
             <div className="bg-white rounded-2xl shadow-lg border border-[#d97706]/20 overflow-hidden transition-all">
-              <div className="px-8 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
+              <div className="px-4 sm:px-8 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-[#d97706]/10 rounded-xl">
                       <FaTruck className="text-[#d97706] text-xl" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Shipping Information</h2>
-                      <p className="text-sm text-gray-500">Where should we deliver your order?</p>
+                      <h2 className="text-lg sm:text-xl font-bold text-gray-900">Shipping Information</h2>
+                      <p className="text-xs sm:text-sm text-gray-500">Where should we deliver your order?</p>
                     </div>
                   </div>
                   {step > 1 && (
                     <button
                       onClick={() => handleStepChange(1)}
-                      className="text-[#d97706] hover:text-[#b45309] font-medium text-sm px-4 py-2 hover:bg-[#d97706]/10 rounded-lg transition-colors"
+                      className="text-[#d97706] hover:text-[#b45309] font-medium text-sm px-3 sm:px-4 py-2 hover:bg-[#d97706]/10 rounded-lg transition-colors"
                     >
                       Edit
                     </button>
@@ -332,47 +586,77 @@ export default function Checkout() {
               </div>
 
               {step === 1 && (
-                <div className="p-8 space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <div className="flex items-center gap-2">
-                          <FaUser className="text-[#d97706]" />
-                          Recipient's Full Name
-                        </div>
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Enter your full name"
-                        className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                      />
-                    </div>
+                <div className="p-4 sm:p-8 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Name Field */}
+<div className="md:col-span-2">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    <div className="flex items-center gap-2">
+      <FaUser className="text-[#d97706]" />
+      <span className="text-xs sm:text-sm">Recipient's Full Name *</span>
+    </div>
+  </label>
+  <input
+    type="text"
+    name="name"
+    value={formData.name}
+    onChange={handleChange}
+    onBlur={() => handleBlur('name')}
+    placeholder="Enter your full name"
+    className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.name && formErrors.name
+      ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+      : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+      }`}
+    aria-label="Recipient's full name"
+  />
+  {touchedFields.name && formErrors.name && (
+    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+      <FaTimes className="text-xs" />
+      {formErrors.name}
+    </p>
+  )}
+  {!touchedFields.name && !formErrors.name && (
+    <p className="mt-1 text-xs text-gray-500">
+      Only letters and spaces, cannot start with space
+    </p>
+  )}
+</div>
 
+                    {/* Address Field */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaMapMarkerAlt className="text-[#d97706]" />
-                          Complete Address
+                          <span className="text-xs sm:text-sm">Complete Address *</span>
                         </div>
                       </label>
                       <textarea
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
+                        onBlur={() => handleBlur('address')}
                         placeholder="House number, street name, apartment/suite"
                         rows={3}
-                        className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all resize-none"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all resize-none ${touchedFields.address && formErrors.address
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
+                        aria-label="Complete shipping address"
                       />
+                      {touchedFields.address && formErrors.address && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.address}
+                        </p>
+                      )}
                     </div>
 
+                    {/* City Field - Only letters, spaces, and hyphens */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaHome className="text-[#d97706]" />
-                          City / State
+                          <span className="text-xs sm:text-sm">City / State *</span>
                         </div>
                       </label>
                       <input
@@ -380,132 +664,220 @@ export default function Checkout() {
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
-                        placeholder="e.g., Colombo"
-                        className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                        onBlur={() => handleBlur('city')}
+                        placeholder="e.g., Colombo or New York"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.city && formErrors.city
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
+                        aria-label="City or state"
                       />
+                      {touchedFields.city && formErrors.city && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.city}
+                        </p>
+                      )}
+                      <p className="mt-1 text-xs text-gray-500">
+                        Only letters, spaces, and hyphens allowed
+                      </p>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Postal Code
-                      </label>
-                      <input
-                        type="text"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleChange}
-                        placeholder="e.g., 10100"
-                        className="w-full px-4 py-3 border border-[#d97706] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                      />
-                    </div>
+                    {/* Postal Code Field */}
+                    {/* Postal Code Field */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    <span className="text-xs sm:text-sm">Postal Code</span>
+  </label>
+  <input
+    type="text"
+    name="postalCode"
+    value={formData.postalCode}
+    onChange={handleChange}
+    onBlur={() => handleBlur('postalCode')}
+    placeholder="e.g., 10100 or ABC123"
+    className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.postalCode && formErrors.postalCode
+      ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+      : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+      }`}
+    aria-label="Postal code"
+    maxLength={10} // Add maxLength to prevent too long input
+  />
+  {touchedFields.postalCode && formErrors.postalCode ? (
+    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+      <FaTimes className="text-xs" />
+      {formErrors.postalCode}
+    </p>
+  ) : (
+    <p className="mt-1 text-xs text-gray-500">
+      Letters and numbers only (3-10 characters)
+    </p>
+  )}
+</div>
 
+                    {/* Phone Number Section */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
                           <FaPhoneAlt className="text-[#d97706]" />
-                          Contact Phone Number
+                          <span className="text-xs sm:text-sm">Contact Phone Number *</span>
                         </div>
                       </label>
-                      <div className="flex gap-2">
-                        <div className="relative">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Country Selector */}
+                        <div className="relative w-full sm:w-[350px]">
                           <select
                             name="countryCode"
                             value={formData.countryCode}
                             onChange={handleChange}
-                            className="appearance-none px-4 py-3 pr-8 rounded-lg border border-[#d97706] bg-[#d97706]/10 text-[#d97706] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                            className="w-full text-sm sm:text-base appearance-none px-4 py-3 pr-10 rounded-lg border border-[#d97706] bg-[#FBF9F6FF]/10 text-[#0C0C0CFF] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
+                            aria-label="Country code"
                           >
-                            {countryCodes.map((country) => (
+                            {countries.map((country) => (
                               <option key={country.code} value={country.code}>
-                                +{country.code} ({country.name})
+                                {country.dialCode} ({country.name})
                               </option>
                             ))}
                           </select>
-                          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                             <svg className="w-4 h-4 text-[#d97706]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                           </div>
                         </div>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="77 123 4567"
-                          className="flex-1 px-4 py-3 rounded-lg border border-[#d97706] focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706] transition-all"
-                        />
+
+                        {/* Phone Number Input */}
+                        <div className="flex-1">
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('phone')}
+                            placeholder={`e.g., ${currentCountry.example}`}
+                            className={`w-full text-sm sm:text-base px-4 py-3 rounded-lg border focus:outline-none transition-all ${touchedFields.phone && formErrors.phone
+                              ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                              : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                              }`}
+                            aria-label="Phone number"
+                          />
+                          {touchedFields.phone && formErrors.phone ? (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <FaTimes className="text-xs" />
+                              {formErrors.phone}
+                            </p>
+                          ) : (
+                            <div className="flex justify-between items-center mt-2">
+                              <p className="text-xs text-gray-500">
+                                Enter without country code
+                              </p>
+                              <span className="text-xs text-gray-400">
+                                {formData.phone.length}/{currentCountry.digits} digits
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Enter your phone number without the country code
-                      </p>
+
+                      {/* Country Information */}
+                      <div className="mt-2 p-2 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20">
+                        <div className="text-xs text-gray-600 flex items-center gap-2">
+                          <span className="font-medium">Format:</span>
+                          <span>{currentCountry.dialCode} {currentCountry.example} ({currentCountry.digits} digits)</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <button
-                      onClick={handleBackToCart}
-                      className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                    >
-                      <FaArrowLeft className="text-sm" />
-                      Back to Cart
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!formData.name || !formData.address || !formData.city || !formData.phone) {
-                          alert('Please fill in all required shipping information');
-                          return;
-                        }
-                        handleStepChange(2);
-                      }}
-                      className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
-                    >
-                      Continue to Review
-                      <FaArrowRight className="text-sm" />
-                    </button>
+                  {/* Buttons for Step 1 - Responsive */}
+                  <div className="pt-6 border-t border-[#d97706]/20">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                      <button
+                        onClick={handleBackToCart}
+                        className="w-full md:w-auto px-4 sm:px-6 py-3 text-sm sm:text-base border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
+                        aria-label="Back to cart"
+                      >
+                        <FaArrowLeft className="text-sm" />
+                        Back to Cart
+                      </button>
+                      <button
+                        onClick={() => handleStepChange(2)}
+                        className="w-full md:w-auto px-4 sm:px-8 py-3 text-sm sm:text-base bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center justify-center gap-2"
+                        aria-label="Continue to review order"
+                      >
+                        Continue to Review
+                        <FaArrowRight className="text-sm" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Step 2: Review Items */}
+            {/* Step 2: Review Items - FIXED RESPONSIVE DESIGN */}
             <div className="bg-white rounded-2xl shadow-lg border border-[#d97706]/20 overflow-hidden transition-all">
-              <div className="px-8 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-[#d97706]/10 rounded-xl">
-                    <FaList className="text-[#d97706] text-xl" />
+              <div className="px-4 sm:px-8 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-[#d97706]/10 rounded-xl">
+                    <FaList className="text-[#d97706] text-lg sm:text-xl" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Review Your Order</h2>
-                    <p className="text-sm text-gray-500">Review items and shipping details</p>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Review Your Order</h2>
+                    <p className="text-xs sm:text-sm text-gray-500">Review items and shipping details</p>
                   </div>
                 </div>
               </div>
 
               {step === 2 && (
-                <div className="p-8 space-y-8">
-                  <div className="space-y-4">
-                    {cart.items.map(it => {
+                <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
+                  <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto scrollbar-hide pr-2">
+                    {selectedCartItems.map((it) => {
                       const itemImage = getItemImage(it);
                       const itemColorName = getItemColorName(it);
                       const itemColorCode = getItemColorCode(it);
-                      
+                      const itemKey = cart.getItemKey(it as any);
+
                       return (
-                        <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-4 p-4 border border-[#d97706]/20 rounded-lg hover:bg-[#d97706]/5 transition-colors">
-                          <div className="w-20 h-20 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-2 flex-shrink-0">
-                            <img
-                              src={getImageUrl(itemImage)}
-                              className="w-full h-full object-contain"
-                              alt={it.product.name}
-                            />
+                        <div key={itemKey} className="py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center gap-4 group">
+                          {/* Product Image - Mobile: Full width, Desktop: Fixed */}
+                          <div className="flex items-center gap-3 sm:gap-4 sm:flex-shrink-0">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-2">
+                              <img
+                                src={getImageUrl(itemImage)}
+                                className="w-full h-full object-contain"
+                                alt={it.product.name}
+                                loading="lazy"
+                              />
+                            </div>
+
+                            {/* Product Info - Mobile: Stacked, Desktop: Inline */}
+                            <div className="flex-1 sm:hidden">
+                              <h4 className="font-medium text-gray-900 text-sm sm:text-base mb-1">{it.product.name}</h4>
+                              {itemColorName && (
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-xs text-gray-500">Color:</span>
+                                  <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                    <div
+                                      className="w-3 h-3 rounded-full border border-gray-300 shadow-sm"
+                                      style={{ backgroundColor: itemColorCode }}
+                                    />
+                                    <span className="text-xs font-medium text-gray-700">{itemColorName}</span>
+                                  </div>
+                                </div>
+                              )}
+                              <p className="text-xs sm:text-sm text-[#d97706]">Quantity: {it.quantity}</p>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 mb-1">{it.product.name}</h4>
+
+                          {/* Desktop Product Info */}
+                          <div className="hidden sm:block flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 text-base mb-1">{it.product.name}</h4>
                             {itemColorName && (
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-xs text-gray-500">Color:</span>
-                                <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                                <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
                                   <div
-                                    className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                    className="w-3 h-3 rounded-full border border-gray-300 shadow-sm"
                                     style={{ backgroundColor: itemColorCode }}
                                   />
                                   <span className="text-xs font-medium text-gray-700">{itemColorName}</span>
@@ -513,13 +885,30 @@ export default function Checkout() {
                               </div>
                             )}
                             <p className="text-sm text-[#d97706]">Quantity: {it.quantity}</p>
+                            {(it.selectedSize || it.selectedWeight) && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="text-xs text-indigo-600 font-medium whitespace-nowrap">
+                                  {it.selectedSize ? `Size: ${it.selectedSize}` : `Weight: ${it.selectedWeight}`}
+                                </span>
+                                {getAddonPrice(it) > 0 && (
+                                  <span className="text-[10px] text-indigo-400 font-medium opacity-80">(+${getAddonPrice(it)})</span>
+                                )}
+                              </div>
+                            )}
                           </div>
-                          <div className="text-right">
-                            <div className="font-bold text-gray-900">
-                              ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+
+                          {/* Price Section - Mobile: Full width with flex, Desktop: Fixed */}
+                          <div className="flex justify-between items-center sm:block sm:text-right mt-2 sm:mt-0">
+                            <div className="sm:hidden">
+                              <span className="text-xs text-gray-500">Price:</span>
                             </div>
-                            <div className="text-sm text-[#d97706]">
-                              ${(it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price).toLocaleString()} each
+                            <div>
+                              <div className="font-bold text-gray-900 text-sm sm:text-base">
+                                ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
+                              </div>
+                              <div className="text-xs sm:text-sm text-[#d97706]">
+                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()} each
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -528,50 +917,59 @@ export default function Checkout() {
                   </div>
 
                   {/* Shipping Details Review */}
-                  <div className="bg-[#d97706]/5 border border-[#d97706]/20 rounded-xl p-6">
-                    <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <FaTruck className="text-[#d97706]" />
+                  <div className="bg-[#d97706]/5 border border-[#d97706]/20 rounded-xl p-4 sm:p-6">
+                    <h4 className="font-bold text-gray-900 text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                      <FaTruck className="text-[#d97706] text-sm sm:text-base" />
                       Shipping Details
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">Name</p>
-                        <p className="font-medium text-gray-900">{formData.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">Name</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{formData.name}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">Phone</p>
-                        <p className="font-medium text-gray-900">+{formData.countryCode} {formData.phone}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">Phone</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{currentCountry.dialCode} {formData.phone}</p>
                       </div>
-                      <div className="md:col-span-2">
-                        <p className="text-sm text-gray-600 mb-1">Address</p>
-                        <p className="font-medium text-gray-900">{formData.address}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">City</p>
-                        <p className="font-medium text-gray-900">{formData.city}</p>
+                      <div className="sm:col-span-2">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">Address</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base break-words">{formData.address}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">Postal Code</p>
-                        <p className="font-medium text-gray-900">{formData.postalCode}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">City</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{formData.city}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">Postal Code</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{formData.postalCode || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">Country</p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{currentCountry.name}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <button
-                      onClick={() => handleStepChange(1)}
-                      className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                    >
-                      <FaArrowLeft className="text-sm" />
-                      Back to Shipping
-                    </button>
-                    <button
-                      onClick={() => handleStepChange(3)}
-                      className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center gap-2"
-                    >
-                      Proceed to Payment
-                      <FaArrowRight className="text-sm" />
-                    </button>
+                  {/* Buttons for Step 2 - Responsive */}
+                  <div className="pt-6 border-t border-[#d97706]/20">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 sm:gap-4">
+                      <button
+                        onClick={() => handleStepChange(1)}
+                        className="w-full md:w-auto px-4 sm:px-6 py-3 text-sm sm:text-base border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
+                        aria-label="Back to shipping information"
+                      >
+                        <FaArrowLeft className="text-sm" />
+                        Back to Shipping
+                      </button>
+                      <button
+                        onClick={() => handleStepChange(3)}
+                        className="w-full md:w-auto px-4 sm:px-8 py-3 text-sm sm:text-base bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all flex items-center justify-center gap-2"
+                        aria-label="Proceed to payment"
+                      >
+                        Proceed to Payment
+                        <FaArrowRight className="text-sm" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -579,59 +977,75 @@ export default function Checkout() {
 
             {/* Step 3: Payment Method */}
             <div className="bg-white rounded-2xl shadow-lg border border-[#d97706]/20 overflow-hidden transition-all">
-              <div className="px-8 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-[#d97706]/10 rounded-xl">
-                    <FaRegCreditCard className="text-[#d97706] text-xl" />
+              <div className="px-4 sm:px-8 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-[#d97706]/10 rounded-xl">
+                    <FaRegCreditCard className="text-[#d97706] text-lg sm:text-xl" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Payment Method</h2>
-                    <p className="text-sm text-gray-500">Complete your secure payment</p>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Payment Method</h2>
+                    <p className="text-xs sm:text-sm text-gray-500">Complete your secure payment</p>
                   </div>
                 </div>
               </div>
 
               {step === 3 && (
-                <div className="p-8 space-y-8">
+                <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                   {/* Online Payment Option - Only Option */}
-                  <div className="border border-[#d97706] bg-[#d97706]/10 rounded-xl p-6 ring-2 ring-[#d97706] ring-offset-2">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-white text-[#d97706] rounded-lg">
-                        <FaCreditCard className="text-xl" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 mb-2">Secure Online Payment</h4>
-                        <div className="flex items-center flex-wrap gap-3 mt-2">
-                          <div className="flex items-center gap-1 bg-white p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiVisa className="text-blue-800 text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-white p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiMastercard className="text-red-600 text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-white p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiAmericanexpress className="text-blue-600 text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-white p-1.5 rounded shadow-sm border border-gray-200">
-                            <SiDiscover className="text-orange-500 text-base" />
-                          </div>
-                          <div className="flex items-center gap-1 bg-gradient-to-r from-[#d97706] to-[#b45309] p-1.5 rounded shadow-sm">
-                            <RiSecurePaymentLine className="text-white text-base" />
-                          </div>
-                        </div>
-                      </div>
-                      <FaCheckCircle className="text-[#d97706] text-xl" />
-                    </div>
-                  </div>
+                 {/* Online Payment Option - Only Option - MOBILE RESPONSIVE */}
+<div className="border border-[#FAF7F4] bg-[#FDDDB6]/10 rounded-xl p-3 sm:p-4 md:p-6 ring-2 ring-[#F4F1EE] ring-offset-1 sm:ring-offset-2">
+  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+    <div className="flex items-start gap-3 w-full sm:w-auto">
+      <div className="p-2 sm:p-3 bg-white text-[#d97706] rounded-lg flex-shrink-0">
+        <FaCreditCard className="text-base sm:text-lg md:text-xl" />
+      </div>
+      <div className="flex-1 sm:hidden">
+        <h4 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Secure Online Payment</h4>
+      </div>
+    </div>
+    
+    <div className="flex-1 w-full">
+      {/* Hidden on mobile, shown on sm+ */}
+      <h4 className="hidden sm:block font-bold text-gray-900 text-base md:text-lg mb-2">Secure Online Payment</h4>
+      
+      {/* Payment Methods - Improved mobile responsiveness */}
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start items-center">
+          {paymentMethods.map((method, index) => (
+            <div
+              key={index}
+              className="p-1.5 sm:p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10"
+              title={method.name}
+            >
+              {method.icon}
+            </div>
+          ))}
+        </div>
+        
+        {/* Secure SSL Badge - Mobile responsive */}
+        <div className="flex justify-center sm:justify-start">
+          {/* <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#d97706] to-[#b45309] px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded shadow-sm w-fit">
+            <RiSecurePaymentLine className="text-white text-xs sm:text-sm md:text-base" />
+            <span className="text-white text-xs sm:text-xs md:text-sm font-medium">Secure SSL Payment</span>
+          </div> */}
+        </div>
+      </div>
+    </div>
+    
+    {/* Checkmark - Hidden on mobile, shown on sm+ */}
+    <FaCheckCircle className="hidden sm:block text-[#d97706] text-lg sm:text-xl flex-shrink-0" />
+  </div>
+</div>
 
                   {/* Security Notice */}
-                  <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <FaLock className="text-[#d97706] text-lg" />
+                  <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-4 sm:p-6">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="p-2 bg-white rounded-lg shadow-sm flex-shrink-0">
+                        <FaLock className="text-[#d97706] text-base sm:text-lg" />
                       </div>
                       <div>
-                        <h5 className="font-medium text-gray-900 mb-2">Secure Checkout Process</h5>
-                        <p className="text-sm text-gray-600">
+                        <h5 className="font-medium text-gray-900 text-sm sm:text-base mb-2">Secure Checkout Process</h5>
+                        <p className="text-xs sm:text-sm text-gray-600">
                           <strong>Important:</strong> This is an online-only business. Your order will be shipped only after
                           successful payment confirmation. All transactions are protected with 256-bit SSL encryption
                           and PCI-DSS compliance. We never store your card details on our servers.
@@ -640,31 +1054,36 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 border-t border-[#d97706]/20">
-                    <button
-                      onClick={() => handleStepChange(2)}
-                      className="px-6 py-3 border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center gap-2"
-                    >
-                      <FaArrowLeft className="text-sm" />
-                      Back to Review
-                    </button>
-                    <button
-                      onClick={handlePlaceOrder}
-                      disabled={loading}
-                      className="px-8 py-3 bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[180px] flex items-center justify-center gap-2"
-                    >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Processing...
-                        </div>
-                      ) : (
-                        <>
-                          Pay Securely
-                          <FaArrowRight className="text-sm" />
-                        </>
-                      )}
-                    </button>
+                  {/* Buttons for Step 3 - Responsive */}
+                  <div className="pt-6 border-t border-[#d97706]/20">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 sm:gap-4">
+                      <button
+                        onClick={() => handleStepChange(2)}
+                        className="w-full md:w-auto px-4 sm:px-6 py-3 text-sm sm:text-base border border-[#d97706] text-[#d97706] rounded-lg font-medium hover:bg-[#d97706]/10 transition-colors flex items-center justify-center gap-2"
+                        aria-label="Back to review order"
+                      >
+                        <FaArrowLeft className="text-sm" />
+                        Back to Review
+                      </button>
+                      <button
+                        onClick={handlePlaceOrder}
+                        disabled={loading || isProcessing}
+                        className="w-full md:w-auto px-4 sm:px-8 py-3 text-sm sm:text-base bg-gradient-to-r from-[#d97706] to-[#b45309] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#d97706]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        aria-label={loading ? "Processing payment" : "Place order and proceed to payment"}
+                      >
+                        {loading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Processing...
+                          </div>
+                        ) : (
+                          <>
+                            Pay Securely
+                            <FaArrowRight className="text-sm" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -675,45 +1094,56 @@ export default function Checkout() {
           <div className="lg:w-1/3">
             <div className="bg-white rounded-2xl shadow-lg border border-[#d97706]/20 sticky top-6">
               {/* Summary Header */}
-              <div className="px-6 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
-                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-3">
-                  <FaReceipt className="text-[#d97706]" />
+              <div className="px-4 sm:px-6 py-6 border-b border-[#d97706]/20 bg-gradient-to-r from-[#d97706]/5 to-white">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-3">
+                  <FaReceipt className="text-[#d97706] text-sm sm:text-base" />
                   Order Summary
                 </h3>
               </div>
 
               {/* Order Items Preview */}
-              <div className="px-6 py-4 border-b border-[#d97706]/20">
+              <div className="px-4 sm:px-6 py-4 border-b border-[#d97706]/20">
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {cart.items.map(it => {
+                  {selectedCartItems.map(it => {
                     const itemImage = getItemImage(it);
                     const itemColorName = getItemColorName(it);
                     const itemColorCode = getItemColorCode(it);
-                    
+
                     return (
-                      <div key={it.product._id + (it.variationId || '')} className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-1 flex-shrink-0">
+                      <div key={cart.getItemKey(it as any)} className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d97706]/5 rounded-lg overflow-hidden border border-[#d97706]/20 p-1 flex-shrink-0">
                           <img
                             src={getImageUrl(itemImage)}
                             className="w-full h-full object-contain"
                             alt={it.product.name}
+                            loading="lazy"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">{it.product.name}</h4>
+                          <h4 className="text-xs sm:text-sm font-medium text-gray-900 truncate">{it.product.name}</h4>
                           {itemColorName && (
                             <div className="flex items-center gap-1.5 mt-1">
                               <div
-                                className="w-3 h-3 rounded-full border border-gray-300"
+                                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-gray-300"
                                 style={{ backgroundColor: itemColorCode }}
                               />
-                              <span className="text-xs text-gray-500">{itemColorName}</span>
+                              <span className="text-xs text-gray-500 truncate">{itemColorName}</span>
                             </div>
                           )}
                           <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
+                          {(it.selectedSize || it.selectedWeight) && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[10px] text-indigo-600 font-medium">
+                                {it.selectedSize || it.selectedWeight}
+                              </span>
+                              {getAddonPrice(it) > 0 && (
+                                <span className="text-[9px] text-indigo-400 opacity-70">(+${getAddonPrice(it)})</span>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <div className="text-sm font-medium text-gray-900">
-                          ${((it.product.discount ? Math.round(it.product.price * (1 - it.product.discount / 100)) : it.product.price) * it.quantity).toLocaleString()}
+                        <div className="text-xs sm:text-sm font-medium text-gray-900">
+                          ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                         </div>
                       </div>
                     );
@@ -722,20 +1152,20 @@ export default function Checkout() {
               </div>
 
               {/* Price Breakdown */}
-              <div className="px-6 py-6 border-b border-[#d97706]/20 space-y-4">
+              <div className="px-4 sm:px-6 py-4 sm:py-6 border-b border-[#d97706]/20 space-y-3 sm:space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal ({itemCount} items)</span>
-                  <span className="font-medium text-gray-900">${subtotal.toLocaleString()}</span>
+                  <span className="text-sm sm:text-base text-gray-600">Subtotal ({itemCount} items)</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-900">${subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col">
-                    <span className="text-gray-600">Shipping</span>
+                    <span className="text-sm sm:text-base text-gray-600">Shipping</span>
                     <div className="mt-1 space-y-1">
-                      {Array.from(new Set(cart.items.map(it => it.product._id))).map(productId => {
-                        const item = cart.items.find(it => it.product._id === productId);
+                      {Array.from(new Set(selectedCartItems.map(it => it.product._id))).map(productId => {
+                        const item = selectedCartItems.find(it => it.product._id === productId);
                         if (!item) return null;
                         return (
-                          <div key={productId} className="text-[10px] text-gray-500 flex items-center gap-1">
+                          <div key={productId} className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
                             <span className="truncate max-w-[120px]">{item.product.name}</span>:
                             <span>${(item.product.shippingFee || 0).toLocaleString()}</span>
                           </div>
@@ -743,28 +1173,29 @@ export default function Checkout() {
                       })}
                     </div>
                   </div>
-                  <span className="font-medium text-gray-900">${shipping.toLocaleString()}</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-900">${shipping.toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Total */}
-              <div className="px-6 py-6">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-gray-900">${total.toLocaleString()}</span>
+              <div className="px-4 sm:px-6 py-4 sm:py-6">
+                <div className="flex justify-between items-center mb-4 sm:mb-6">
+                  <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
+                  <span className="text-xl sm:text-2xl font-bold text-gray-900">${total.toLocaleString()}</span>
                 </div>
 
                 {/* Shipping Info */}
                 {step > 1 && (
-                  <div className="space-y-4 mb-6">
-                    <div className="p-4 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20">
-                      <div className="flex items-start gap-3">
-                        <FaMapMarkerAlt className="text-[#d97706] mt-1" />
+                  <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+                    <div className="p-3 sm:p-4 bg-[#d97706]/5 rounded-lg border border-[#d97706]/20">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <FaMapMarkerAlt className="text-[#d97706] mt-0.5 text-sm sm:text-base" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900 mb-1">Shipping to</p>
-                          <p className="text-xs text-gray-600">{formData.address}</p>
+                          <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">Shipping to</p>
+                          <p className="text-xs text-gray-600 truncate">{formData.address}</p>
                           <p className="text-xs text-gray-600">{formData.city}, {formData.postalCode}</p>
-                          <p className="text-xs text-gray-600">Phone: +{formData.countryCode} {formData.phone}</p>
+                          <p className="text-xs text-gray-600">Phone: {currentCountry.dialCode} {formData.phone}</p>
+                          <p className="text-xs text-gray-600">Country: {currentCountry.name}</p>
                         </div>
                       </div>
                     </div>
@@ -772,19 +1203,19 @@ export default function Checkout() {
                 )}
 
                 {/* Payment Notice */}
-                <div className="flex items-center gap-3 p-3 bg-[#d97706]/5 rounded-lg mb-4">
-                  <FaCreditCard className="text-[#d97706]" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-[#d97706]/5 rounded-lg mb-3 sm:mb-4">
+                  <FaCreditCard className="text-[#d97706] text-sm sm:text-base" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Payment Required</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-900">Payment Required</p>
                     <p className="text-xs text-[#d97706]">Order ships after payment confirmation</p>
                   </div>
                 </div>
 
                 {/* Delivery Estimate */}
-                <div className="flex items-center gap-3 p-3 bg-[#d97706]/5 rounded-lg">
-                  <FaTruck className="text-[#d97706]" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-[#d97706]/5 rounded-lg">
+                  <FaTruck className="text-[#d97706] text-sm sm:text-base" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Estimated Delivery</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-900">Estimated Delivery</p>
                     <p className="text-xs text-[#d97706]">3-5 business days after payment</p>
                   </div>
                 </div>

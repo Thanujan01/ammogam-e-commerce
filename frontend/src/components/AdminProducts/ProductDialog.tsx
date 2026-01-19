@@ -4,9 +4,24 @@ import { getImageUrl } from '../../utils/imageUrl';
 import { FiPlus, FiTrash2, FiImage, FiX } from 'react-icons/fi';
 import { api } from '../../api/api';
 
+export interface SizeOption {
+  size: string;
+  stock: number;
+  price: number;
+}
+
+export interface WeightOption {
+  weight: string;
+  stock: number;
+  price: number;
+}
+
 export interface ColorVariant {
   colorName: string;
   colorCode: string;
+  variantType: 'size' | 'weight' | 'none';
+  sizes?: SizeOption[];
+  weights?: WeightOption[];
   stock: number;
   images: string[];
 }
@@ -75,10 +90,10 @@ export default function ProductDialog({
     if (isOpen) {
       const selectedCat = categories.find(c => c.id === formData.category);
       setCategorySearch(selectedCat?.name || '');
-      
+
       // Reset section search
       setSectionSearch((formData as any).mainSubcategory || '');
-      
+
       // Reset subcategory search
       setSubCategorySearch(formData.subCategory || '');
     } else {
@@ -115,6 +130,9 @@ export default function ProductDialog({
     const newVariant: ColorVariant = {
       colorName: '',
       colorCode: '#000000',
+      variantType: 'none',
+      sizes: [],
+      weights: [],
       stock: 0,
       images: []
     };
@@ -135,8 +153,75 @@ export default function ProductDialog({
   const handleColorVariantChange = (index: number, field: keyof ColorVariant, value: any) => {
     const updated = [...colorVariants];
     updated[index] = { ...updated[index], [field]: value };
+
+    // If variantType changes, reset specific options
+    if (field === 'variantType') {
+      if (value === 'none') {
+        updated[index].sizes = [];
+        updated[index].weights = [];
+      } else if (value === 'size') {
+        updated[index].weights = [];
+        if (!updated[index].sizes || updated[index].sizes.length === 0) {
+          updated[index].sizes = [{ size: '', stock: 0, price: 0 }];
+        }
+      } else if (value === 'weight') {
+        updated[index].sizes = [];
+        if (!updated[index].weights || updated[index].weights.length === 0) {
+          updated[index].weights = [{ weight: '', stock: 0, price: 0 }];
+        }
+      }
+    }
+
     setColorVariants(updated);
     onChange('colorVariants', updated);
+  };
+
+  const handleAddSizeOption = (variantIndex: number) => {
+    const updated = [...colorVariants];
+    const sizes = updated[variantIndex].sizes || [];
+    updated[variantIndex].sizes = [...sizes, { size: '', stock: 0, price: 0 }];
+    setColorVariants(updated);
+    onChange('colorVariants', updated);
+  };
+
+  const handleRemoveSizeOption = (variantIndex: number, sizeIndex: number) => {
+    const updated = [...colorVariants];
+    updated[variantIndex].sizes = updated[variantIndex].sizes?.filter((_, i) => i !== sizeIndex);
+    setColorVariants(updated);
+    onChange('colorVariants', updated);
+  };
+
+  const handleSizeOptionChange = (variantIndex: number, sizeIndex: number, field: keyof SizeOption, value: any) => {
+    const updated = [...colorVariants];
+    if (updated[variantIndex].sizes) {
+      updated[variantIndex].sizes![sizeIndex] = { ...updated[variantIndex].sizes![sizeIndex], [field]: value };
+      setColorVariants(updated);
+      onChange('colorVariants', updated);
+    }
+  };
+
+  const handleAddWeightOption = (variantIndex: number) => {
+    const updated = [...colorVariants];
+    const weights = updated[variantIndex].weights || [];
+    updated[variantIndex].weights = [...weights, { weight: '', stock: 0, price: 0 }];
+    setColorVariants(updated);
+    onChange('colorVariants', updated);
+  };
+
+  const handleRemoveWeightOption = (variantIndex: number, weightIndex: number) => {
+    const updated = [...colorVariants];
+    updated[variantIndex].weights = updated[variantIndex].weights?.filter((_, i) => i !== weightIndex);
+    setColorVariants(updated);
+    onChange('colorVariants', updated);
+  };
+
+  const handleWeightOptionChange = (variantIndex: number, weightIndex: number, field: keyof WeightOption, value: any) => {
+    const updated = [...colorVariants];
+    if (updated[variantIndex].weights) {
+      updated[variantIndex].weights![weightIndex] = { ...updated[variantIndex].weights![weightIndex], [field]: value };
+      setColorVariants(updated);
+      onChange('colorVariants', updated);
+    }
   };
 
   const handleColorImageUpload = async (index: number, file: File) => {
@@ -178,7 +263,7 @@ export default function ProductDialog({
               {isEditing ? 'Update product details' : 'Fill in details to add a new product'}
             </p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="text-white hover:bg-white/20 rounded-lg p-2 transition-all"
             title="Close"
@@ -196,7 +281,14 @@ export default function ProductDialog({
                 <div>
                   <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Overall Stock</p>
                   <p className="text-2xl font-black text-indigo-900 leading-none mt-1">
-                    {colorVariants.reduce((sum, v) => sum + (v.stock || 0), 0)} <span className="text-sm font-medium opacity-60">Items</span>
+                    {colorVariants.reduce((sum, v) => {
+                      if (v.variantType === 'size' && v.sizes) {
+                        return sum + v.sizes.reduce((s, size) => s + (size.stock || 0), 0);
+                      } else if (v.variantType === 'weight' && v.weights) {
+                        return sum + v.weights.reduce((w, weight) => w + (weight.stock || 0), 0);
+                      }
+                      return sum + (v.stock || 0);
+                    }, 0)} <span className="text-sm font-medium opacity-60">Items</span>
                   </p>
                 </div>
               </div>
@@ -265,7 +357,7 @@ export default function ProductDialog({
                 {showCategoryDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {categories
-                      .filter(cat => 
+                      .filter(cat =>
                         cat.name.toLowerCase().startsWith(categorySearch.toLowerCase())
                       )
                       .map(cat => (
@@ -278,9 +370,8 @@ export default function ProductDialog({
                             setCategorySearch(cat.name);
                             setShowCategoryDropdown(false);
                           }}
-                          className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${
-                            formData.category === cat.id ? 'bg-primary1/20 font-semibold' : ''
-                          }`}
+                          className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${formData.category === cat.id ? 'bg-primary1/20 font-semibold' : ''
+                            }`}
                         >
                           {cat.name}
                         </div>
@@ -334,7 +425,7 @@ export default function ProductDialog({
                         {showSectionDropdown && (
                           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                             {selectedCat.mainSubcategories
-                              .filter(sub => 
+                              .filter(sub =>
                                 sub.title.toLowerCase().startsWith(sectionSearch.toLowerCase())
                               )
                               .map((sub, idx) => (
@@ -347,9 +438,8 @@ export default function ProductDialog({
                                     setSubCategorySearch('');
                                     setShowSectionDropdown(false);
                                   }}
-                                  className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${
-                                    (formData as any).mainSubcategory === sub.title ? 'bg-primary1/20 font-semibold' : ''
-                                  }`}
+                                  className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${(formData as any).mainSubcategory === sub.title ? 'bg-primary1/20 font-semibold' : ''
+                                    }`}
                                 >
                                   {sub.title}
                                 </div>
@@ -396,7 +486,7 @@ export default function ProductDialog({
                         {showSubCategoryDropdown && selectedSection && !(formData as any).mainSubcategory === false && (
                           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                             {selectedSection.items
-                              .filter(item => 
+                              .filter(item =>
                                 item.toLowerCase().startsWith(subCategorySearch.toLowerCase())
                               )
                               .map((item, idx) => (
@@ -407,9 +497,8 @@ export default function ProductDialog({
                                     setSubCategorySearch(item);
                                     setShowSubCategoryDropdown(false);
                                   }}
-                                  className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${
-                                    formData.subCategory === item ? 'bg-primary1/20 font-semibold' : ''
-                                  }`}
+                                  className={`px-4 py-2.5 cursor-pointer hover:bg-primary1/10 transition-colors ${formData.subCategory === item ? 'bg-primary1/20 font-semibold' : ''
+                                    }`}
                                 >
                                   {item}
                                 </div>
@@ -554,19 +643,6 @@ export default function ProductDialog({
 
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Stock Quantity *
-                          </label>
-                          <input
-                            type="number"
-                            value={variant.stock}
-                            onChange={(e) => handleColorVariantChange(index, 'stock', parseInt(e.target.value) || 0)}
-                            placeholder="0"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
                             Color Code
                           </label>
                           <div className="flex gap-2">
@@ -585,7 +661,159 @@ export default function ProductDialog({
                             />
                           </div>
                         </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Variant Type
+                          </label>
+                          <select
+                            value={variant.variantType}
+                            onChange={(e) => handleColorVariantChange(index, 'variantType', e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none bg-white"
+                          >
+                            <option value="none">None (Standard Stock)</option>
+                            <option value="size">Size Based</option>
+                            <option value="weight">Weight Based</option>
+                          </select>
+                        </div>
+
+                        {variant.variantType === 'none' && (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Stock Quantity *
+                            </label>
+                            <input
+                              type="number"
+                              value={variant.stock}
+                              onChange={(e) => handleColorVariantChange(index, 'stock', parseInt(e.target.value) || 0)}
+                              placeholder="0"
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none"
+                            />
+                          </div>
+                        )}
                       </div>
+
+                      {/* Size Options */}
+                      {variant.variantType === 'size' && (
+                        <div className="mb-4 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Size Options</h4>
+                            <button
+                              type="button"
+                              onClick={() => handleAddSizeOption(index)}
+                              className="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 transition-colors flex items-center gap-1"
+                            >
+                              <FiPlus size={10} /> Add Size
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {variant.sizes?.map((sizeOpt, sIdx) => (
+                              <div key={sIdx} className="grid grid-cols-12 gap-2 items-end">
+                                <div className="col-span-4">
+                                  <label className="block text-[10px] text-gray-500 mb-0.5">Size</label>
+                                  <input
+                                    type="text"
+                                    value={sizeOpt.size}
+                                    onChange={(e) => handleSizeOptionChange(index, sIdx, 'size', e.target.value)}
+                                    placeholder="e.g. S, M, L"
+                                    className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                  <label className="block text-[10px] text-gray-500 mb-0.5">Stock</label>
+                                  <input
+                                    type="number"
+                                    value={sizeOpt.stock}
+                                    onChange={(e) => handleSizeOptionChange(index, sIdx, 'stock', parseInt(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                  <label className="block text-[10px] text-gray-500 mb-0.5">Price Add-on</label>
+                                  <input
+                                    type="number"
+                                    value={sizeOpt.price}
+                                    onChange={(e) => handleSizeOptionChange(index, sIdx, 'price', parseFloat(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
+                                  />
+                                </div>
+                                <div className="col-span-2 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveSizeOption(index, sIdx)}
+                                    className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-md transition-all"
+                                  >
+                                    <FiTrash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Weight Options */}
+                      {variant.variantType === 'weight' && (
+                        <div className="mb-4 bg-orange-50/50 p-3 rounded-lg border border-orange-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-xs font-bold text-orange-900 uppercase tracking-wider">Weight Options</h4>
+                            <button
+                              type="button"
+                              onClick={() => handleAddWeightOption(index)}
+                              className="text-[10px] bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700 transition-colors flex items-center gap-1"
+                            >
+                              <FiPlus size={10} /> Add Weight
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {variant.weights?.map((weightOpt, wIdx) => (
+                              <div key={wIdx} className="grid grid-cols-12 gap-2 items-end">
+                                <div className="col-span-4">
+                                  <label className="block text-[10px] text-gray-500 mb-0.5">Weight</label>
+                                  <input
+                                    type="text"
+                                    value={weightOpt.weight}
+                                    onChange={(e) => handleWeightOptionChange(index, wIdx, 'weight', e.target.value)}
+                                    placeholder="e.g. 500g, 1kg"
+                                    className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-orange-500 outline-none"
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                  <label className="block text-[10px] text-gray-500 mb-0.5">Stock</label>
+                                  <input
+                                    type="number"
+                                    value={weightOpt.stock}
+                                    onChange={(e) => handleWeightOptionChange(index, wIdx, 'stock', parseInt(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-orange-500 outline-none"
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                  <label className="block text-[10px] text-gray-500 mb-0.5">Price Add-on</label>
+                                  <input
+                                    type="number"
+                                    value={weightOpt.price}
+                                    onChange={(e) => handleWeightOptionChange(index, wIdx, 'price', parseFloat(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-orange-500 outline-none"
+                                  />
+                                </div>
+                                <div className="col-span-2 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveWeightOption(index, wIdx)}
+                                    className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-md transition-all"
+                                  >
+                                    <FiTrash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Multiple Images Section */}
                       <div className="mt-2 bg-white p-3 rounded-lg border border-gray-200">

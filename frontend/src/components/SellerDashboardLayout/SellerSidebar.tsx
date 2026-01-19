@@ -46,7 +46,7 @@ export function SellerSidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
                         <div className="flex items-center gap-3">
-                            <img src="/src/assets/logo.png" alt="Ammogam Logo" className="w-[70%] h-auto mx-auto" />
+                            <img src="/src/assets/logo.jpeg" alt="Ammogam Logo" className="w-[60%] h-auto mx-auto" />
                         </div>
                         <button
                             onClick={onClose}

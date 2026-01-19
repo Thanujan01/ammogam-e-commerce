@@ -54,7 +54,7 @@ export function AdminSidebar({ isOpen, onClose }: SidebarProps) {
           {/* Logo Section */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white/60 ">
             <div className="flex items-center gap-3">
-              <img src="/src/assets/logo.png" alt="Ammogam Logo" className="w-[70%] h-auto items-center flex mx-auto" />
+              <img src="/src/assets/logo.jpeg" alt="Ammogam Logo" className="w-[60%] h-auto items-center flex mx-auto" />
             </div>
 
             {/* Close Button (Mobile) */}
