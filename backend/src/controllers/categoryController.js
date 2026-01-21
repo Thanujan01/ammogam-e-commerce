@@ -11,7 +11,19 @@ exports.createCategory = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
   try {
-    const list = await Category.find();
+    const limit = parseInt(req.query.limit) || 0;
+    const query = Category.find();
+
+    if (limit > 0) {
+      query.limit(limit);
+    }
+
+    if (req.query.select) {
+      const selectFields = req.query.select.split(',').join(' ');
+      query.select(selectFields);
+    }
+
+    const list = await query;
     res.json(list);
   } catch (error) {
     res.status(500).json({ message: error.message });

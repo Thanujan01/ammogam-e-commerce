@@ -218,8 +218,8 @@ export default function Home() {
       setLoading(true);
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          api.get('/products?limit=25'),
-          api.get('/categories')
+          api.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand'),
+          api.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color')
         ]);
 
         // Process categories - FIXED: Store icon name string, not JSX element

@@ -5,7 +5,7 @@ exports.createProduct = async (req, res) => {
   try {
     const { name, price, description, category, mainSubcategory, subCategory } = req.body;
     const colorVariants = req.body.colorVariants || [];
-    
+
     // Calculate total stock from variants
     const totalStock = colorVariants.reduce((sum, variant) => {
       if (variant.variantType === 'size' && variant.sizes) {
@@ -16,7 +16,7 @@ exports.createProduct = async (req, res) => {
         return sum + (Number(variant.stock) || 0);
       }
     }, 0);
-    
+
     // Pick the first image of the first variant as the main image
     let defaultImage = null;
     if (colorVariants.length > 0 && colorVariants[0].images && colorVariants[0].images.length > 0) {
@@ -56,12 +56,23 @@ exports.createProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 0;
+
+    // Check if select field is provided
+    let selectFields = "";
+    if (req.query.select) {
+      selectFields = req.query.select.split(',').join(' ');
+    }
+
     const query = Product.find().populate("category").populate("seller", "name businessName email");
-    
+
     if (limit > 0) {
       query.limit(limit);
     }
-    
+
+    if (selectFields) {
+      query.select(selectFields);
+    }
+
     const products = await query;
     res.json(products);
   } catch (error) {
@@ -95,7 +106,7 @@ exports.getProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -119,7 +130,7 @@ exports.updateProduct = async (req, res) => {
           return sum + (Number(variant.stock) || 0);
         }
       }, 0);
-      
+
       if (colorVariants.length > 0 && colorVariants[0].images && colorVariants[0].images.length > 0) {
         updateData.image = colorVariants[0].images[0];
       }
@@ -128,7 +139,7 @@ exports.updateProduct = async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
     });
-    
+
     res.json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -138,7 +149,7 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -222,7 +233,7 @@ exports.getSellerOrders = async (req, res) => {
 
     // Filter order items to only include seller's products
     const sellerOrders = orders.map(order => {
-      const sellerItems = order.items.filter(item => 
+      const sellerItems = order.items.filter(item =>
         productIds.some(id => id.toString() === item.product._id.toString())
       );
 
