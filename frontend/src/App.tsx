@@ -1,54 +1,62 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Link } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-import Home from './pages/Home';
-import ProductList from './pages/ProductList';
-import ProductDetail from './pages/ProductDetail';
-import CartPage from './pages/CartPage';
-import Checkout from './pages/Checkout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import UserDashboard from './pages/UserDashboard';
-// import PaymentSimulator from './pages/PaymentSimulator';
-import OrderSuccess from './pages/OrderSuccess';
-import PaymentFailed from './pages/PaymentFailed';
-import OrderDetails from './pages/OrderDetails';
-import Notifications from './pages/Notifications';
-import Wishlist from './pages/Wishlist';
-import AboutUs from './pages/AboutUs'; // Fixed import
-
-// Legal/Policy Pages
-import TermsAndConditions from './pages/TermsAndConditions';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-
-import { AdminDashboardLayout } from './components/AdminDashboardLayout/AdminDashboardLayout';
-import AdminDashboard from './pages/Admin/AdminDashboard';
-import AdminProducts from './pages/Admin/AdminProducts';
-import AdminCategories from './pages/Admin/AdminCategories';
-import AdminOrders from './pages/Admin/AdminOrders';
-import AdminProfile from './pages/Admin/AdminProfile';
-import AdminSellers from './pages/Admin/AdminSellers';
-import AdminSellerDetails from './pages/Admin/AdminSellerDetails';
-
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtected from './components/AdminProtected';
-import Users from './pages/Admin/Users';
-import AdminNotification from './pages/Admin/AdminNotification';
-import AdminReports from './pages/Admin/AdminReports';
-
 import SellerProtected from './components/SellerProtected';
+import { AdminDashboardLayout } from './components/AdminDashboardLayout/AdminDashboardLayout';
 import { SellerDashboardLayout } from './components/SellerDashboardLayout/SellerDashboardLayout';
-import SellerDashboard from './pages/Seller/SellerDashboard';
-import SellerProducts from './pages/Seller/SellerProducts';
-import SellerOrders from './pages/Seller/SellerOrders';
-import SellerProfile from './pages/Seller/SellerProfile';
-import SellerNotifications from './pages/Seller/SellerNotifications';
 
-import { Toaster } from 'react-hot-toast';
-import { Link } from 'react-router-dom'; // Moved import to top
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'));
+const ProductList = lazy(() => import('./pages/ProductList'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const UserDashboard = lazy(() => import('./pages/UserDashboard'));
+// const PaymentSimulator = lazy(() => import('./pages/PaymentSimulator'));
+const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const PaymentFailed = lazy(() => import('./pages/PaymentFailed'));
+const OrderDetails = lazy(() => import('./pages/OrderDetails'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+
+// Legal/Policy Pages
+const TermsAndConditions = lazy(() => import('./pages/TermsAndConditions'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+
+// Admin Pages
+const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('./pages/Admin/AdminProducts'));
+const AdminCategories = lazy(() => import('./pages/Admin/AdminCategories'));
+const AdminOrders = lazy(() => import('./pages/Admin/AdminOrders'));
+const AdminProfile = lazy(() => import('./pages/Admin/AdminProfile'));
+const AdminSellers = lazy(() => import('./pages/Admin/AdminSellers'));
+const AdminSellerDetails = lazy(() => import('./pages/Admin/AdminSellerDetails'));
+const Users = lazy(() => import('./pages/Admin/Users'));
+const AdminNotification = lazy(() => import('./pages/Admin/AdminNotification'));
+const AdminReports = lazy(() => import('./pages/Admin/AdminReports'));
+
+// Seller Pages
+const SellerDashboard = lazy(() => import('./pages/Seller/SellerDashboard'));
+const SellerProducts = lazy(() => import('./pages/Seller/SellerProducts'));
+const SellerOrders = lazy(() => import('./pages/Seller/SellerOrders'));
+const SellerProfile = lazy(() => import('./pages/Seller/SellerProfile'));
+const SellerNotifications = lazy(() => import('./pages/Seller/SellerNotifications'));
+
+const Loading = () => (
+  <div className="flex justify-center items-center min-h-screen bg-gray-50">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+  </div>
+);
 
 function App() {
   const location = useLocation();
@@ -60,174 +68,168 @@ function App() {
       <Toaster position="top-right" reverseOrder={false} />
       {(!isAdminRoute && !isSellerRoute) && <Header />}
       <main className="flex-1">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<ProductList />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/about" element={<AboutUs />} /> {/* About Us route */}
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/about" element={<AboutUs />} />
 
-          {/* Authentication Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+            {/* Authentication Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Legal/Policy Routes */}
-          <Route path="/terms" element={<TermsAndConditions />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
+            {/* Legal/Policy Routes */}
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
-          {/* User Protected Routes */}
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <Notifications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute>
-                <Wishlist />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <ProtectedRoute>
-                <OrderDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
-          />
-          {/* <Route
-            path="/payment/:orderId"
-            element={
-              <ProtectedRoute>
-                <PaymentSimulator />
-              </ProtectedRoute>
-            }
-          /> */}
-          <Route
-            path="/order-success/:orderId"
-            element={
-              <ProtectedRoute>
-                <OrderSuccess />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/payment-failed/:orderId"
-            element={
-              <ProtectedRoute>
-                <PaymentFailed />
-              </ProtectedRoute>
-            }
-          />
+            {/* User Protected Routes */}
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Notifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <Wishlist />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-success/:orderId"
+              element={
+                <ProtectedRoute>
+                  <OrderSuccess />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payment-failed/:orderId"
+              element={
+                <ProtectedRoute>
+                  <PaymentFailed />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Seller Routes */}
-          <Route
-            path="/seller"
-            element={
-              <SellerProtected>
-                <SellerDashboardLayout />
-              </SellerProtected>
-            }
-          >
-            <Route index element={<SellerDashboard />} />
-            <Route path="products" element={<SellerProducts />} />
-            <Route path="orders" element={<SellerOrders />} />
-            <Route path="notifications" element={<SellerNotifications />} />
-            <Route path="profile" element={<SellerProfile />} />
-          </Route>
+            {/* Seller Routes */}
+            <Route
+              path="/seller"
+              element={
+                <SellerProtected>
+                  <SellerDashboardLayout />
+                </SellerProtected>
+              }
+            >
+              <Route index element={<SellerDashboard />} />
+              <Route path="products" element={<SellerProducts />} />
+              <Route path="orders" element={<SellerOrders />} />
+              <Route path="notifications" element={<SellerNotifications />} />
+              <Route path="profile" element={<SellerProfile />} />
+            </Route>
 
-          {/* Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <AdminProtected>
-                <AdminDashboardLayout />
-              </AdminProtected>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="users" element={<Users />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="profile" element={<AdminProfile />} />
-            <Route path="notifications" element={<AdminNotification />} />
-            <Route path="reports" element={<AdminReports />} />
-            <Route path="sellers" element={<AdminSellers />} />
-            <Route path="sellers/:id" element={<AdminSellerDetails />} />
-          </Route>
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <AdminProtected>
+                  <AdminDashboardLayout />
+                </AdminProtected>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="users" element={<Users />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="profile" element={<AdminProfile />} />
+              <Route path="notifications" element={<AdminNotification />} />
+              <Route path="reports" element={<AdminReports />} />
+              <Route path="sellers" element={<AdminSellers />} />
+              <Route path="sellers/:id" element={<AdminSellerDetails />} />
+            </Route>
 
-          {/* Category Routes */}
-          <Route path="/category/:category" element={<ProductList />} />
-          <Route path="/category/:category/:subcategory" element={<ProductList />} />
+            {/* Category Routes */}
+            <Route path="/category/:category" element={<ProductList />} />
+            <Route path="/category/:category/:subcategory" element={<ProductList />} />
 
-          {/* Additional Policy Routes (Placeholders for future implementation) */}
-          <Route path="/shipping" element={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="text-center p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Shipping Policy</h1>
-                <p className="text-gray-600">Coming Soon</p>
-                <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
-                  Back to Home
-                </Link>
+            {/* Additional Policy Routes */}
+            <Route path="/shipping" element={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center p-8">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4">Shipping Policy</h1>
+                  <p className="text-gray-600">Coming Soon</p>
+                  <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
+                    Back to Home
+                  </Link>
+                </div>
               </div>
-            </div>
-          } />
-          <Route path="/returns" element={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="text-center p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Returns & Refunds Policy</h1>
-                <p className="text-gray-600">Coming Soon</p>
-                <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
-                  Back to Home
-                </Link>
+            } />
+            <Route path="/returns" element={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center p-8">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4">Returns & Refunds Policy</h1>
+                  <p className="text-gray-600">Coming Soon</p>
+                  <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
+                    Back to Home
+                  </Link>
+                </div>
               </div>
-            </div>
-          } />
-          <Route path="/cookies" element={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="text-center p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Cookie Policy</h1>
-                <p className="text-gray-600">Coming Soon</p>
-                <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
-                  Back to Home
-                </Link>
+            } />
+            <Route path="/cookies" element={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center p-8">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4">Cookie Policy</h1>
+                  <p className="text-gray-600">Coming Soon</p>
+                  <Link to="/" className="mt-4 inline-block text-amber-600 hover:text-amber-800 font-semibold">
+                    Back to Home
+                  </Link>
+                </div>
               </div>
-            </div>
-          } />
-        </Routes>
+            } />
+          </Routes>
+        </Suspense>
       </main>
       {(!isAdminRoute && !isSellerRoute) && <Footer />}
     </div>

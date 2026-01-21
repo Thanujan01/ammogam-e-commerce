@@ -55,7 +55,14 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category").populate("seller", "name businessName email");
+    const limit = parseInt(req.query.limit) || 0;
+    const query = Product.find().populate("category").populate("seller", "name businessName email");
+    
+    if (limit > 0) {
+      query.limit(limit);
+    }
+    
+    const products = await query;
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
