@@ -1,0 +1,106 @@
+# Ammogam E-Commerce Project Analysis Report
+
+## 1. Project Overview
+**Project Name**: Ammogam E-Commerce
+**Architecture**: Monorepo Application
+**Tech Stack**:
+-   **Frontend**: React (Vite), TypeScript, TailwindCSS
+-   **Backend**: Node.js, Express.js, MongoDB (Mongoose)
+-   **Storage**: Google Cloud Storage (GCS) / Local Uploads
+-   **Payment**: Stripe
+
+This project is a fully-featured multi-vendor e-commerce platform that supports three distinct user roles: Customers, Sellers, and Administrators. It includes comprehensive product management, order processing, and user administration capabilities.
+
+---
+
+## 2. Project Structure & Dependencies
+
+### Frontend (`/frontend`)
+Built with React and Vite for high performance.
+-   **Core Dependencies**: `react-router-dom` (Routing), `axios` (API requests), `react-hot-toast` (Notifications), `@stripe/stripe-js` (Payments).
+-   **UI/UX**: `lucide-react`, `react-icons` (Icons), `chart.js` (Analytics), `tailwindcss` (Styling).
+-   **Key Directories**:
+    -   `src/pages`: Contains all page views (Public, User, Seller, Admin).
+    -   `src/components`: Reusable UI components and specific layouts (Header, Footer, Dashboards).
+    -   `src/routes`: Managed via `App.tsx` with `Suspense` and `lazy` loading.
+
+### Backend (`/backend`)
+Built with Express.js and Mongoose.
+-   **Core Dependencies**: `express`, `mongoose` (Database), `dotenv`, `cors`.
+-   **Security**: `bcryptjs` (Password Hashing), `jsonwebtoken` (Auth).
+-   **Functionality**: `multer` (File Uploads), `nodemailer` (Emails), `stripe` (Payments).
+-   **Key Directories**:
+    -   `src/models`: Database parameters (User, Product, Order, etc.).
+    -   `src/controllers`: Business logic.
+    -   `src/routes`: API endpoints.
+    -   `src/middlewares`: Auth and Error handling.
+
+---
+
+## 3. Functional Requirements
+
+### A. User Roles & Authentication
+1.  **General**:
+    -   User Registration and Login (JWT-based).
+    -   Password Recovery (Forgot/Reset Password).
+2.  **Customer**:
+    -   Browse and search products by category/subcategory.
+    -   Manage Cart and Wishlist.
+    -   Secure Checkout via Stripe.
+    -   View Order History and details.
+    -   Manage Profile (Address, Phone).
+3.  **Seller**:
+    -   Register as a Seller (requires Admin approval).
+    -   Manage Business Profile (Tax ID, Bank Details).
+    -   Product Management (Create, Update, Delete).
+    -   Order Management (View orders for their products).
+    -   View Sales Analytics/Notifications.
+4.  **Admin**:
+    -   Full control over Users and Sellers (Approve/Reject sellers).
+    -   Global Product and Order management.
+    -   System-wide analytics and reports.
+    -   Manage Categories.
+
+### B. Core Functional Modules
+1.  **Product Management**:
+    -   Supports complex variants: Colors (with specific images), Sizes, Weights.
+    -   Inventory tracking per variant.
+    -   Rich descriptions, badges (Choice, Certified), and discount management.
+2.  **Order System**:
+    -   Order placement and status tracking.
+    -   Status updates (Processing, Shipped, Delivered, Cancelled).
+    -   Payment integration handling (Success/Failure flows).
+3.  **Feedback System**:
+    -   Product Reviews and Ratings.
+
+---
+
+## 4. Non-Functional Requirements
+
+### A. Performance
+-   **Lazy Loading**: Frontend routes are code-split using `React.lazy` and `Suspense` to improve initial load time.
+-   **Optimized Assets**: Image handling set up for Cloud Storage (GCS) to offload static asset delivery.
+-   **Database Efficiency**: Mongoose schemas designed with relationships (References) for efficient data retrieval (e.g., populating Seller info on Products).
+
+### B. Security
+-   **Authentication**: Secure JWT (JSON Web Tokens) for session management.
+-   **Authorization**: Role-based access control (RBAC) middleware protects Admin and Seller routes.
+-   **Data Protection**: Passwords are hashed using `bcryptjs`.
+-   **Secure Payments**: Stripe integration ensures PCI-compliant payment processing; sensitive card data is never stored on the server.
+-   **Input Validation**: Implied through Mongoose schemas (types, enums).
+
+### C. Scalability & Maintainability
+-   **Modular Architecture**: Clear separation of concerns between Frontend (UI) and Backend (API).
+-   **Cloud Ready**: Storage abstraction allows switching between local and cloud (GCS) drivers via environment variables.
+-   **Configurable**: extensive use of `.env` for configuration.
+
+---
+
+## 5. Key Features
+
+-   **Multi-Vendor Marketplace**: Allows third-party sellers to sign up, manage their own shops, and sell products alongside the platform owner.
+-   **Advanced Product Variants**: Sophisticated handling of product options (e.g., a shirt can have different stock levels for "Red/Large" vs "Blue/Small").
+-   **Dashboard Analytics**: Visual capabilities (Charts) for Admins and Sellers to track performance.
+-   **Wishlist & Notifications**: Integrated user engagement tools.
+-   **Responsive Design**: Mobile-first approach using TailwindCSS.
+-   **Review System**: Built-in product review and rating mechanism to build trust.

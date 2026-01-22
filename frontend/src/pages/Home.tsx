@@ -19,6 +19,7 @@ import {
   FaPaw, FaBaby as FaBabyIcon, FaShoppingBag,
   FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid
 } from 'react-icons/fa';
+import { HomeSkeleton } from '../components/Skeletons';
 
 // CategoryIcon component - receives icon name string and returns the icon
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -606,183 +607,145 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-
-        {/* Mobile Hero Banner Carousel - Only shown on mobile */}
-        <div className="md:hidden mb-6">
-          <div className="relative overflow-hidden rounded-xl shadow-lg">
-            {/* Banner Container */}
-            <div className="relative h-64">
-              <div
-                className="flex banner-slide"
-                style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
-              >
-                {mobileBanners.map((banner) => (
+        {loading ? (
+          <HomeSkeleton />
+        ) : (
+          <>
+            {/* Mobile Hero Banner Carousel */}
+            <div className="md:hidden mb-6">
+              <div className="relative overflow-hidden rounded-xl shadow-lg">
+                <div className="relative h-64">
                   <div
-                    key={banner.id}
-                    className="w-full flex-shrink-0 relative h-64"
+                    className="flex banner-slide"
+                    style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
                   >
-                    {/* Background Image */}
-                    <div className="absolute inset-0">
-                      <img
-                        src={banner.image}
-                        alt={banner.title || "Promotional Banner"}
-                        className="w-full h-full object-cover"
-                      />
-                      {/* Only show gradient overlay for first banner */}
-                      {/* {banner.showText && (
-                        <div className={`absolute inset-0 bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600 opacity-80`}></div>
-                      )} */}
-                    </div>
-
-                    {/* Content - Only show for first banner */}
-                    {banner.showText && (
-                      <div className="relative h-full flex flex-col justify-center items-center text-center px-6">
-                        <div className="text-white mb-2">
-
+                    {mobileBanners.map((banner) => (
+                      <div
+                        key={banner.id}
+                        className="w-full flex-shrink-0 relative h-64"
+                      >
+                        <div className="absolute inset-0">
+                          <img
+                            src={banner.image}
+                            alt={banner.title || "Promotional Banner"}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-2">
-                          {banner.title}
-                        </h1>
-
-                        <button
-                          onClick={handleViewAllProducts}
-                          className="bg-white text-gray-800 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                          {banner.buttonText}
-                        </button>
+                        {banner.showText && (
+                          <div className="relative h-full flex flex-col justify-center items-center text-center px-6">
+                            <h1 className="text-3xl font-bold text-white mb-2">
+                              {banner.title}
+                            </h1>
+                            <button
+                              onClick={handleViewAllProducts}
+                              className="bg-white text-gray-800 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                            >
+                              {banner.buttonText}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                <button
+                  onClick={prevBanner}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
+                >
+                  <FaChevronLeft className="text-lg" />
+                </button>
+                <button
+                  onClick={nextBanner}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
+                >
+                  <FaChevronRightSolid className="text-lg" />
+                </button>
+
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                  {mobileBanners.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentBannerIndex(index)}
+                      className={`w-2 h-2 rounded-full banner-dot ${index === currentBannerIndex ? 'bg-white active' : 'bg-white/50'}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Navigation Buttons */}
-            <button
-              onClick={prevBanner}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
-            >
-              <FaChevronLeft className="text-lg" />
-            </button>
-            <button
-              onClick={nextBanner}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-colors z-10"
-            >
-              <FaChevronRightSolid className="text-lg" />
-            </button>
-
-            {/* Dot Indicators */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-              {mobileBanners.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentBannerIndex(index)}
-                  className={`w-2 h-2 rounded-full banner-dot ${index === currentBannerIndex ? 'bg-white active' : 'bg-white/50'}`}
-                />
-              ))}
+            {/* Shop by Category - Desktop */}
+            <div className="hidden md:block">
+              <ProfessionalCategories />
             </div>
-          </div>
-        </div>
 
-        {/* Shop by Category - Hidden on mobile, shown first on desktop */}
-        <div className="hidden md:block">
-          <ProfessionalCategories />
-        </div>
-
-        {/* Desktop Hero Banner - Single banner for desktop */}
-        <div className="hidden md:block mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
-          <div className="relative h-64 sm:h-80 md:h-96">
-            <div className="flex flex-col md:flex-row h-full">
-              {/* Left side - Text Content (50%) */}
-              <div className="w-full md:w-1/2 relative bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
-                    <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 sm:mb-4">
-                      Ammogam
-                    </h1>
-                    <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
-                      Discover amazing deals on electronics, fashion, and more
-                    </p>
-                    <button
-                      onClick={handleViewAllProducts}
-                      className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
-                    >
-                      Shop Now
-                    </button>
+            {/* Desktop Hero Banner */}
+            <div className="hidden md:block mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl">
+              <div className="relative h-64 sm:h-80 md:h-96">
+                <div className="flex flex-col md:flex-row h-full">
+                  <div className="w-full md:w-1/2 relative bg-gradient-to-r from-amber-700 via-amber-600 to-orange-600">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center px-4 sm:px-8 md:px-12 max-w-3xl mx-auto">
+                        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 sm:mb-4">
+                          Ammogam
+                        </h1>
+                        <p className="text-white/90 text-base sm:text-xl mb-5 sm:mb-6 max-w-2xl mx-auto">
+                          Discover amazing deals on electronics, fashion, and more
+                        </p>
+                        <button
+                          onClick={handleViewAllProducts}
+                          className="bg-white text-amber-700 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg"
+                        >
+                          Shop Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 relative">
+                    <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
+                    <img
+                      src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
+                      alt="Ammogam"
+                      className="w-full h-full object-cover"
+                      fetchPriority="high"
+                    />
                   </div>
                 </div>
               </div>
-
-              {/* Right side - Image (50%) */}
-              <div className="w-full md:w-1/2 relative">
-                <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
-                <img
-                  src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
-                  alt="Ammogam"
-                  className="w-full h-full object-cover"
-                />
-              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Shop by Category for Mobile - Hidden on desktop, shown second on mobile */}
-        <div className="md:hidden">
-          <ProfessionalCategories />
-        </div>
-
-        {/* Featured Products (3rd on both desktop and mobile) */}
-        <div className="mb-10 sm:mb-12">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
-              {/* <p className="text-gray-600 text-sm mt-1">
-                Showing {filteredFeaturedProducts.length} of {products.length}+  products
-              </p> */}
+            {/* Shop by Category - Mobile */}
+            <div className="md:hidden">
+              <ProfessionalCategories />
             </div>
-            <button
-              onClick={handleViewAllProducts}
-              className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
-            >
-              View all <FaChevronRight className="ml-1" />
-            </button>
-          </div>
 
-          {/* Category Filter - Horizontal scrolling with hidden scrollbar - FIXED */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 scrollbar-hide">
-              {/* {categoryFilters.map((category) => (
+            {/* Featured Products */}
+            <div className="mb-10 sm:mb-12">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
+                </div>
                 <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full whitespace-nowrap transition-all duration-300 text-xs sm:text-sm flex-shrink-0 ${activeCategory === category
-                    ? 'bg-[#8B4513] text-white shadow-lg'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-amber-300'
-                    }`}
+                  onClick={handleViewAllProducts}
+                  className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
                 >
-                  {category}
+                  View all <FaChevronRight className="ml-1" />
                 </button>
-              ))} */}
-            </div>
-          </div>
+              </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center py-20 sm:py-40">
-              <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-amber-600"></div>
-            </div>
-          ) : (
-            <>
-              {/* Products Grid - Featured (10 items) */}
+              <div className="mb-6 sm:mb-8">
+                <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 scrollbar-hide">
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
                 {featuredProducts.map((product: any) => {
                   const isOutOfStock = product.stock <= 0;
-
                   return (
                     <div
                       key={product.id}
                       className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
                     >
-                      {/* Quick Add Icon - Gray for out of stock, amber for in stock */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -797,7 +760,6 @@ export default function Home() {
                         <FaCartPlus className={`text-base sm:text-lg ${isOutOfStock ? 'text-gray-400' : 'text-amber-600'}`} />
                       </button>
 
-                      {/* Product Image */}
                       <div
                         className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
                         onClick={() => handleProductClick(product.id)}
@@ -811,18 +773,6 @@ export default function Home() {
                             target.src = '/placeholder.png';
                           }}
                         />
-
-                        {/* Brand Badge */}
-                        {/* {product.badge && (
-                          <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2">
-                            <div className="bg-amber-600 text-white text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1">
-                              {product.badgeIcon}
-                              <span className="text-xs">{product.badge}</span>
-                            </div>
-                          </div>
-                        )} */}
-
-                        {/* Discount Badge */}
                         {product.discountPercent && (
                           <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 mt-6 sm:mt-8">
                             <div className="bg-red-500 text-white text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded">
@@ -830,8 +780,6 @@ export default function Home() {
                             </div>
                           </div>
                         )}
-
-                        {/* Wishlist Button */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -852,33 +800,13 @@ export default function Home() {
                         </button>
                       </div>
 
-                      {/* Product Info */}
                       <div className="p-2 sm:p-3">
-                        {/* Product Name */}
                         <h3
                           className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
                           onClick={() => handleProductClick(product.id)}
                         >
                           {product.name}
                         </h3>
-
-                        {/* Color and Size Options */}
-                        {/* <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
-                          {product.colorOptions && (
-                            <div className="flex items-center gap-0.5">
-                              <FaPaletteIcon className="text-xs text-gray-500" />
-                              <span className="text-xs text-gray-600">Color</span>
-                            </div>
-                          )}
-                          {product.sizeOptions && (
-                            <div className="flex items-center gap-0.5">
-                              <FaRuler className="text-xs text-gray-500" />
-                              <span className="text-xs text-gray-600">Size</span>
-                            </div>
-                          )}
-                        </div> */}
-
-                        {/* Price Section */}
                         <div className="mb-1.5 sm:mb-2">
                           <div className="flex items-baseline gap-1">
                             <span className="text-sm sm:text-base font-bold text-gray-900">
@@ -891,8 +819,6 @@ export default function Home() {
                             )}
                           </div>
                         </div>
-
-                        {/* Rating */}
                         <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
                           <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
@@ -906,8 +832,6 @@ export default function Home() {
                             ({product.sold || 0} sold)
                           </span>
                         </div>
-
-                        {/* Promotions */}
                         {product.promotions && product.promotions.length > 0 && (
                           <div className="mb-2 sm:mb-3 space-y-1">
                             {product.promotions.map((promo: any, index: number) => (
@@ -922,8 +846,6 @@ export default function Home() {
                             ))}
                           </div>
                         )}
-
-                        {/* Bundle Deals Button - Gray for out of stock, amber for in stock */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                           <button
                             className={`font-medium text-xs flex items-center gap-0.5 ${isOutOfStock
@@ -954,291 +876,253 @@ export default function Home() {
                   );
                 })}
               </div>
+            </div>
 
-              {/* More Products (10 items) */}
-              {moreProducts.length > 0 && (
-                <div className="mb-8 sm:mb-12">
-                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Latest Arrivals</h2>
-                  </div>
-                  <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
-                    {moreProducts.map((product: any) => {
-                      const isOutOfStock = product.stock <= 0;
-
-                      return (
-                        <div
-                          key={product.id}
-                          className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
+            {/* More Products */}
+            {moreProducts.length > 0 && (
+              <div className="mb-8 sm:mb-12">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Latest Arrivals</h2>
+                </div>
+                <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-12">
+                  {moreProducts.map((product: any) => {
+                    const isOutOfStock = product.stock <= 0;
+                    return (
+                      <div
+                        key={product.id}
+                        className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isOutOfStock) addToCart(product);
+                          }}
+                          disabled={isOutOfStock}
+                          className={`absolute top-2 sm:top-3 right-2 sm:right-3 z-20 rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110 ${isOutOfStock
+                            ? 'bg-gray-200 cursor-not-allowed'
+                            : 'bg-white/90 hover:bg-white'}`}
+                          title={isOutOfStock ? "Out of stock" : "Add to cart"}
                         >
-                          {/* Quick Add Icon - Gray for out of stock, amber for in stock */}
+                          <FaCartPlus className={`text-base sm:text-lg ${isOutOfStock ? 'text-gray-400' : 'text-amber-600'}`} />
+                        </button>
+                        <div
+                          className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
+                          onClick={() => handleProductClick(product.id)}
+                        >
+                          <img
+                            src={product.image || '/placeholder.png'}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder.png';
+                            }}
+                          />
+                          {product.discountPercent && (
+                            <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 mt-6 sm:mt-8">
+                              <div className="bg-red-500 text-white text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded">
+                                -{product.discountPercent}%
+                              </div>
+                            </div>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (!isOutOfStock) addToCart(product);
+                              if (!isOutOfStock) handleToggleWishlist(product.id);
                             }}
                             disabled={isOutOfStock}
-                            className={`absolute top-2 sm:top-3 right-2 sm:right-3 z-20 rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110 ${isOutOfStock
+                            className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock
                               ? 'bg-gray-200 cursor-not-allowed'
                               : 'bg-white/90 hover:bg-white'}`}
-                            title={isOutOfStock ? "Out of stock" : "Add to cart"}
+                            title={isOutOfStock ? "Out of stock" : "Add to wishlist"}
                           >
-                            <FaCartPlus className={`text-base sm:text-lg ${isOutOfStock ? 'text-gray-400' : 'text-amber-600'}`} />
+                            <FaHeart className={`text-sm sm:text-base ${isOutOfStock
+                              ? 'text-gray-400'
+                              : isInWishlist(product.id)
+                                ? 'text-red-500'
+                                : 'text-gray-400 hover:text-red-500'}`}
+                            />
                           </button>
-
-                          {/* Product Image */}
-                          <div
-                            className="relative h-32 sm:h-40 overflow-hidden bg-gray-100 cursor-pointer"
+                        </div>
+                        <div className="p-2 sm:p-3">
+                          <h3
+                            className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
                             onClick={() => handleProductClick(product.id)}
                           >
-                            <img
-                              src={product.image || '/placeholder.png'}
-                              alt={product.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/placeholder.png';
-                              }}
-                            />
-
-                            {/* Discount Badge */}
-                            {product.discountPercent && (
-                              <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 mt-6 sm:mt-8">
-                                <div className="bg-red-500 text-white text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded">
-                                  -{product.discountPercent}%
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Wishlist Button */}
+                            {product.name}
+                          </h3>
+                          <div className="mb-1.5 sm:mb-2">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-sm sm:text-base font-bold text-gray-900">
+                                {product.currentPrice}
+                              </span>
+                              {product.originalPrice && (
+                                <span className="text-xs sm:text-sm text-gray-500 line-through">
+                                  {product.originalPrice}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <FaStar
+                                  key={i}
+                                  className={`text-xs ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-600">
+                              ({product.sold || 0} sold)
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                            <button
+                              className={`font-medium text-xs flex items-center gap-0.5 ${isOutOfStock
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-amber-700 hover:text-amber-800'}`}
+                              onClick={() => !isOutOfStock && handleProductClick(product.id)}
+                              disabled={isOutOfStock}
+                            >
+                              {isOutOfStock ? 'Finished' : 'Bundle deals'}
+                              {!isOutOfStock && <FaChevronRightIcon className="text-xs" />}
+                            </button>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (!isOutOfStock) handleToggleWishlist(product.id);
+                                if (!isOutOfStock) addToCart(product);
                               }}
                               disabled={isOutOfStock}
-                              className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock
-                                ? 'bg-gray-200 cursor-not-allowed'
-                                : 'bg-white/90 hover:bg-white'}`}
-                              title={isOutOfStock ? "Out of stock" : "Add to wishlist"}
+                              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors ${isOutOfStock
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
                             >
-                              <FaHeart className={`text-sm sm:text-base ${isOutOfStock
-                                ? 'text-gray-400'
-                                : isInWishlist(product.id)
-                                  ? 'text-red-500'
-                                  : 'text-gray-400 hover:text-red-500'}`}
-                              />
+                              <FaCartPlus className="text-xs" />
+                              {isOutOfStock ? 'not available' : 'Add'}
                             </button>
                           </div>
-
-                          {/* Product Info */}
-                          <div className="p-2 sm:p-3">
-                            {/* Product Name */}
-                            <h3
-                              className="font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer hover:text-amber-700"
-                              onClick={() => handleProductClick(product.id)}
-                            >
-                              {product.name}
-                            </h3>
-
-                            {/* Price Section */}
-                            <div className="mb-1.5 sm:mb-2">
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-sm sm:text-base font-bold text-gray-900">
-                                  {product.currentPrice}
-                                </span>
-                                {product.originalPrice && (
-                                  <span className="text-xs sm:text-sm text-gray-500 line-through">
-                                    {product.originalPrice}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Rating */}
-                            <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <FaStar
-                                    key={i}
-                                    className={`text-xs ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs text-gray-600">
-                                ({product.sold || 0} sold)
-                              </span>
-                            </div>
-
-                            {/* Promotions */}
-                            {product.promotions && product.promotions.length > 0 && (
-                              <div className="mb-2 sm:mb-3 space-y-1">
-                                {product.promotions.map((promo: any, index: number) => (
-                                  <div key={index} className="flex items-center gap-1">
-                                    <div className="flex-shrink-0">
-                                      {promo.icon}
-                                    </div>
-                                    <span className="text-xs text-gray-700 flex-1 line-clamp-1">
-                                      {promo.text}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Bundle Deals Button */}
-                            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                              <button
-                                className={`font-medium text-xs flex items-center gap-0.5 ${isOutOfStock
-                                  ? 'text-gray-400 cursor-not-allowed'
-                                  : 'text-amber-700 hover:text-amber-800'}`}
-                                onClick={() => !isOutOfStock && handleProductClick(product.id)}
-                                disabled={isOutOfStock}
-                              >
-                                {isOutOfStock ? 'Finished' : 'Bundle deals'}
-                                {!isOutOfStock && <FaChevronRightIcon className="text-xs" />}
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (!isOutOfStock) addToCart(product);
-                                }}
-                                disabled={isOutOfStock}
-                                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors ${isOutOfStock
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
-                              >
-                                <FaCartPlus className="text-xs" />
-                                {isOutOfStock ? 'not available' : 'Add'}
-                              </button>
-                            </div>
-                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* View All Products CTA */}
-              <div className="text-center mb-8 sm:mb-12">
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl sm:rounded-2xl p-6 sm:p-8">
-                  <div className="max-w-2xl mx-auto">
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                      Want to see more products?
-                    </h3>
-
-                    <button
-                      onClick={handleViewAllProducts}
-                      className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base mx-auto"
-                    >
-                      See all products <FaChevronRight className="ml-1 sm:ml-2" />
-                    </button>
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            )}
 
-              {/* Recently Viewed - Shows products viewed from ANY page (4th on both desktop and mobile) */}
-              <div className="mb-8 sm:mb-12">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-                      Recently Viewed
-                      {recentlyViewed.length > 0 && (
-                        <span className="ml-2 text-sm font-normal text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                          {recentlyViewed.length} items
-                        </span>
-                      )}
-                    </h2>
-                    <p className="text-gray-600 text-sm mt-1">
-                      {recentlyViewed.length > 0
-                        ? 'Continue exploring products you recently viewed'
-                        : 'Products you view will appear here'
-                      }
-                    </p>
-                  </div>
-                  {recentlyViewed.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleViewAllProducts}
-                        className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
-                      >
-                        Shop More <FaChevronRight className="ml-1" />
-                      </button>
-                    </div>
-                  )}
+            {/* CTA */}
+            <div className="text-center mb-8 sm:mb-12">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl sm:rounded-2xl p-6 sm:p-8">
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+                    Want to see more products?
+                  </h3>
+                  <button
+                    onClick={handleViewAllProducts}
+                    className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base mx-auto"
+                  >
+                    See all products <FaChevronRight className="ml-1 sm:ml-2" />
+                  </button>
                 </div>
+              </div>
+            </div>
 
-                {recentlyViewed.length > 0 ? (
-                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-                    {recentlyViewed.map((item, index) => {
-                      // Try to find full product details from products array
-                      const fullProduct = products.find(p => p.id === item.id);
-                      const isOutOfStock = fullProduct?.stock <= 0;
-
-                      return (
-                        <div
-                          key={item.id}
-                          className="relative bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-all duration-300 hover:border-amber-200 group cursor-pointer"
-                          onClick={() => handleRecentlyViewedClick(item)}
-                        >
-                          {/* Position indicator for most recent item */}
-                          {index === 0 && !isOutOfStock && (
-                            <div className="absolute -top-1 -left-1 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
-                              Latest
-                            </div>
-                          )}
-
-                          <div
-                            className="relative overflow-hidden rounded-lg mb-2 sm:mb-3"
-                            onMouseEnter={() => setHoveredRecentlyViewed(item.id)}
-                            onMouseLeave={() => setHoveredRecentlyViewed(null)}
-                          >
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className={`w-full h-24 sm:h-32 object-cover rounded-lg transition-transform duration-500 ${hoveredRecentlyViewed === item.id ? 'transform scale-110' : ''}`}
-                            />
-                            <div className="absolute bottom-2 right-2 flex flex-col gap-1">
-                              <div className="bg-black/70 text-white text-[10px] px-2 py-1 rounded">
-                                Viewed
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 group-hover:text-amber-700">
-                            {item.name}
-                          </div>
-                          <div className="text-sm font-bold text-amber-700">
-                            {fullProduct?.currentPrice || item.currentPrice || '$ 0.00'}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  // Empty state when no recently viewed
-                  <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FaClock className="text-gray-400 text-2xl" />
-                      </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Recently Viewed Items</h3>
-                      <p className="text-gray-600 text-sm mb-4">
-                        Products you view on Home page, Product List page, or Product Detail page will appear here to help you find them later
-                      </p>
-                      <button
-                        onClick={handleViewAllProducts}
-                        className="text-amber-700 hover:text-amber-800 font-medium text-sm bg-amber-50 hover:bg-amber-100 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 mx-auto"
-                      >
-                        <FaShoppingBag className="text-sm" />
-                        Start Browsing Products →
-                      </button>
-                    </div>
+            {/* Recently Viewed */}
+            <div className="mb-8 sm:mb-12">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                    Recently Viewed
+                    {recentlyViewed.length > 0 && (
+                      <span className="ml-2 text-sm font-normal text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                        {recentlyViewed.length} items
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {recentlyViewed.length > 0
+                      ? 'Continue exploring products you recently viewed'
+                      : 'Products you view will appear here'
+                    }
+                  </p>
+                </div>
+                {recentlyViewed.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleViewAllProducts}
+                      className="text-amber-700 hover:text-amber-800 font-medium flex items-center text-sm sm:text-base"
+                    >
+                      Shop More <FaChevronRight className="ml-1" />
+                    </button>
                   </div>
                 )}
               </div>
-            </>
-          )}
-        </div>
+
+              {recentlyViewed.length > 0 ? (
+                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+                  {recentlyViewed.map((item, index) => {
+                    const fullProduct = products.find(p => p.id === item.id);
+                    const isOutOfStock = fullProduct?.stock <= 0;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="relative bg-white rounded-lg sm:rounded-xl border border-gray-200 p-2 sm:p-4 hover:shadow-lg transition-all duration-300 hover:border-amber-200 group cursor-pointer"
+                        onClick={() => handleRecentlyViewedClick(item)}
+                      >
+                        {index === 0 && !isOutOfStock && (
+                          <div className="absolute -top-1 -left-1 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
+                            Latest
+                          </div>
+                        )}
+                        <div
+                          className="relative overflow-hidden rounded-lg mb-2 sm:mb-3"
+                          onMouseEnter={() => setHoveredRecentlyViewed(item.id)}
+                          onMouseLeave={() => setHoveredRecentlyViewed(null)}
+                        >
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className={`w-full h-24 sm:h-32 object-cover rounded-lg transition-transform duration-500 ${hoveredRecentlyViewed === item.id ? 'transform scale-110' : ''}`}
+                          />
+                          <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+                            <div className="bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                              Viewed
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 group-hover:text-amber-700">
+                          {item.name}
+                        </div>
+                        <div className="text-sm font-bold text-amber-700">
+                          {fullProduct?.currentPrice || item.currentPrice || '$ 0.00'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaClock className="text-gray-400 text-2xl" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Recently Viewed Items</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Products you view on Home page, Product List page, or Product Detail page will appear here to help you find them later
+                    </p>
+                    <button
+                      onClick={handleViewAllProducts}
+                      className="text-amber-700 hover:text-amber-800 font-medium text-sm bg-amber-50 hover:bg-amber-100 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 mx-auto"
+                    >
+                      <FaShoppingBag className="text-sm" />
+                      Start Browsing Products →
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
