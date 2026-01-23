@@ -214,72 +214,97 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [isMobile]);
 
+  // Retry logic helper
+  const fetchWithRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000) => {
+    try {
+      return await fn();
+    } catch (error) {
+      if (retries === 0) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return fetchWithRetry(fn, retries - 1, delay * 2);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      try {
-        const [productsRes, categoriesRes] = await Promise.all([
-          api.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand'),
-          api.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color')
-        ]);
 
-        // Process categories - FIXED: Store icon name string, not JSX element
-        const dbCategories = categoriesRes.data;
-        const mergedCategories = dbCategories.map((dbCat: any) => ({
-          ...dbCat,
-          id: dbCat._id,
-          name: dbCat.name,
-          iconName: dbCat.icon, // Store the icon name string
-          image: dbCat.image || '',
-          items: `${dbCat.subCategories?.length || 0} Items`,
-          mainSubcategories: dbCat.mainSubcategories || [],
-          color: dbCat.color || 'blue'
-        }));
-        setCategories(mergedCategories);
+      // Define fetch functions separately
+      const fetchProducts = async () => {
+        try {
+          const res = await fetchWithRetry(() =>
+            api.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand')
+          );
 
-        // Process products - IMPORTANT: Include stock information
-        const dbProducts = productsRes.data.map((p: any) => ({
-          ...p,
-          id: p._id,
-          name: p.name,
-          currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
-          originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
-          rating: p.rating || 0,
-          sold: p.sold || 0,
-          stock: p.stock || 0, // ✅ Add stock information
-          badge: p.badge,
-          badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
-          tags: p.discount > 0 ? ['Choice', 'Sale'] : ['Choice'],
-          category: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
-          categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
-          subCategory: p.subCategory || '',
-          image: getImageUrl(p.image || (p.colorVariants?.[0]?.images?.[0])),
-          discountPercent: p.discount,
-          colorOptions: true,
-          sizeOptions: true,
-          promotions: [
-            { text: p.discount > 0 ? `Save ${p.discount}%` : 'Best Price', icon: <FaTag className="text-green-500" /> },
-          ],
-          brand: p.brand,
-          description: p.description,
-          features: [
-            'High quality material',
-            'Durable and long lasting',
-            'Warranty included'
-          ],
-          deliveryInfo: 'Fast delivery to your doorstep',
-          warranty: '1-year warranty',
-          returnPolicy: '30-day return policy',
-          certified: true,
-        }));
+          const dbProducts = res.data.map((p: any) => ({
+            ...p,
+            id: p._id,
+            name: p.name,
+            currentPrice: `$ ${(p.price || 0).toFixed(2)}`,
+            originalPrice: (p.discount > 0 && p.price) ? `$ ${(p.price / (1 - p.discount / 100)).toFixed(2)}` : null,
+            rating: p.rating || 0,
+            sold: p.sold || 0,
+            stock: p.stock || 0,
+            badge: p.badge,
+            badgeIcon: p.badge === 'New' ? <FaGem className="text-white text-xs" /> : p.badge === 'Sale' ? <FaFire className="text-white text-xs" /> : p.badge === 'Bestseller' ? <FaCrown className="text-white text-xs" /> : null,
+            tags: p.discount > 0 ? ['Choice', 'Sale'] : ['Choice'],
+            category: p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'Uncategorized',
+            categoryId: p.category ? (typeof p.category === 'string' ? '' : p.category._id) : '',
+            subCategory: p.subCategory || '',
+            image: getImageUrl(p.image || (p.colorVariants?.[0]?.images?.[0])),
+            discountPercent: p.discount,
+            colorOptions: true,
+            sizeOptions: true,
+            promotions: [
+              { text: p.discount > 0 ? `Save ${p.discount}%` : 'Best Price', icon: <FaTag className="text-green-500" /> },
+            ],
+            brand: p.brand,
+            description: p.description,
+            features: [
+              'High quality material',
+              'Durable and long lasting',
+              'Warranty included'
+            ],
+            deliveryInfo: 'Fast delivery to your doorstep',
+            warranty: '1-year warranty',
+            returnPolicy: '30-day return policy',
+            certified: true,
+          }));
+          setProducts(dbProducts);
+        } catch (error) {
+          console.error("Failed to fetch products after retries", error);
+        }
+      };
 
-        setProducts(dbProducts);
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      } finally {
-        setLoading(false);
-      }
+      const fetchCategories = async () => {
+        try {
+          const res = await fetchWithRetry(() =>
+            api.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color')
+          );
+
+          const dbCategories = res.data;
+          const mergedCategories = dbCategories.map((dbCat: any) => ({
+            ...dbCat,
+            id: dbCat._id,
+            name: dbCat.name,
+            iconName: dbCat.icon,
+            image: dbCat.image || '',
+            items: `${dbCat.subCategories?.length || 0} Items`,
+            mainSubcategories: dbCat.mainSubcategories || [],
+            color: dbCat.color || 'blue'
+          }));
+          setCategories(mergedCategories);
+        } catch (error) {
+          console.error("Failed to fetch categories after retries", error);
+        }
+      };
+
+      // Execute both independently
+      await Promise.allSettled([fetchProducts(), fetchCategories()]);
+
+      setLoading(false);
     };
+
     fetchData();
   }, [user]);
 
