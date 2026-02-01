@@ -69,21 +69,21 @@ export default function ProductDetail() {
 
   // Payment methods data - matching footer style with image logos
   const paymentMethods = [
-    { 
-      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
-      name: 'Visa' 
+    {
+      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />,
+      name: 'Visa'
     },
-    { 
-      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
-      name: 'Mastercard' 
+    {
+      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />,
+      name: 'Mastercard'
     },
-    { 
-      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
-      name: 'American Express' 
+    {
+      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />,
+      name: 'American Express'
     },
-    { 
-      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
-      name: 'Discover' 
+    {
+      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />,
+      name: 'Discover'
     },
   ];
 
@@ -854,27 +854,27 @@ export default function ProductDetail() {
             </div>
 
             {/* Payment Methods Section - Added after description, matching footer style with images */}
-           <div className="mt-8 pt-8 border-t border-gray-200">
-  <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
-  <div className="space-y-4">
-    <div className="flex flex-nowrap gap-0 justify-start items-center overflow-x-auto pb-2">
-      {paymentMethods.map((method, index) => (
-        <div
-          key={index}
-          className="p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
-          title={method.name}
-        >
-          {method.icon}
-        </div>
-      ))}
-    </div>
-    {/* <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-3 md:p-4 border border-amber-800/30">
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <h4 className="text-lg font-bold mb-4 pb-2 border-b border-amber-800/30">We Accept</h4>
+              <div className="space-y-4">
+                <div className="flex flex-nowrap gap-0 justify-start items-center overflow-x-auto pb-2">
+                  {paymentMethods.map((method, index) => (
+                    <div
+                      key={index}
+                      className="p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-16 h-10"
+                      title={method.name}
+                    >
+                      {method.icon}
+                    </div>
+                  ))}
+                </div>
+                {/* <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg p-3 md:p-4 border border-amber-800/30">
       <p className="text-xs md:text-sm text-gray-300">
         All transactions are secured with SSL encryption. Your payment information is protected with the highest security standards.
       </p>
     </div> */}
-  </div>
-</div>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -50,7 +50,7 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
 // Product Card Component - Mobile optimized
 const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isFav, showCategoryBadge = false }: any) => {
   const isOutOfStock = product.stock <= 0;
-  
+
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
       {/* Brand Badge - Mobile: smaller, Desktop: regular */}
@@ -70,8 +70,8 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
           addToCart(product);
         }}
         disabled={isOutOfStock}
-        className={`absolute top-2 sm:top-3 right-2 sm:right-3 z-20 rounded-full p-1 sm:p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110 ${isOutOfStock 
-          ? 'bg-gray-200 cursor-not-allowed' 
+        className={`absolute top-2 sm:top-3 right-2 sm:right-3 z-20 rounded-full p-1 sm:p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110 ${isOutOfStock
+          ? 'bg-gray-200 cursor-not-allowed'
           : 'bg-white/90 hover:bg-white'}`}
         title={isOutOfStock ? "Out of stock" : "Add to cart"}
       >
@@ -104,21 +104,21 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
 
         {/* Wishlist Button - Gray for out of stock */}
         <button
-          onClick={(e) => { 
-            e.stopPropagation(); 
-            if (!isOutOfStock) toggleWishlist(product.id); 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isOutOfStock) toggleWishlist(product.id);
           }}
           disabled={isOutOfStock}
-          className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock 
-            ? 'bg-gray-200 cursor-not-allowed' 
+          className={`absolute top-2 sm:top-3 left-2 sm:left-3 z-10 w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-md transition-all duration-300 group-hover:scale-110 ${isOutOfStock
+            ? 'bg-gray-200 cursor-not-allowed'
             : 'bg-white/90 hover:bg-white'}`}
           title={isOutOfStock ? "Out of stock" : "Add to wishlist"}
         >
-          <FaHeart className={`text-xs sm:text-base ${isOutOfStock 
-            ? 'text-gray-400' 
-            : isFav && isFav(product.id) 
-              ? 'text-red-500' 
-              : 'text-gray-400 hover:text-red-500'}`} 
+          <FaHeart className={`text-xs sm:text-base ${isOutOfStock
+            ? 'text-gray-400'
+            : isFav && isFav(product.id)
+              ? 'text-red-500'
+              : 'text-gray-400 hover:text-red-500'}`}
           />
         </button>
       </div>
@@ -126,8 +126,8 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
       {/* Product Info */}
       <div className="p-2 sm:p-3">
         <h3
-          className={`font-semibold line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer ${isOutOfStock 
-            ? 'text-gray-500' 
+          className={`font-semibold line-clamp-2 mb-1.5 sm:mb-2 text-xs sm:text-sm h-8 sm:h-10 cursor-pointer ${isOutOfStock
+            ? 'text-gray-500'
             : 'text-gray-900 hover:text-amber-700'}`}
           onClick={() => openProductModal(product)}
         >
@@ -372,7 +372,7 @@ const getCategoryColor = (categoryName: string, isSelected: boolean) => {
   // Create a simple hash from category name to get consistent color
   const hash = categoryName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const colorIndex = hash % colors.length;
-  
+
   return colors[colorIndex];
 };
 
@@ -412,7 +412,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
           </button>
         </div>
       </div>
-      
+
       <div className="relative">
         {/* Scroll buttons for mobile */}
         <div className="sm:hidden absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
@@ -423,7 +423,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
             <FaAngleLeft className="text-gray-600 text-sm" />
           </button>
         </div>
-        
+
         <div className="sm:hidden absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
           <button
             onClick={scrollRight}
@@ -443,17 +443,17 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
             onClick={() => onCategorySelect(null)}
             onMouseEnter={() => setHoveredCategory('all')}
             onMouseLeave={() => setHoveredCategory(null)}
-            className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-8 h-8 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${selectedCategory === null 
-              ? 'bg-[#e1630d] border-[#e1630d] text-white shadow-md' 
+            className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 border-2 w-8 h-8 sm:w-32 sm:h-32 shadow-sm hover:shadow-md relative ${selectedCategory === null
+              ? 'bg-[#e1630d] border-[#e1630d] text-white shadow-md'
               : 'bg-orange-50 border-orange-100 hover:bg-orange-100 text-orange-700'}`}
           >
             <div className={`rounded-full flex items-center justify-center sm:mb-3 w-8 h-8 sm:w-14 sm:h-14 ${selectedCategory === null ? 'bg-white/20' : 'bg-orange-100'}`}>
               <FaBox className={`text-base sm:text-xl ${selectedCategory === null ? 'text-white' : 'text-orange-600'}`} />
             </div>
-            
+
             {/* Category name - Only visible on desktop */}
             <span className="hidden sm:block text-xs font-semibold text-center">All</span>
-            
+
             {/* Mobile tooltip - Shows category name on hover */}
             {hoveredCategory === 'all' && (
               <div className="sm:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-50">
@@ -468,7 +468,7 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
             const isSelected = selectedCategory === category.id;
             const colors = getCategoryColor(category.name, isSelected);
             const isHovered = hoveredCategory === category.id;
-            
+
             return (
               <button
                 key={category.id}
@@ -480,12 +480,12 @@ const MainCategories = ({ categories, selectedCategory, onCategorySelect }: any)
                 <div className={`rounded-full flex items-center justify-center sm:mb-3  sm:w-14 sm:h-14 ${colors.iconBg}`}>
                   <CategoryIcon name={category.iconName} className={`text-base sm:text-xl ${colors.iconColor}`} />
                 </div>
-                
+
                 {/* Category name - Only visible on desktop */}
                 <span className="hidden sm:block text-xs font-semibold text-center line-clamp-2">
                   {category.name}
                 </span>
-                
+
                 {/* Mobile tooltip - Shows category name on hover */}
                 {isHovered && (
                   <div className="sm:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-50 max-w-[120px] text-center">
@@ -532,9 +532,9 @@ const SubcategoryDropdown = ({ categories, selectedCategory, selectedSubcategory
           <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">Browse by Subcategory</h3>
           <p className="text-gray-600 text-xs sm:text-sm">Select a subcategory to filter products</p>
         </div>
-        
+
         {/* Dropdown for mobile */}
-       <div className="sm:hidden relative w-full">
+        <div className="sm:hidden relative w-full">
           <select
             value={selectedSubcategory || ""}
             onChange={(e) => onSubcategorySelect(e.target.value)}
@@ -558,25 +558,25 @@ const SubcategoryDropdown = ({ categories, selectedCategory, selectedSubcategory
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => onSubcategorySelect(null)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${!selectedSubcategory 
-              ? 'bg-[#e1630d] text-white shadow-md' 
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${!selectedSubcategory
+              ? 'bg-[#e1630d] text-white shadow-md'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           >
             All
           </button>
-          
+
           {displaySubcategories.map((subcat) => (
             <button
               key={subcat}
               onClick={() => onSubcategorySelect(subcat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${selectedSubcategory === subcat 
-                ? 'bg-[#e1630d] text-white shadow-md' 
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${selectedSubcategory === subcat
+                ? 'bg-[#e1630d] text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
             >
               {subcat}
             </button>
           ))}
-          
+
           {/* View All / Show Less button */}
           {uniqueSubcategories.length > 10 && (
             <button
@@ -642,7 +642,7 @@ const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters, 
 const CategoryHeroBanner = ({ selectedCategory, categories }: any) => {
   // Single hero banner image for all categories
   const heroImage = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
-  
+
   let title = "All Products";
   let description = "Discover amazing products";
 
@@ -655,7 +655,7 @@ const CategoryHeroBanner = ({ selectedCategory, categories }: any) => {
 
   return (
     <div className="mb-6 sm:mb-8 rounded-lg sm:rounded-xl overflow-hidden relative">
-      <img 
+      <img
         src={heroImage}
         alt={`${title} Banner`}
         className="w-full h-48 sm:h-64 md:h-80 object-cover"
@@ -699,14 +699,14 @@ export default function ProductList() {
   useEffect(() => {
     // Scroll to top on initial load
     window.scrollTo(0, 0);
-    
+
     // Also handle browser back/forward navigation
     const handlePopState = () => {
       window.scrollTo(0, 0);
     };
-    
+
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -756,7 +756,7 @@ export default function ProductList() {
               productImage = firstVariant.images[0];
             }
           }
-          
+
           return {
             ...p,
             id: p._id,
@@ -839,7 +839,7 @@ export default function ProductList() {
   const handleCategorySelect = (categoryId: string | null) => {
     // ✅ FIX: Scroll to top when category changes
     window.scrollTo(0, 0);
-    
+
     const params = new URLSearchParams(searchParams);
 
     if (categoryId && selectedCategory !== categoryId) {
@@ -863,7 +863,7 @@ export default function ProductList() {
   const handleSubcategorySelect = (subcategoryId: string | null) => {
     // ✅ FIX: Scroll to top when subcategory changes
     window.scrollTo(0, 0);
-    
+
     const params = new URLSearchParams(searchParams);
 
     if (selectedCategory) {
@@ -891,7 +891,7 @@ export default function ProductList() {
   const handleClearFilters = (type: 'category' | 'subcategory' | 'all') => {
     // ✅ FIX: Scroll to top when clearing filters
     window.scrollTo(0, 0);
-    
+
     const params = new URLSearchParams();
 
     if (type === 'all' || type === 'category') {
@@ -941,7 +941,7 @@ export default function ProductList() {
       alert('This product is currently out of stock.');
       return;
     }
-    
+
     cart.addToCart(product);
     const notification = document.createElement('div');
     notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow-lg z-50 animate-fade-in flex items-center gap-2';
@@ -960,10 +960,10 @@ export default function ProductList() {
   const openProductModal = (product: any) => {
     // ✅ FIX: Scroll to top before navigating to product detail
     window.scrollTo(0, 0);
-    
+
     // ✅ IMPORTANT: Add product to recently viewed
     addToRecentlyViewed(product);
-    
+
     // Navigate to product detail page
     navigate(`/products/${product.id}`);
   };
@@ -975,14 +975,14 @@ export default function ProductList() {
       navigate('/login');
       return;
     }
-    
+
     // Find the product to check stock
     const product = allProducts.find(p => p.id === productId);
     if (product && product.stock <= 0) {
       alert('This product is out of stock and cannot be added to wishlist.');
       return;
     }
-    
+
     await contextToggle(productId);
   };
 
