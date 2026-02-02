@@ -7,45 +7,19 @@ import { AuthContext } from '../contexts/AuthContext';
 import { WishlistContext } from '../contexts/WishlistContext';
 import {
   FaStar, FaShoppingCart, FaHeart, FaChevronRight,
-  FaMobileAlt, FaCamera, FaDog, FaBaby,
-  FaGem, FaGlobeAsia, FaTools,
-  FaLaptop, FaPrint,
   FaTag,
   FaCheckCircle,
   FaFire, FaCrown, FaCartPlus,
-  FaChevronRight as FaChevronRightIcon, FaWallet,
-  FaTshirt as FaTShirt, FaPalette as FaHome,
-  FaImages, FaCreditCard, FaClock, FaCloudSun,
-  FaPaw, FaBaby as FaBabyIcon, FaShoppingBag,
-  FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid
+  FaChevronRight as FaChevronRightIcon,
+  FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid,
+  FaGem,
+  FaShoppingBag,
+  FaClock
 } from 'react-icons/fa';
 import { HomeSkeleton } from '../components/Skeletons';
+import { CategoryIcon } from '../components/CategoryIcons';
 
-// CategoryIcon component - receives icon name string and returns the icon
-const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
-  const icons: any = {
-    FaMobileAlt: <FaMobileAlt className={className} />,
-    FaCamera: <FaCamera className={className} />,
-    FaTshirt: <FaTShirt className={className} />,
-    FaCrown: <FaCrown className={className} />,
-    FaCreditCard: <FaCreditCard className={className} />,
-    FaPaw: <FaPaw className={className} />,
-    FaBaby: <FaBaby className={className} />,
-    FaClock: <FaClock className={className} />,
-    FaGlobeAsia: <FaGlobeAsia className={className} />,
-    FaCloudSun: <FaCloudSun className={className} />,
-    FaTools: <FaTools className={className} />,
-    FaLaptop: <FaLaptop className={className} />,
-    FaHome: <FaHome className={className} />,
-    FaImages: <FaImages className={className} />,
-    FaPrint: <FaPrint className={className} />,
-    FaDog: <FaDog className={className} />,
-    FaBabyIcon: <FaBabyIcon className={className} />,
-    FaWallet: <FaWallet className={className} />,
-    FaShoppingBag: <FaShoppingBag className={className} />
-  };
-  return icons[name] || <FaShoppingBag className={className} />;
-};
+
 
 // Function to add product to recently viewed (available globally)
 export const addToRecentlyViewed = (product: any) => {
@@ -107,6 +81,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   //const [activeCategory, setActiveCategory] = useState('All');
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
@@ -226,15 +201,26 @@ export default function Home() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
-      setLoading(true);
+      // If we already have data, don't show full loading state, just background refresh
+      if (products.length === 0) {
+        setLoading(true);
+      }
+      setError(null);
 
       // Define fetch functions separately
       const fetchProducts = async () => {
         try {
+          // Explicitly remove Authorization header for public data
           const res = await fetchWithRetry(() =>
-            api.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand')
+            api.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand', {
+              headers: { Authorization: '' }
+            })
           );
+
+          if (!isMounted) return;
 
           const dbProducts = res.data.map((p: any) => ({
             ...p,
@@ -273,14 +259,20 @@ export default function Home() {
           setProducts(dbProducts);
         } catch (error) {
           console.error("Failed to fetch products after retries", error);
+          if (isMounted) setError("Failed to load products. Please check your connection.");
         }
       };
 
       const fetchCategories = async () => {
         try {
+          // Explicitly remove Authorization header for public data
           const res = await fetchWithRetry(() =>
-            api.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color')
+            api.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color', {
+              headers: { Authorization: '' }
+            })
           );
+
+          if (!isMounted) return;
 
           const dbCategories = res.data;
           const mergedCategories = dbCategories.map((dbCat: any) => ({
@@ -302,11 +294,15 @@ export default function Home() {
       // Execute both independently
       await Promise.allSettled([fetchProducts(), fetchCategories()]);
 
-      setLoading(false);
+      if (isMounted) setLoading(false);
     };
 
     fetchData();
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array - run once on mount independent of user auth state
 
   // ✅ FIXED: Check stock before adding to cart
   const addToCart = (product: any) => {
@@ -634,6 +630,17 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
         {loading ? (
           <HomeSkeleton />
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">Something went wrong</h2>
+            <p className="text-gray-500 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
         ) : (
           <>
             {/* Mobile Hero Banner Carousel */}
