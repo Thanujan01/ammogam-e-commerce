@@ -2,6 +2,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
+import { CurrencyContext } from '../contexts/CurrencyContext';
 import { api } from '../api/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
@@ -13,7 +14,7 @@ import {
   FaRegCreditCard, FaTimes,
 } from 'react-icons/fa';
 // import { SiVisa, SiMastercard, SiAmericanexpress, SiDiscover } from 'react-icons/si';
- //import { RiSecurePaymentLine } from 'react-icons/ri';
+//import { RiSecurePaymentLine } from 'react-icons/ri';
 
 
 // Import the same image logos as in the footer
@@ -63,26 +64,27 @@ const countries = [
   { code: 'AU', name: 'Australia', dialCode: '+61', digits: 9, example: '412345678', pattern: /^[4-5][0-9]{8}$/ },
 ];
 const paymentMethods = [
-    { 
-      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
-      name: 'Visa' 
-    },
-    { 
-      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
-      name: 'Mastercard' 
-    },
-    { 
-      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
-      name: 'American Express' 
-    },
-    { 
-      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
-      name: 'Discover' 
-    },
-  ];
+  {
+    icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />,
+    name: 'Visa'
+  },
+  {
+    icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />,
+    name: 'Mastercard'
+  },
+  {
+    icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />,
+    name: 'American Express'
+  },
+  {
+    icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />,
+    name: 'Discover'
+  },
+];
 export default function Checkout() {
   const cart = useContext(CartContext)!;
   const auth = useContext(AuthContext)!;
+  const currency = useContext(CurrencyContext)!;
   const navigate = useNavigate();
 
   // Cast selectedCartItems to CartItem[] to fix type issues
@@ -149,22 +151,22 @@ export default function Checkout() {
 
   // Validation functions
   const validateName = (value: string) => {
-  if (!value.trim()) return 'Name is required';
-  if (value.trim().length < 2) return 'Name must be at least 2 characters';
-  
-  // Only allow letters and spaces, not starting with space
-  const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
-  if (!nameRegex.test(value.trim())) {
-    return 'Name can only contain letters and spaces, and cannot start with space';
-  }
-  
-  // Check for multiple consecutive spaces
-  if (/\s{2,}/.test(value)) {
-    return 'Name cannot have multiple consecutive spaces';
-  }
-  
-  return '';
-};
+    if (!value.trim()) return 'Name is required';
+    if (value.trim().length < 2) return 'Name must be at least 2 characters';
+
+    // Only allow letters and spaces, not starting with space
+    const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
+    if (!nameRegex.test(value.trim())) {
+      return 'Name can only contain letters and spaces, and cannot start with space';
+    }
+
+    // Check for multiple consecutive spaces
+    if (/\s{2,}/.test(value)) {
+      return 'Name cannot have multiple consecutive spaces';
+    }
+
+    return '';
+  };
 
   const validateAddress = (value: string) => {
     if (!value.trim()) return 'Address is required';
@@ -206,19 +208,19 @@ export default function Checkout() {
   };
 
   const validatePostalCode = (value: string) => {
-  if (!value.trim()) return '';
-  
-  // Only allow letters and numbers (alphanumeric)
-  const postalCodeRegex = /^[A-Za-z0-9]+$/;
-  if (!postalCodeRegex.test(value)) {
-    return 'Postal code can only contain letters and numbers';
-  }
-  
-  if (value.trim().length < 3) return 'Postal code is too short';
-  if (value.trim().length > 10) return 'Postal code is too long';
-  
-  return '';
-};
+    if (!value.trim()) return '';
+
+    // Only allow letters and numbers (alphanumeric)
+    const postalCodeRegex = /^[A-Za-z0-9]+$/;
+    if (!postalCodeRegex.test(value)) {
+      return 'Postal code can only contain letters and numbers';
+    }
+
+    if (value.trim().length < 3) return 'Postal code is too short';
+    if (value.trim().length > 10) return 'Postal code is too long';
+
+    return '';
+  };
 
   const validateForm = () => {
     const errors = {
@@ -241,6 +243,12 @@ export default function Checkout() {
     return !Object.values(errors).some(error => error);
   };
 
+  // Helper function to convert and format price
+  const getConvertedPrice = (priceInUSD: number) => {
+    if (currency.loading) return `$ ${priceInUSD.toFixed(2)}`;
+    return currency.formatPrice(priceInUSD);
+  };
+
   const handleBackToCart = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate('/cart'), 150);
@@ -259,55 +267,55 @@ export default function Checkout() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  // Special handling for city field - only allow letters, spaces, and hyphens
-  if (name === 'city') {
-    // Allow only letters, spaces, and hyphens
-    const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
-    setFormData({ ...formData, [name]: filteredValue });
-  }
-  // Special handling for name field - only allow letters and spaces, cannot start with space
-  else if (name === 'name') {
-    // Remove any non-letter characters except spaces
-    let filteredValue = value.replace(/[^A-Za-z\s]/g, '');
-    
-    // Remove multiple consecutive spaces
-    filteredValue = filteredValue.replace(/\s{2,}/g, ' ');
-    
-    // Trim if starting with space
-    if (filteredValue.startsWith(' ')) {
-      filteredValue = filteredValue.trimStart();
+    // Special handling for city field - only allow letters, spaces, and hyphens
+    if (name === 'city') {
+      // Allow only letters, spaces, and hyphens
+      const filteredValue = value.replace(/[^A-Za-z\s\-]/g, '');
+      setFormData({ ...formData, [name]: filteredValue });
     }
-    
-    setFormData({ ...formData, [name]: filteredValue });
-  }
-  // Special handling for postal code field - only allow letters and numbers
-  else if (name === 'postalCode') {
-    // Allow only letters and numbers
-    const filteredValue = value.replace(/[^A-Za-z0-9]/g, '');
-    setFormData({ ...formData, [name]: filteredValue });
-  }
-  // Special handling for phone field - only allow digits
-  else if (name === 'phone') {
-    // Allow only digits
-    const filteredValue = value.replace(/\D/g, '');
-    setFormData({ ...formData, [name]: filteredValue });
-  }
-  // When country changes, clear phone validation
-  else if (name === 'countryCode') {
-    setFormData({ ...formData, [name]: value, phone: '' });
-    setFormErrors({ ...formErrors, phone: '' });
-  }
-  else {
-    setFormData({ ...formData, [name]: value });
-  }
+    // Special handling for name field - only allow letters and spaces, cannot start with space
+    else if (name === 'name') {
+      // Remove any non-letter characters except spaces
+      let filteredValue = value.replace(/[^A-Za-z\s]/g, '');
 
-  // Clear error when user starts typing
-  if (formErrors[name]) {
-    setFormErrors({ ...formErrors, [name]: '' });
-  }
-};
+      // Remove multiple consecutive spaces
+      filteredValue = filteredValue.replace(/\s{2,}/g, ' ');
+
+      // Trim if starting with space
+      if (filteredValue.startsWith(' ')) {
+        filteredValue = filteredValue.trimStart();
+      }
+
+      setFormData({ ...formData, [name]: filteredValue });
+    }
+    // Special handling for postal code field - only allow letters and numbers
+    else if (name === 'postalCode') {
+      // Allow only letters and numbers
+      const filteredValue = value.replace(/[^A-Za-z0-9]/g, '');
+      setFormData({ ...formData, [name]: filteredValue });
+    }
+    // Special handling for phone field - only allow digits
+    else if (name === 'phone') {
+      // Allow only digits
+      const filteredValue = value.replace(/\D/g, '');
+      setFormData({ ...formData, [name]: filteredValue });
+    }
+    // When country changes, clear phone validation
+    else if (name === 'countryCode') {
+      setFormData({ ...formData, [name]: value, phone: '' });
+      setFormErrors({ ...formErrors, phone: '' });
+    }
+    else {
+      setFormData({ ...formData, [name]: value });
+    }
+
+    // Clear error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors({ ...formErrors, [name]: '' });
+    }
+  };
 
   const handleBlur = (field: string) => {
     setTouchedFields({ ...touchedFields, [field]: true });
@@ -526,6 +534,22 @@ export default function Checkout() {
         </div>
       </div>
 
+      {/* Currency Indicator */}
+      {currency.currency !== 'USD' && !currency.loading && (
+        <div className="bg-white border-b border-blue-200">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="text-gray-700">
+                  Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
+                </span>
+                <span className="text-gray-500 text-xs">(Converted from USD)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Progress Steps */}
       <div className="bg-white border-b border-[#d97706]/20 py-6">
         <div className="max-w-4xl mx-auto px-4">
@@ -589,38 +613,38 @@ export default function Checkout() {
                 <div className="p-4 sm:p-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {/* Name Field */}
-<div className="md:col-span-2">
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    <div className="flex items-center gap-2">
-      <FaUser className="text-[#d97706]" />
-      <span className="text-xs sm:text-sm">Recipient's Full Name *</span>
-    </div>
-  </label>
-  <input
-    type="text"
-    name="name"
-    value={formData.name}
-    onChange={handleChange}
-    onBlur={() => handleBlur('name')}
-    placeholder="Enter your full name"
-    className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.name && formErrors.name
-      ? 'border-red-500 focus:ring-2 focus:ring-red-100'
-      : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-      }`}
-    aria-label="Recipient's full name"
-  />
-  {touchedFields.name && formErrors.name && (
-    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-      <FaTimes className="text-xs" />
-      {formErrors.name}
-    </p>
-  )}
-  {!touchedFields.name && !formErrors.name && (
-    <p className="mt-1 text-xs text-gray-500">
-      Only letters and spaces, cannot start with space
-    </p>
-  )}
-</div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="flex items-center gap-2">
+                          <FaUser className="text-[#d97706]" />
+                          <span className="text-xs sm:text-sm">Recipient's Full Name *</span>
+                        </div>
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur('name')}
+                        placeholder="Enter your full name"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.name && formErrors.name
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
+                        aria-label="Recipient's full name"
+                      />
+                      {touchedFields.name && formErrors.name && (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.name}
+                        </p>
+                      )}
+                      {!touchedFields.name && !formErrors.name && (
+                        <p className="mt-1 text-xs text-gray-500">
+                          Only letters and spaces, cannot start with space
+                        </p>
+                      )}
+                    </div>
 
                     {/* Address Field */}
                     <div className="md:col-span-2">
@@ -685,35 +709,35 @@ export default function Checkout() {
 
                     {/* Postal Code Field */}
                     {/* Postal Code Field */}
-<div>
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    <span className="text-xs sm:text-sm">Postal Code</span>
-  </label>
-  <input
-    type="text"
-    name="postalCode"
-    value={formData.postalCode}
-    onChange={handleChange}
-    onBlur={() => handleBlur('postalCode')}
-    placeholder="e.g., 10100 or ABC123"
-    className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.postalCode && formErrors.postalCode
-      ? 'border-red-500 focus:ring-2 focus:ring-red-100'
-      : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
-      }`}
-    aria-label="Postal code"
-    maxLength={10} // Add maxLength to prevent too long input
-  />
-  {touchedFields.postalCode && formErrors.postalCode ? (
-    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-      <FaTimes className="text-xs" />
-      {formErrors.postalCode}
-    </p>
-  ) : (
-    <p className="mt-1 text-xs text-gray-500">
-      Letters and numbers only (3-10 characters)
-    </p>
-  )}
-</div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <span className="text-xs sm:text-sm">Postal Code</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="postalCode"
+                        value={formData.postalCode}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur('postalCode')}
+                        placeholder="e.g., 10100 or ABC123"
+                        className={`w-full px-4 py-3 text-sm sm:text-base border rounded-lg focus:outline-none transition-all ${touchedFields.postalCode && formErrors.postalCode
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-100'
+                          : 'border-[#d97706] focus:ring-2 focus:ring-[#d97706] focus:border-[#d97706]'
+                          }`}
+                        aria-label="Postal code"
+                        maxLength={10} // Add maxLength to prevent too long input
+                      />
+                      {touchedFields.postalCode && formErrors.postalCode ? (
+                        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <FaTimes className="text-xs" />
+                          {formErrors.postalCode}
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-xs text-gray-500">
+                          Letters and numbers only (3-10 characters)
+                        </p>
+                      )}
+                    </div>
 
                     {/* Phone Number Section */}
                     <div className="md:col-span-2">
@@ -904,10 +928,10 @@ export default function Checkout() {
                             </div>
                             <div>
                               <div className="font-bold text-gray-900 text-sm sm:text-base">
-                                ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
+                                {getConvertedPrice(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity)}
                               </div>
                               <div className="text-xs sm:text-sm text-[#d97706]">
-                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()} each
+                                {getConvertedPrice((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price))} each
                               </div>
                             </div>
                           </div>
@@ -992,50 +1016,50 @@ export default function Checkout() {
               {step === 3 && (
                 <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                   {/* Online Payment Option - Only Option */}
-                 {/* Online Payment Option - Only Option - MOBILE RESPONSIVE */}
-<div className="border border-[#FAF7F4] bg-[#FDDDB6]/10 rounded-xl p-3 sm:p-4 md:p-6 ring-2 ring-[#F4F1EE] ring-offset-1 sm:ring-offset-2">
-  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-    <div className="flex items-start gap-3 w-full sm:w-auto">
-      <div className="p-2 sm:p-3 bg-white text-[#d97706] rounded-lg flex-shrink-0">
-        <FaCreditCard className="text-base sm:text-lg md:text-xl" />
-      </div>
-      <div className="flex-1 sm:hidden">
-        <h4 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Secure Online Payment</h4>
-      </div>
-    </div>
-    
-    <div className="flex-1 w-full">
-      {/* Hidden on mobile, shown on sm+ */}
-      <h4 className="hidden sm:block font-bold text-gray-900 text-base md:text-lg mb-2">Secure Online Payment</h4>
-      
-      {/* Payment Methods - Improved mobile responsiveness */}
-      <div className="space-y-3 sm:space-y-4">
-        <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start items-center">
-          {paymentMethods.map((method, index) => (
-            <div
-              key={index}
-              className="p-1.5 sm:p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10"
-              title={method.name}
-            >
-              {method.icon}
-            </div>
-          ))}
-        </div>
-        
-        {/* Secure SSL Badge - Mobile responsive */}
-        <div className="flex justify-center sm:justify-start">
-          {/* <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#d97706] to-[#b45309] px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded shadow-sm w-fit">
+                  {/* Online Payment Option - Only Option - MOBILE RESPONSIVE */}
+                  <div className="border border-[#FAF7F4] bg-[#FDDDB6]/10 rounded-xl p-3 sm:p-4 md:p-6 ring-2 ring-[#F4F1EE] ring-offset-1 sm:ring-offset-2">
+                    <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                      <div className="flex items-start gap-3 w-full sm:w-auto">
+                        <div className="p-2 sm:p-3 bg-white text-[#d97706] rounded-lg flex-shrink-0">
+                          <FaCreditCard className="text-base sm:text-lg md:text-xl" />
+                        </div>
+                        <div className="flex-1 sm:hidden">
+                          <h4 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Secure Online Payment</h4>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 w-full">
+                        {/* Hidden on mobile, shown on sm+ */}
+                        <h4 className="hidden sm:block font-bold text-gray-900 text-base md:text-lg mb-2">Secure Online Payment</h4>
+
+                        {/* Payment Methods - Improved mobile responsiveness */}
+                        <div className="space-y-3 sm:space-y-4">
+                          <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start items-center">
+                            {paymentMethods.map((method, index) => (
+                              <div
+                                key={index}
+                                className="p-1.5 sm:p-2 rounded-lg transition-colors duration-300 flex items-center justify-center flex-shrink-0 w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10"
+                                title={method.name}
+                              >
+                                {method.icon}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Secure SSL Badge - Mobile responsive */}
+                          <div className="flex justify-center sm:justify-start">
+                            {/* <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#d97706] to-[#b45309] px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded shadow-sm w-fit">
             <RiSecurePaymentLine className="text-white text-xs sm:text-sm md:text-base" />
             <span className="text-white text-xs sm:text-xs md:text-sm font-medium">Secure SSL Payment</span>
           </div> */}
-        </div>
-      </div>
-    </div>
-    
-    {/* Checkmark - Hidden on mobile, shown on sm+ */}
-    <FaCheckCircle className="hidden sm:block text-[#d97706] text-lg sm:text-xl flex-shrink-0" />
-  </div>
-</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Checkmark - Hidden on mobile, shown on sm+ */}
+                      <FaCheckCircle className="hidden sm:block text-[#d97706] text-lg sm:text-xl flex-shrink-0" />
+                    </div>
+                  </div>
 
                   {/* Security Notice */}
                   <div className="bg-gradient-to-r from-[#d97706]/5 to-[#d97706]/10 border border-[#d97706]/20 rounded-xl p-4 sm:p-6">
@@ -1143,7 +1167,7 @@ export default function Checkout() {
                           )}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-900">
-                          ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
+                          {getConvertedPrice(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity)}
                         </div>
                       </div>
                     );
@@ -1155,7 +1179,7 @@ export default function Checkout() {
               <div className="px-4 sm:px-6 py-4 sm:py-6 border-b border-[#d97706]/20 space-y-3 sm:space-y-4">
                 <div className="flex justify-between">
                   <span className="text-sm sm:text-base text-gray-600">Subtotal ({itemCount} items)</span>
-                  <span className="text-sm sm:text-base font-medium text-gray-900">${subtotal.toLocaleString()}</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-900">{getConvertedPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col">
@@ -1167,13 +1191,13 @@ export default function Checkout() {
                         return (
                           <div key={productId} className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
                             <span className="truncate max-w-[120px]">{item.product.name}</span>:
-                            <span>${(item.product.shippingFee || 0).toLocaleString()}</span>
+                            <span>{getConvertedPrice(item.product.shippingFee || 0)}</span>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                  <span className="text-sm sm:text-base font-medium text-gray-900">${shipping.toLocaleString()}</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-900">{getConvertedPrice(shipping)}</span>
                 </div>
               </div>
 
@@ -1181,7 +1205,7 @@ export default function Checkout() {
               <div className="px-4 sm:px-6 py-4 sm:py-6">
                 <div className="flex justify-between items-center mb-4 sm:mb-6">
                   <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-xl sm:text-2xl font-bold text-gray-900">${total.toLocaleString()}</span>
+                  <span className="text-xl sm:text-2xl font-bold text-gray-900">{getConvertedPrice(total)}</span>
                 </div>
 
                 {/* Shipping Info */}

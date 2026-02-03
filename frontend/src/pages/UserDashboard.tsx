@@ -12,6 +12,7 @@ import {
   FaTruck, FaHeart, FaFilter, FaBars
 } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
+import { CurrencyContext } from '../contexts/CurrencyContext';
 
 interface User {
   _id: string;
@@ -41,6 +42,12 @@ export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const currency = useContext(CurrencyContext)!;
+
+  const getConvertedPrice = (priceInUSD: number) => {
+    if (currency.loading) return `$ ${priceInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return currency.formatPrice(priceInUSD);
+  };
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -478,8 +485,8 @@ export default function UserDashboard() {
                     key={tab.id}
                     onClick={() => handleTabChange(tab.id)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg transition-all ${activeTab === tab.id
-                        ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
-                        : 'text-gray-700 hover:bg-[#d97706]/5'
+                      ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
+                      : 'text-gray-700 hover:bg-[#d97706]/5'
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -610,7 +617,7 @@ export default function UserDashboard() {
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="text-xs sm:text-sm text-gray-600">
-                                {order.items.length} item{order.items.length !== 1 ? 's' : ''} • ${order.totalAmount.toLocaleString()}
+                                {order.items.length} item{order.items.length !== 1 ? 's' : ''} • {getConvertedPrice(order.totalAmount)}
                               </div>
                               <button
                                 onClick={() => viewOrderDetails(order._id)}
@@ -724,7 +731,7 @@ export default function UserDashboard() {
                                 </div>
                                 <div>
                                   <div className="text-xs font-medium text-[#d97706] uppercase tracking-wider mb-1">Total</div>
-                                  <div className="font-bold text-[#d97706] text-sm sm:text-base">${order.totalAmount.toLocaleString()}</div>
+                                  <div className="font-bold text-[#d97706] text-sm sm:text-base">{getConvertedPrice(order.totalAmount)}</div>
                                 </div>
                               </div>
                               <div className="flex items-center justify-between sm:justify-end gap-3">
@@ -782,7 +789,7 @@ export default function UserDashboard() {
                                       <div className="flex items-center justify-between mt-1 sm:mt-2">
                                         <span className="text-xs sm:text-sm text-[#d97706]">Qty: {item.quantity}</span>
                                         <span className="font-medium text-[#d97706] text-sm sm:text-base">
-                                          ${(item.price * item.quantity).toLocaleString()}
+                                          {getConvertedPrice(item.price * item.quantity)}
                                         </span>
                                       </div>
                                     </div>

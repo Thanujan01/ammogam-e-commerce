@@ -6,17 +6,20 @@ import './styles/index.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <App />
-          </BrowserRouter>
-        </WishlistProvider>
-      </CartProvider>
+      <CurrencyProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <App />
+            </BrowserRouter>
+          </WishlistProvider>
+        </CartProvider>
+      </CurrencyProvider>
     </AuthProvider>
   </React.StrictMode>
 );

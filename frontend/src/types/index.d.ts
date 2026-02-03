@@ -31,6 +31,7 @@ export interface IUser {
   role: 'admin' | 'customer' | 'seller';
   address?: string;
   phone?: string;
+  country?: string; // Country code for currency conversion
   businessName?: string;
   avatar?: string;
   createdAt?: string;

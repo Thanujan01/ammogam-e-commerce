@@ -6,6 +6,7 @@ import { api } from '../api/api';
 import type { IProduct } from '../types';
 import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
+import { CurrencyContext } from '../contexts/CurrencyContext';
 import { getImageUrl } from '../utils/imageUrl';
 import {
   FaShoppingCart, FaHeart, FaShareAlt,
@@ -66,6 +67,7 @@ export default function ProductDetail() {
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
   const { isInWishlist, toggleWishlist: contextToggle } = useContext(WishlistContext)!;
+  const currency = useContext(CurrencyContext)!;
 
   // Payment methods data - matching footer style with image logos
   const paymentMethods = [
@@ -303,9 +305,16 @@ export default function ProductDetail() {
     setShowShareModal(false);
   };
 
+  // Helper function to convert and format price
+  const getConvertedPrice = (priceInUSD: number) => {
+    if (currency.loading) return `$ ${priceInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return currency.formatPrice(priceInUSD);
+  };
+
   const shareOnWhatsApp = () => {
     if (!product) return;
-    const message = `Check out this amazing product: ${product.name}\nPrice: $${getCurrentPrice().toLocaleString()}\n${window.location.href}`;
+    const priceDisplay = getConvertedPrice(getCurrentPrice());
+    const message = `Check out this amazing product: ${product.name}\nPrice: ${priceDisplay}\n${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     setShowShareModal(false);
   };
@@ -507,6 +516,20 @@ export default function ProductDetail() {
         <span className="text-gray-900 font-medium truncate">{product.name}</span>
       </div>
 
+      {/* Currency Indicator */}
+      {currency.currency !== 'USD' && !currency.loading && (
+        <div className="mb-6">
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <span className="text-gray-700">
+                Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
+              </span>
+              <span className="text-gray-500 text-xs">(Converted from USD)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
           {/* Left Column: Image Gallery */}
@@ -640,11 +663,11 @@ export default function ProductDetail() {
                   <span className="text-sm text-gray-600">Price:</span>
                   <div className="flex items-baseline gap-3 mt-1">
                     <span className="text-3xl font-bold text-gray-900">
-                      ${currentPrice.toLocaleString()}
+                      {getConvertedPrice(currentPrice)}
                     </span>
                     {originalPrice && (
                       <span className="text-lg text-gray-400 line-through">
-                        ${Math.round(originalPrice).toLocaleString()}
+                        {getConvertedPrice(originalPrice)}
                       </span>
                     )}
                     {discountPercent > 0 && (
@@ -713,7 +736,7 @@ export default function ProductDetail() {
                         }`}
                     >
                       {s.size}
-                      {s.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+${s.price})</span>}
+                      {s.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+{getConvertedPrice(s.price)})</span>}
                     </button>
                   ))}
                 </div>
@@ -743,7 +766,7 @@ export default function ProductDetail() {
                         }`}
                     >
                       {w.weight}
-                      {w.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+${w.price})</span>}
+                      {w.price > 0 && <span className="ml-1 text-[10px] opacity-70">(+{getConvertedPrice(w.price)})</span>}
                     </button>
                   ))}
                 </div>
@@ -782,7 +805,7 @@ export default function ProductDetail() {
                 <span className="font-medium text-gray-900">Shipping:</span>
                 <div className="flex items-center gap-2 text-gray-700">
                   <FaTruck className="text-gray-500" />
-                  <span>${product.shippingFee ? product.shippingFee.toFixed(2) : '0.00'}</span>
+                  <span>{getConvertedPrice(product.shippingFee || 0)}</span>
                   <span className="text-sm text-gray-500">• 3-5 business days</span>
                 </div>
               </div>
@@ -792,16 +815,16 @@ export default function ProductDetail() {
             <div className="grid grid-cols-1 gap-4 mb-8 p-4 bg-amber-50 rounded-xl border border-amber-200">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-gray-900">Subtotal:</span>
-                <span className="text-lg font-bold text-gray-900">${subtotal.toFixed(2)}</span>
+                <span className="text-lg font-bold text-gray-900">{getConvertedPrice(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-medium text-gray-900">Shipping:</span>
-                <span className="text-gray-700">${shipping.toFixed(2)}</span>
+                <span className="text-gray-700">{getConvertedPrice(shipping)}</span>
               </div>
               <div className="border-t border-amber-200 pt-3">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900">Total:</span>
-                  <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-gray-900">{getConvertedPrice(total)}</span>
                 </div>
               </div>
             </div>

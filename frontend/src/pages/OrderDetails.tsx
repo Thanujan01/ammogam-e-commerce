@@ -13,6 +13,9 @@ import {
     FaWhatsapp, FaFacebook, FaLink, FaStar
 } from 'react-icons/fa';
 
+import { useContext } from 'react';
+import { CurrencyContext } from '../contexts/CurrencyContext';
+
 export default function OrderDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -24,6 +27,12 @@ export default function OrderDetails() {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
+    const currency = useContext(CurrencyContext)!;
+
+    const getConvertedPrice = (priceInUSD: number) => {
+        if (currency.loading) return `$ ${priceInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return currency.formatPrice(priceInUSD);
+    };
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -209,7 +218,7 @@ export default function OrderDetails() {
     };
 
     const shareOnWhatsApp = () => {
-        const message = `Check out my order #${order?._id?.slice(-8).toUpperCase()}\nStatus: ${order?.status}\nTotal: $${order?.totalAmount?.toLocaleString()}\n${window.location.href}`;
+        const message = `Check out my order #${order?._id?.slice(-8).toUpperCase()}\nStatus: ${order?.status}\nTotal: ${getConvertedPrice(order?.totalAmount)}\n${window.location.href}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
         setShowShareModal(false);
     };
@@ -370,6 +379,20 @@ export default function OrderDetails() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                     {/* Left Column - Order Items & Summary */}
                     <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+                        {/* Currency Indicator */}
+                        {currency.currency !== 'USD' && !currency.loading && (
+                            <div className="mb-6">
+                                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3">
+                                    <div className="flex items-center justify-center gap-2 text-sm">
+                                        <span className="text-gray-700">
+                                            Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
+                                        </span>
+                                        <span className="text-gray-500 text-xs">(Converted from USD)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Order Progress - FIXED FOR MOBILE */}
                         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
@@ -450,7 +473,7 @@ export default function OrderDetails() {
                                                             <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
                                                                 <span>Qty: {item.quantity}</span>
                                                                 <span className="hidden sm:inline">•</span>
-                                                                <span className="text-xs sm:text-sm">${item.price.toLocaleString()} each</span>
+                                                                <span className="text-xs sm:text-sm">{getConvertedPrice(item.price)} each</span>
                                                             </div>
                                                             {/* Display selected color if available */}
                                                             {item.color && (
@@ -477,10 +500,10 @@ export default function OrderDetails() {
                                                         </div>
                                                         <div className="text-right">
                                                             <div className="text-base sm:text-lg font-bold text-gray-900">
-                                                                ${(item.price * item.quantity).toLocaleString()}
+                                                                {getConvertedPrice(item.price * item.quantity)}
                                                             </div>
                                                             <div className="text-xs sm:text-sm text-gray-500 sm:hidden">
-                                                                ${item.price.toLocaleString()} each
+                                                                {getConvertedPrice(item.price)} each
                                                             </div>
                                                         </div>
                                                     </div>
@@ -527,19 +550,19 @@ export default function OrderDetails() {
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                                     <span className="text-gray-600 text-sm sm:text-base">Subtotal</span>
                                     <span className="font-medium text-gray-900 text-sm sm:text-base">
-                                        ${(order.totalAmount - (order.shippingFee || 0)).toLocaleString()}
+                                        {getConvertedPrice(order.totalAmount - (order.shippingFee || 0))}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                                     <span className="text-gray-600 text-sm sm:text-base">Shipping</span>
                                     <span className="font-medium text-gray-900 text-sm sm:text-base">
-                                        ${(order.shippingFee || 0).toLocaleString()}
+                                        {getConvertedPrice(order.shippingFee || 0)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-200">
                                     <span className="text-base sm:text-lg font-bold text-gray-900">Total Amount</span>
                                     <span className="text-xl sm:text-2xl font-bold text-amber-700">
-                                        ${order.totalAmount.toLocaleString()}
+                                        {getConvertedPrice(order.totalAmount)}
                                     </span>
                                 </div>
                             </div>
