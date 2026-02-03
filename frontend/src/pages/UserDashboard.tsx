@@ -478,8 +478,8 @@ export default function UserDashboard() {
                     key={tab.id}
                     onClick={() => handleTabChange(tab.id)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg transition-all ${activeTab === tab.id
-                        ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
-                        : 'text-gray-700 hover:bg-[#d97706]/5'
+                      ? 'bg-[#d97706]/10 text-[#d97706] border-l-4 border-[#d97706]'
+                      : 'text-gray-700 hover:bg-[#d97706]/5'
                       }`}
                   >
                     <div className="flex items-center gap-3">
