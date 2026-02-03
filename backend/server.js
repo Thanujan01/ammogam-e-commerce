@@ -34,9 +34,9 @@ app.get("/", (req, res) => {
     2: "Connecting",
     3: "Disconnecting"
   };
-  
-  res.json({ 
-    status: "Backend is running", 
+
+  res.json({
+    status: "Backend is running",
     database: statusMap[dbStatus] || "Unknown",
     db_uri_present: !!process.env.MONGO_URI,
     timestamp: new Date(),
@@ -79,14 +79,14 @@ app.use("/api", async (req, res, next) => {
       await connectDB();
       // If still not connected after one attempt, wait a bit or return error
       if (mongoose.connection.readyState !== 1) {
-        return res.status(503).json({ 
-          message: "Database connection still in progress. Please try again in 10 seconds.", 
+        return res.status(503).json({
+          message: "Database connection still in progress. Please try again in 10 seconds.",
           status: "Connecting"
         });
       }
     } catch (err) {
-      return res.status(503).json({ 
-        message: "Database connection failed", 
+      return res.status(503).json({
+        message: "Database connection failed",
         error: err.message,
         suggestion: "Ensure your MongoDB Atlas IP whitelist allows Vercel's dynamic IP addresses (suggested: allow all 0.0.0.0/0 for testing)."
       });

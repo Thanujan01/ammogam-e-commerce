@@ -38,8 +38,8 @@ exports.login = async (req, res) => {
 
     // Check if seller account is approved
     if (user.role === 'seller' && user.isApproved === false) {
-      return res.status(403).json({ 
-        message: "Your seller account is pending approval. Please wait for admin confirmation." 
+      return res.status(403).json({
+        message: "Your seller account is pending approval. Please wait for admin confirmation."
       });
     }
 
@@ -172,7 +172,7 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { email, otp, password } = req.body;
-    
+
     // Get hashed OTP
     const hashedOtp = crypto
       .createHash("sha256")
@@ -207,7 +207,7 @@ exports.resetPassword = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    
+
     // Get hashed OTP
     const hashedOtp = crypto
       .createHash("sha256")

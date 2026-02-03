@@ -11,8 +11,8 @@ const UserSchema = new mongoose.Schema(
 
     address: String,
     phone: String,
-    
-    
+
+
     // Seller-specific fields
     isApproved: { type: Boolean, default: true }, // false for sellers until admin approves
     businessName: String,
@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema(
     taxId: String,
     approvedAt: Date,
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    
+
     // Bank details for sellers
     bankName: String,
     accountHolderName: String,
