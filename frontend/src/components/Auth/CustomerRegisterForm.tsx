@@ -34,34 +34,34 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
     const [loading, setLoading] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+    
+    const [errors, setErrors] = useState<{[key: string]: string}>({});
+    const [touched, setTouched] = useState<{[key: string]: boolean}>({});
 
     // Validation functions
     const validateName = (value: string) => {
         if (!value.trim()) return 'Name is required';
         if (value.trim().length < 2) return 'Name must be at least 2 characters';
-
+        
         // Check if name starts with space
         if (value.startsWith(' ')) return 'Name should not start with a space';
-
+        
         // Check if name contains only letters and spaces
         const nameRegex = /^[A-Za-z\s]+$/;
         if (!nameRegex.test(value)) return 'Name can only contain letters and spaces';
-
+        
         return '';
     };
 
     const validateEmail = (value: string) => {
         if (!value) return 'Email is required';
-
+        
         // Check if email starts with space
         if (value.startsWith(' ')) return 'Email should not start with a space';
-
+        
         // Check if email contains spaces anywhere (not just at start)
         if (/\s/.test(value)) return 'Email should not contain any spaces';
-
+        
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) return 'Please enter a valid email address';
         return '';
@@ -69,15 +69,15 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
 
     const validatePhone = (value: string) => {
         if (!value) return 'Phone number is required';
-
+        
         // Remove any non-digit characters
         const digitsOnly = value.replace(/\D/g, '');
-
+        
         // Check if it has the correct number of digits for the selected country
         if (digitsOnly.length !== selectedCountry.digits) {
             return `${selectedCountry.name} numbers should be ${selectedCountry.digits} digits`;
         }
-
+        
         // Country-specific validation
         switch (selectedCountry.code) {
             case 'LK': // Sri Lanka
@@ -96,7 +96,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                 // Basic validation for other countries
                 if (!/^[0-9]+$/.test(digitsOnly)) return 'Phone number should contain only digits';
         }
-
+        
         return '';
     };
 
@@ -120,14 +120,14 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
 
     // Handle field blur
     const handleBlur = (field: string) => {
-        setTouched({ ...touched, [field]: true });
+        setTouched({...touched, [field]: true});
         validateField(field);
     };
 
     // Validate single field
     const validateField = (field: string) => {
         let error = '';
-
+        
         switch (field) {
             case 'name':
                 error = validateName(name);
@@ -145,8 +145,8 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                 error = validateConfirmPassword(confirmPassword);
                 break;
         }
-
-        setErrors({ ...errors, [field]: error });
+        
+        setErrors({...errors, [field]: error});
         return error === '';
     };
 
@@ -159,7 +159,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
             password: validatePassword(password),
             confirmPassword: validateConfirmPassword(confirmPassword)
         };
-
+        
         setErrors(newErrors);
         setTouched({
             name: true,
@@ -168,7 +168,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
             password: true,
             confirmPassword: true
         });
-
+        
         return !Object.values(newErrors).some(error => error);
     };
 
@@ -200,7 +200,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
         setSelectedCountry(country);
         setShowCountryDropdown(false);
         // Clear phone validation when country changes
-        setErrors({ ...errors, phone: '' });
+        setErrors({...errors, phone: ''});
         setLocalPhone(''); // Clear phone number when country changes
     };
 
@@ -224,19 +224,18 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
         try {
             // Combine country code with local number
             const fullPhoneNumber = `${selectedCountry.dialCode}${localPhone}`;
-
+            
             // Only register, NO auto login
-            await auth.register({
-                name,
-                email,
-                password,
+            await auth.register({ 
+                name, 
+                email, 
+                password, 
                 phone: fullPhoneNumber,
-                countryCode: selectedCountry.dialCode,
-                country: selectedCountry.code // Send country code for currency conversion
+                countryCode: selectedCountry.dialCode
             });
-
+            
             if (onSuccess) onSuccess('Registration successful! Redirecting to login...');
-
+            
             // Clear the form
             setName('');
             setEmail('');
@@ -245,12 +244,12 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
             setConfirmPassword('');
             setErrors({});
             setTouched({});
-
+            
             // Show success message for 2 seconds then redirect
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
-
+            
         } catch (err: any) {
             if (onError) onError(err?.response?.data?.message || err.message || 'Registration failed');
         } finally {
@@ -269,12 +268,12 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
 
     const getPasswordStrength = () => {
         if (password.length === 0) return { width: '0%', color: 'bg-gray-300', label: '' };
-
+        
         // Count how many requirements are met
         const metRequirements = passwordRequirements.filter(req => req.test).length;
         const totalRequirements = passwordRequirements.length;
         const percentage = (metRequirements / totalRequirements) * 100;
-
+        
         if (percentage < 40) return { width: `${percentage}%`, color: 'bg-red-500', label: 'Weak' };
         if (percentage < 80) return { width: `${percentage}%`, color: 'bg-yellow-500', label: 'Medium' };
         return { width: `${percentage}%`, color: 'bg-green-500', label: 'Strong' };
@@ -295,10 +294,11 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                         <input
                             type="text"
                             required
-                            className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${touched.name && errors.name
-                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100'
+                            className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${
+                                touched.name && errors.name 
+                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
                                     : 'border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:bg-white'
-                                }`}
+                            }`}
                             placeholder="Enter your full name"
                             value={name}
                             onChange={e => handleNameChange(e.target.value)}
@@ -324,10 +324,11 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                         <input
                             type="email"
                             required
-                            className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${touched.email && errors.email
-                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100'
+                            className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${
+                                touched.email && errors.email 
+                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
                                     : 'border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:bg-white'
-                                }`}
+                            }`}
                             placeholder="Enter your email"
                             value={email}
                             onChange={e => handleEmailChange(e.target.value)}
@@ -348,7 +349,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Contact Phone Number
                     </label>
-
+                    
                     <div className="space-y-3">
                         {/* Country Code Display */}
                         <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl">
@@ -376,10 +377,11 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                                             key={country.code}
                                             type="button"
                                             onClick={() => handleCountrySelect(country)}
-                                            className={`p-3 border rounded-lg text-left transition-all ${selectedCountry.code === country.code
+                                            className={`p-3 border rounded-lg text-left transition-all ${
+                                                selectedCountry.code === country.code
                                                     ? 'border-green-500 bg-green-50 ring-2 ring-green-100'
                                                     : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
-                                                }`}
+                                            }`}
                                         >
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-lg">{country.flag}</span>
@@ -399,10 +401,11 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                             <input
                                 type="tel"
                                 required
-                                className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${touched.phone && errors.phone
-                                        ? 'border-red-500 focus:ring-4 focus:ring-red-100'
+                                className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${
+                                    touched.phone && errors.phone 
+                                        ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
                                         : 'border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:bg-white'
-                                    }`}
+                                }`}
                                 placeholder={`e.g., ${selectedCountry.example}`}
                                 value={localPhone}
                                 onChange={e => handlePhoneChange(e.target.value)}
@@ -410,7 +413,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                                 disabled={loading}
                             />
                         </div>
-
+                        
                         {/* Phone Instructions and Validation */}
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                             <div>
@@ -426,7 +429,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                                 )}
                             </div>
                             <div className="text-xs text-gray-400">
-                                {localPhone.length}/{selectedCountry.digits} digits •
+                                {localPhone.length}/{selectedCountry.digits} digits • 
                                 Will be saved as: <span className="font-semibold text-gray-600">{selectedCountry.dialCode}{localPhone || 'XXXXXXXXXX'}</span>
                             </div>
                         </div>
@@ -443,10 +446,11 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                         <input
                             type={showPassword ? "text" : "password"}
                             required
-                            className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${touched.password && errors.password
-                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100'
+                            className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${
+                                touched.password && errors.password 
+                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
                                     : 'border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:bg-white'
-                                }`}
+                            }`}
                             placeholder="Create a strong password"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
@@ -461,7 +465,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
-
+                    
                     {/* Password Strength Meter */}
                     {password && (
                         <div className="mt-2">
@@ -477,7 +481,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                             </div>
                         </div>
                     )}
-
+                    
                     {/* Password Requirements */}
                     {password && (
                         <div className="mt-3">
@@ -498,7 +502,7 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                             </ul>
                         </div>
                     )}
-
+                    
                     {touched.password && errors.password && (
                         <p className="mt-2 text-xs text-red-600 flex items-center gap-1">
                             <FaTimes className="text-xs" />
@@ -517,10 +521,11 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                         <input
                             type={showConfirmPassword ? "text" : "password"}
                             required
-                            className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${touched.confirmPassword && errors.confirmPassword
-                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100'
+                            className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-300 ${
+                                touched.confirmPassword && errors.confirmPassword 
+                                    ? 'border-red-500 focus:ring-4 focus:ring-red-100' 
                                     : 'border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:bg-white'
-                                }`}
+                            }`}
                             placeholder="Confirm your password"
                             value={confirmPassword}
                             onChange={e => setConfirmPassword(e.target.value)}
@@ -557,12 +562,13 @@ export default function CustomerRegisterForm({ onSuccess, onError }: CustomerReg
                 <input
                     type="checkbox"
                     id="customer-terms"
-                    className={`w-5 h-5 border-2 rounded accent-green-600 focus:ring-2 focus:ring-green-300 transition-colors mt-0.5 ${!termsAccepted && touched.terms ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                    className={`w-5 h-5 border-2 rounded accent-green-600 focus:ring-2 focus:ring-green-300 transition-colors mt-0.5 ${
+                        !termsAccepted && touched.terms ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     checked={termsAccepted}
                     onChange={() => {
                         setTermsAccepted(!termsAccepted);
-                        setTouched({ ...touched, terms: true });
+                        setTouched({...touched, terms: true});
                     }}
                     disabled={loading}
                 />

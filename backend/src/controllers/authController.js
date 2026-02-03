@@ -7,7 +7,7 @@ const sendEmail = require("../utils/sendEmail");
 exports.register = async (req, res) => {
   try {
     console.log("BACKEND DEBUG: authController register HIT with data:", req.body.email);
-    const { name, email, password, phone, address, country } = req.body;
+    const { name, email, password, phone, address } = req.body;
 
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: "Email exists" });
@@ -20,7 +20,6 @@ exports.register = async (req, res) => {
       password: hash,
       phone,
       address,
-      country: country || 'US', // Default to US if not provided
       role: "customer",
     });
 
@@ -39,8 +38,8 @@ exports.login = async (req, res) => {
 
     // Check if seller account is approved
     if (user.role === 'seller' && user.isApproved === false) {
-      return res.status(403).json({
-        message: "Your seller account is pending approval. Please wait for admin confirmation."
+      return res.status(403).json({ 
+        message: "Your seller account is pending approval. Please wait for admin confirmation." 
       });
     }
 
@@ -56,8 +55,7 @@ exports.login = async (req, res) => {
       email: user.email,
       role: user.role,
       phone: user.phone,
-      address: user.address,
-      country: user.country
+      address: user.address
     };
 
     res.json({ token, user: userResponse });
@@ -88,8 +86,7 @@ exports.updateProfile = async (req, res) => {
         email: updatedUser.email,
         role: updatedUser.role,
         phone: updatedUser.phone,
-        address: updatedUser.address,
-        country: updatedUser.country
+        address: updatedUser.address
       });
     } else {
       res.status(404).json({ message: "User not found" });
@@ -175,7 +172,7 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { email, otp, password } = req.body;
-
+    
     // Get hashed OTP
     const hashedOtp = crypto
       .createHash("sha256")
@@ -210,7 +207,7 @@ exports.resetPassword = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
-
+    
     // Get hashed OTP
     const hashedOtp = crypto
       .createHash("sha256")

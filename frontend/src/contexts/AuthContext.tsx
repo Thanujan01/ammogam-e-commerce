@@ -9,7 +9,6 @@ type User = {
   role: 'admin' | 'customer' | 'seller';
   phone?: string;
   address?: string;
-  country?: string; // Country code for currency conversion
   avatar?: string;
 };
 
@@ -51,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(false);
         setAuthToken(undefined);
       }
-
+      
       setLoading(false);
     };
 
@@ -61,15 +60,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   async function login(email: string, password: string) {
     const { data } = await api.post('/auth/login', { email, password });
     const { token: t, user } = data;
-
+    
     localStorage.setItem('ammogam_token', t);
     localStorage.setItem('ammogam_user', JSON.stringify(user));
-
+    
     setToken(t);
     setUser(user);
     setIsAuthenticated(true);
     setAuthToken(t);
-
+    
     return user;
   }
 

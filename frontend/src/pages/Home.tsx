@@ -5,7 +5,6 @@ import { getImageUrl } from '../utils/imageUrl';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { WishlistContext } from '../contexts/WishlistContext';
-import { CurrencyContext } from '../contexts/CurrencyContext';
 import {
   FaStar, FaShoppingCart, FaHeart, FaChevronRight,
   FaTag,
@@ -15,8 +14,7 @@ import {
   FaTimes, FaChevronLeft, FaChevronRight as FaChevronRightSolid,
   FaGem,
   FaShoppingBag,
-  FaClock,
-  FaGlobe
+  FaClock
 } from 'react-icons/fa';
 import { HomeSkeleton } from '../components/Skeletons';
 import { CategoryIcon } from '../components/CategoryIcons';
@@ -88,7 +86,6 @@ export default function Home() {
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
   const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
-  const currency = useContext(CurrencyContext)!;
   const [showCartNotification, setShowCartNotification] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -339,12 +336,6 @@ export default function Home() {
     }
 
     await contextToggle(productId);
-  };
-
-  // Helper function to convert and format price
-  const getConvertedPrice = (priceInUSD: number) => {
-    if (currency.loading) return `$ ${priceInUSD.toFixed(2)}`;
-    return currency.formatPrice(priceInUSD);
   };
 
   // Handle View All button click - Navigate to products page
@@ -760,19 +751,6 @@ export default function Home() {
               <ProfessionalCategories />
             </div>
 
-            {/* Currency Indicator */}
-            {currency.currency !== 'USD' && !currency.loading && (
-              <div className="mb-6 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-center gap-2 text-sm sm:text-base">
-                  <FaGlobe className="text-blue-600" />
-                  <span className="text-gray-700">
-                    Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
-                  </span>
-                  <span className="text-gray-500 text-xs sm:text-sm">(Converted from USD)</span>
-                </div>
-              </div>
-            )}
-
             {/* Featured Products */}
             <div className="mb-10 sm:mb-12">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -864,11 +842,11 @@ export default function Home() {
                         <div className="mb-1.5 sm:mb-2">
                           <div className="flex items-baseline gap-1">
                             <span className="text-sm sm:text-base font-bold text-gray-900">
-                              {getConvertedPrice(product.price * (1 - (product.discountPercent || 0) / 100))}
+                              {product.currentPrice}
                             </span>
-                            {product.discountPercent > 0 && (
+                            {product.originalPrice && (
                               <span className="text-xs sm:text-sm text-gray-500 line-through">
-                                {getConvertedPrice(product.price)}
+                                {product.originalPrice}
                               </span>
                             )}
                           </div>

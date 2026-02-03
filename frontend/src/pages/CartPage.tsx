@@ -2,7 +2,6 @@
 import { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
-import { CurrencyContext } from '../contexts/CurrencyContext';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUrl';
 import {
@@ -15,7 +14,6 @@ import {
 export default function CartPage() {
   const cart = useContext(CartContext)!;
   const auth = useContext(AuthContext)!;
-  const currency = useContext(CurrencyContext)!;
   const navigate = useNavigate();
 
   // Use selectedItems from CartContext
@@ -238,12 +236,6 @@ export default function CartPage() {
     setDeleteAction(null);
   };
 
-  // Helper function to convert and format price
-  const getConvertedPrice = (priceInUSD: number) => {
-    if (currency.loading) return `$ ${priceInUSD.toFixed(2)}`;
-    return currency.formatPrice(priceInUSD);
-  };
-
   const handleNavigate = (path: string) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setTimeout(() => navigate(path), 100);
@@ -295,20 +287,6 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-
-      {/* Currency Indicator */}
-      {currency.currency !== 'USD' && !currency.loading && cart.items.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 pt-6">
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <span className="text-gray-700">
-                Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
-              </span>
-              <span className="text-gray-500 text-xs">(Converted from USD)</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && deleteAction && (
@@ -558,7 +536,7 @@ export default function CartPage() {
                                     <div className="bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 flex items-center gap-1">
                                       <span className="text-xs font-medium text-indigo-700">{it.selectedSize || it.selectedWeight}</span>
                                       {getAddonPrice(it) > 0 && (
-                                        <span className="text-[10px] text-indigo-500 opacity-80">(+{getConvertedPrice(getAddonPrice(it))})</span>
+                                        <span className="text-[10px] text-indigo-500 opacity-80">(+${getAddonPrice(it)})</span>
                                       )}
                                     </div>
                                   </div>
@@ -576,11 +554,11 @@ export default function CartPage() {
                             {/* Price (Desktop) */}
                             <div className="hidden md:block col-span-2 text-center">
                               <div className="text-lg font-bold text-gray-900">
-                                {getConvertedPrice((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price))}
+                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()}
                               </div>
                               {it.product.discount > 0 && (
                                 <div className="text-xs text-gray-400 line-through">
-                                  {getConvertedPrice(it.price || it.product.price)}
+                                  ${(it.price || it.product.price).toLocaleString()}
                                 </div>
                               )}
                               <div className="text-sm text-[#d97706]">per unit</div>
@@ -618,10 +596,10 @@ export default function CartPage() {
                             {/* Item Total */}
                             <div className="col-span-2 text-right">
                               <div className="text-xl font-bold text-gray-900 mb-1">
-                                {getConvertedPrice(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity)}
+                                ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                               </div>
                               <div className="text-sm text-[#d97706]">
-                                {getConvertedPrice((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price))} × {it.quantity}
+                                ${((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)).toLocaleString()} × {it.quantity}
                               </div>
                             </div>
                           </div>
@@ -689,7 +667,7 @@ export default function CartPage() {
                               <p className="text-xs text-[#d97706]">Qty: {it.quantity}</p>
                             </div>
                             <div className="text-sm font-medium text-gray-900">
-                              {getConvertedPrice(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity)}
+                              ${(((it.product.discount && it.product.discount > 0) ? Math.round((it.price || it.product.price) * (1 - it.product.discount / 100)) : (it.price || it.product.price)) * it.quantity).toLocaleString()}
                             </div>
                           </div>
                         );
@@ -701,12 +679,12 @@ export default function CartPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium text-gray-900">{getConvertedPrice(subtotal)}</span>
+                      <span className="font-medium text-gray-900">${subtotal.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between relative group">
                       <span className="text-gray-600 border-b border-dotted border-gray-400 cursor-help">Shipping</span>
                       <span className={`font-medium ${shipping === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
-                        {shipping === 0 ? currency.getCurrencySymbol() + '0' : getConvertedPrice(shipping)}
+                        {shipping === 0 ? '$0' : `$${shipping.toLocaleString()}`}
                       </span>
 
                       {/* Shipping Calculation Breakdown Tooltip/Dropdown */}
@@ -722,7 +700,7 @@ export default function CartPage() {
                               <div key={productId} className="flex justify-between items-center text-xs">
                                 <span className="text-gray-600 truncate max-w-[140px]">{item.product.name}</span>
                                 <span className={'text-gray-900 font-medium'}>
-                                  {getConvertedPrice(fee)}
+                                  ${fee.toLocaleString()}
                                 </span>
                               </div>
                             );
@@ -730,7 +708,7 @@ export default function CartPage() {
                           <div className="pt-2 mt-2 border-t border-[#d97706]/10">
                             <div className="flex justify-between items-center text-xs font-bold text-gray-900">
                               <span>Total Shipping</span>
-                              <span>{getConvertedPrice(shipping)}</span>
+                              <span>${shipping.toLocaleString()}</span>
                             </div>
                           </div>
                         </div>
@@ -745,7 +723,7 @@ export default function CartPage() {
                   <div className="border-t border-[#d97706]/20 pt-6">
                     <div className="flex justify-between items-center mb-6">
                       <span className="text-lg font-bold text-gray-900">Total</span>
-                      <span className="text-2xl font-bold text-gray-900">{getConvertedPrice(total)}</span>
+                      <span className="text-2xl font-bold text-gray-900">${total.toLocaleString()}</span>
                     </div>
                   </div>
 

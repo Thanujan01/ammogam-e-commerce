@@ -4,7 +4,6 @@ import { api } from '../api/api';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { WishlistContext } from '../contexts/WishlistContext';
-import { CurrencyContext } from '../contexts/CurrencyContext';
 import { getImageUrl } from '../utils/imageUrl';
 
 import {
@@ -51,17 +50,6 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
 // Product Card Component - Mobile optimized
 const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isFav, showCategoryBadge = false }: any) => {
   const isOutOfStock = product.stock <= 0;
-  const currency = useContext(CurrencyContext)!;
-
-  const getConvertedPrice = (priceInUSD: number) => {
-    if (currency.loading) return `$ ${priceInUSD.toFixed(2)}`;
-    return currency.formatPrice(priceInUSD);
-  };
-
-  const discount = product.discountPercent || product.discount || 0;
-  // Assuming product.price is the Base Price (as per Home.tsx and ProductDetail.tsx)
-  const basePrice = product.price || 0;
-  const finalPrice = discount > 0 ? basePrice * (1 - discount / 100) : basePrice;
 
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative">
@@ -157,11 +145,11 @@ const ProductCard = ({ product, addToCart, openProductModal, toggleWishlist, isF
 
           <div className="flex items-baseline gap-1">
             <span className={`text-sm sm:text-base font-bold ${isOutOfStock ? 'text-gray-400' : 'text-gray-900'}`}>
-              {getConvertedPrice(finalPrice)}
+              {product.currentPrice}
             </span>
-            {discount > 0 && !isOutOfStock && (
+            {product.originalPrice && !isOutOfStock && (
               <span className="text-xs sm:text-sm text-gray-500 line-through">
-                {getConvertedPrice(basePrice)}
+                {product.originalPrice}
               </span>
             )}
           </div>
@@ -706,7 +694,6 @@ export default function ProductList() {
   const cart = useContext(CartContext)!;
   const { user } = useContext(AuthContext)!;
   const { toggleWishlist: contextToggle, isInWishlist } = useContext(WishlistContext)!;
-  const currency = useContext(CurrencyContext)!;
 
   // ✅ FIX: Scroll to top when component mounts
   useEffect(() => {
@@ -1077,20 +1064,6 @@ export default function ProductList() {
         selectedCategory={selectedCategory}
         onCategorySelect={handleCategorySelect}
       />
-
-      {/* Currency Indicator */}
-      {currency.currency !== 'USD' && !currency.loading && (
-        <div className="mb-6">
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <span className="text-gray-700">
-                Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
-              </span>
-              <span className="text-gray-500 text-xs">(Converted from USD)</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 2. Category Hero Banner (Single Image with Text Overlay) */}
       <CategoryHeroBanner

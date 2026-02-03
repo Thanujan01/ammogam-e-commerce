@@ -3,22 +3,21 @@ import { api } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { CartContext } from '../contexts/CartContext';
 import { WishlistContext } from '../contexts/WishlistContext';
-import { CurrencyContext } from '../contexts/CurrencyContext';
 import {
-    FaHeart,
-    FaTrash,
-    FaShoppingCart,
+    FaHeart, 
+    FaTrash, 
+    FaShoppingCart, 
     FaChevronRight,
-    FaRegHeart,
-    FaStar,
+    FaRegHeart, 
+    FaStar, 
     FaEye,
-    FaCheckCircle,
-    FaPlus,
+    FaCheckCircle, 
+    FaPlus, 
     FaFilter,
-    FaChartLine,
+    FaChartLine, 
     FaBusinessTime,
-    FaClipboardCheck,
-    FaFileInvoiceDollar,
+    FaClipboardCheck, 
+    FaFileInvoiceDollar, 
     FaShareAlt,
     FaTimes,
     FaFacebook,
@@ -30,7 +29,6 @@ import { Link } from 'react-router-dom';
 export default function Wishlist() {
     const cart = useContext(CartContext)!;
     const { wishlist, loading, toggleWishlist, fetchWishlist } = useContext(WishlistContext)!;
-    const currency = useContext(CurrencyContext)!;
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [sortBy, setSortBy] = useState<'date' | 'price-high-low' | 'price-low-high' | 'name-a-z' | 'name-z-a'>('date');
@@ -43,10 +41,10 @@ export default function Wishlist() {
     //     const checkMobile = () => {
     //         setIsMobile(window.innerWidth < 768);
     //     };
-
+        
     //     checkMobile();
     //     window.addEventListener('resize', checkMobile);
-
+        
     //     return () => {
     //         window.removeEventListener('resize', checkMobile);
     //     };
@@ -56,14 +54,14 @@ export default function Wishlist() {
     useEffect(() => {
         // Scroll to top on initial load
         window.scrollTo(0, 0);
-
+        
         // Also handle browser back/forward navigation
         const handlePopState = () => {
             window.scrollTo(0, 0);
         };
-
+        
         window.addEventListener('popstate', handlePopState);
-
+        
         return () => {
             window.removeEventListener('popstate', handlePopState);
         };
@@ -103,8 +101,8 @@ export default function Wishlist() {
     };
 
     const toggleSelectItem = (productId: string) => {
-        setSelectedItems(prev =>
-            prev.includes(productId)
+        setSelectedItems(prev => 
+            prev.includes(productId) 
                 ? prev.filter(id => id !== productId)
                 : [...prev, productId]
         );
@@ -145,7 +143,7 @@ export default function Wishlist() {
         const text = `Check out "${productName}" on our store!`;
 
         let url = '';
-
+        
         switch (platform) {
             case 'facebook':
                 url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
@@ -158,11 +156,6 @@ export default function Wishlist() {
         }
 
         window.open(url, '_blank', 'noopener,noreferrer');
-    };
-
-    const getConvertedPrice = (priceInUSD: number) => {
-        if (currency.loading) return `$ ${priceInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        return currency.formatPrice(priceInUSD);
     };
 
     if (loading) {
@@ -181,7 +174,7 @@ export default function Wishlist() {
     }
 
     const products = wishlist || [];
-
+    
     // Sorting function
     const sortedProducts = [...products].sort((a, b) => {
         if (!a || !b) return 0;
@@ -250,7 +243,7 @@ export default function Wishlist() {
                                     </div>
                                     <span className="text-xs sm:text-sm font-medium text-gray-700">Facebook</span>
                                 </button>
-
+                                
                                 {/* WhatsApp */}
                                 <button
                                     onClick={() => shareOnSocialMedia('whatsapp')}
@@ -262,7 +255,7 @@ export default function Wishlist() {
                                     </div>
                                     <span className="text-xs sm:text-sm font-medium text-gray-700">WhatsApp</span>
                                 </button>
-
+                                
                                 {/* Copy URL */}
                                 <button
                                     onClick={copyToClipboard}
@@ -340,17 +333,17 @@ export default function Wishlist() {
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto justify-between lg:justify-normal">
                             <div className="text-right">
                                 <div className="text-xs text-[#FFFDFAFF] uppercase tracking-wider">WISHLIST VALUE</div>
                                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                                    {getConvertedPrice(products.reduce((sum, p) => sum + (p?.price || 0), 0))}
+                                    ${products.reduce((sum, p) => sum + (p?.price || 0), 0).toLocaleString()}
                                 </div>
                             </div>
                             <div className="h-8 w-px bg-white/20 hidden sm:block"></div>
-                            <Link
-                                to="/products"
+                            <Link 
+                                to="/products" 
                                 className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-200 border border-white/20 flex items-center gap-2 text-xs sm:text-sm font-medium whitespace-nowrap"
                             >
                                 <FaPlus className="text-xs" />
@@ -361,20 +354,6 @@ export default function Wishlist() {
                     </div>
                 </div>
             </div>
-
-            {/* Currency Indicator */}
-            {currency.currency !== 'USD' && !currency.loading && products.length > 0 && (
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 mt-6">
-                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-3">
-                        <div className="flex items-center justify-center gap-2 text-sm">
-                            <span className="text-gray-700">
-                                Prices shown in <span className="font-semibold text-blue-700">{currency.currency}</span>
-                            </span>
-                            <span className="text-gray-500 text-xs">(Converted from USD)</span>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Control Panel */}
             {products.length > 0 && (
@@ -393,25 +372,25 @@ export default function Wishlist() {
                                         Select All ({selectedItems.length}/{products.length})
                                     </span>
                                 </div>
-
+                                
                                 {selectedItems.length > 0 && (
                                     <div className="flex items-center gap-2 px-3 py-1.5 bg-[#e67e00]/10 rounded-lg">
                                         <span className="text-sm font-medium text-[#e67e00]">
-                                            Selected: {getConvertedPrice(selectedTotal)}
+                                            Selected: ${selectedTotal.toLocaleString()}
                                         </span>
                                         {selectedSavings > 0 && (
                                             <span className="text-sm font-medium text-green-600">
-                                                Save {getConvertedPrice(selectedSavings)}
+                                                Save ${selectedSavings.toLocaleString()}
                                             </span>
                                         )}
                                     </div>
                                 )}
                             </div>
-
+                            
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto mt-3 sm:mt-0">
                                 <div className="flex items-center gap-2">
                                     <FaFilter className="text-gray-500 hidden sm:block" />
-                                    <select
+                                    <select 
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value as any)}
                                         className="border-0 bg-transparent text-sm font-medium text-gray-700 focus:ring-0 w-full sm:w-auto"
@@ -423,7 +402,7 @@ export default function Wishlist() {
                                         <option value="name-z-a">Product Name: Z to A</option>
                                     </select>
                                 </div>
-
+                                
                                 <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                                     <button
                                         onClick={() => setViewMode('grid')}
@@ -463,16 +442,16 @@ export default function Wishlist() {
                                 Your corporate procurement list is currently empty. Start building your professional collection by saving products for team review.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                                <Link
-                                    to="/products"
+                                <Link 
+                                    to="/products" 
                                     className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#e67e00] text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg font-semibold hover:bg-[#d47300] transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
                                 >
                                     <FaShoppingCart className="text-base sm:text-lg" />
                                     Browse Products Catalog
                                     <FaChevronRight className="text-xs sm:text-sm" />
                                 </Link>
-                                <Link
-                                    to="/"
+                                <Link 
+                                    to="/" 
                                     className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-white text-gray-700 px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 border border-gray-300 shadow-sm text-sm sm:text-base"
                                 >
                                     <FaChartLine />
@@ -551,12 +530,12 @@ export default function Wishlist() {
                                     {/* Price */}
                                     <div className="mb-4 sm:mb-5">
                                         <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                                            {getConvertedPrice(product.price)}
+                                            ${product.price.toLocaleString()}
                                         </div>
                                         {product.discount > 0 && (
                                             <div className="text-xs sm:text-sm text-gray-500">
                                                 <span className="line-through mr-2">
-                                                    {getConvertedPrice(product.price / (1 - product.discount / 100))}
+                                                    ${(product.price / (1 - product.discount / 100)).toLocaleString()}
                                                 </span>
                                                 <span className="text-red-600 font-semibold">
                                                     Save {product.discount}%
@@ -575,7 +554,7 @@ export default function Wishlist() {
                                             <span className="hidden sm:inline">Add to Cart</span>
                                             <span className="sm:hidden">Add</span>
                                         </button>
-                                        <button
+                                        <button 
                                             onClick={() => handleShareClick(product)}
                                             className="px-3 py-2.5 sm:px-3 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-shrink-0"
                                             title="Share this product"
@@ -635,7 +614,7 @@ export default function Wishlist() {
                                                         </div>
                                                         <div className="min-w-0">
                                                             <div className="font-semibold text-gray-900 text-sm sm:text-base truncate">{product.name}</div>
-
+                                                            
                                                             <div className="flex items-center gap-1 mt-1">
                                                                 <FaStar className="text-yellow-400 text-xs" />
                                                                 <span className="text-xs sm:text-sm">{product.rating || '4.5'}</span>
@@ -648,7 +627,7 @@ export default function Wishlist() {
                                                     <div className="text-xs text-gray-500 hidden sm:block">Primary Category</div>
                                                 </td>
                                                 <td className="py-4 px-4 sm:px-6">
-                                                    <div className="text-base sm:text-lg font-bold text-gray-900">{getConvertedPrice(product.price)}</div>
+                                                    <div className="text-base sm:text-lg font-bold text-gray-900">${product.price.toLocaleString()}</div>
                                                     {product.discount > 0 && (
                                                         <div className="text-xs sm:text-sm text-red-600">
                                                             Save {product.discount}%
@@ -740,14 +719,14 @@ export default function Wishlist() {
 
                                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                                         <div>
-                                            <div className="text-lg font-bold text-gray-900">{getConvertedPrice(product.price)}</div>
+                                            <div className="text-lg font-bold text-gray-900">${product.price.toLocaleString()}</div>
                                             {product.discount > 0 && (
                                                 <div className="text-xs text-red-600">
                                                     Save {product.discount}%
                                                 </div>
                                             )}
                                         </div>
-
+                                        
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => cart.addToCart(product)}
@@ -786,7 +765,7 @@ export default function Wishlist() {
                             <div className="p-4 sm:p-6">
                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Procurement Summary</h3>
                                 <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Review and manage your selected items.</p>
-
+                                
                                 {/* Action Buttons */}
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                                     <button
@@ -795,7 +774,7 @@ export default function Wishlist() {
                                         className={`px-4 sm:px-5 py-2.5 sm:py-3 bg-[#e67e00] text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-[#d47300] transition-colors flex items-center justify-center gap-2 ${selectedItems.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <FaShoppingCart className="text-xs sm:text-sm" />
-                                        Add Selected to Cart ({selectedItems.length === 0 ? getConvertedPrice(0) : getConvertedPrice(selectedTotal)})
+                                        Add Selected to Cart (${selectedItems.length === 0 ? '0' : selectedTotal.toLocaleString()})
                                     </button>
                                     <button
                                         onClick={clearAll}
@@ -805,10 +784,10 @@ export default function Wishlist() {
                                         Clear Entire Wishlist
                                     </button>
                                 </div>
-
+                                
                                 {/* Divider Line */}
                                 <hr className="my-4 sm:my-6 border-gray-300" />
-
+                                
                                 {/* Summary Stats */}
                                 <div className="grid grid-cols-2 gap-4 sm:gap-6">
                                     <div>
@@ -817,7 +796,7 @@ export default function Wishlist() {
                                     </div>
                                     <div>
                                         <div className="text-xs sm:text-sm font-semibold text-gray-700 mb-1">Total Value</div>
-                                        <div className="text-xl sm:text-2xl font-bold text-gray-900">{getConvertedPrice(selectedTotal)}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-gray-900">${selectedTotal.toLocaleString()}</div>
                                     </div>
                                 </div>
                             </div>
