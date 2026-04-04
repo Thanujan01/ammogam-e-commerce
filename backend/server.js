@@ -60,10 +60,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to Database
-connectDB().catch(err => {
-  console.error("Delayed DB Connection Error:", err.message);
-});
+// Connect to Database on startup
+console.log("🔄 Attempting to connect to MongoDB...");
+connectDB()
+  .then(() => console.log("✓ Database connected on startup"))
+  .catch(err => console.error("✗ Startup DB Error:", err.message));
 
 // Local uploads
 if (process.env.STORAGE_DRIVER === "local") {
@@ -74,25 +75,38 @@ if (process.env.STORAGE_DRIVER === "local") {
 // Middleware to ensure DB is connected before processing API requests
 app.use("/api", async (req, res, next) => {
   const mongoose = require("mongoose");
-  if (mongoose.connection.readyState !== 1) {
-    try {
-      await connectDB();
-      // If still not connected after one attempt, wait a bit or return error
-      if (mongoose.connection.readyState !== 1) {
-        return res.status(503).json({
-          message: "Database connection still in progress. Please try again in 10 seconds.",
-          status: "Connecting"
-        });
-      }
-    } catch (err) {
+  
+  // If already connected, proceed
+  if (mongoose.connection.readyState === 1) {
+    return next();
+  }
+
+  try {
+    // Connect to database and wait
+    await connectDB();
+    
+    // Wait up to 3 seconds for connection to be ready
+    let attempts = 0;
+    while (mongoose.connection.readyState !== 1 && attempts < 30) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+
+    if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({
-        message: "Database connection failed",
-        error: err.message,
-        suggestion: "Ensure your MongoDB Atlas IP whitelist allows Vercel's dynamic IP addresses (suggested: allow all 0.0.0.0/0 for testing)."
+        message: "Database connection still initializing. Please refresh the page.",
+        status: "Connecting"
       });
     }
+
+    next();
+  } catch (err) {
+    console.error("API Connection Error:", err.message);
+    return res.status(503).json({
+      message: "Server is initializing. Please refresh the page.",
+      error: err.message
+    });
   }
-  next();
 });
 
 app.use("/api/auth", authRoutes);
