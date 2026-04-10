@@ -1,6 +1,27 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 
+const productListCache = new Map();
+const PRODUCT_LIST_CACHE_TTL_MS = 30 * 1000;
+
+const getProductListCache = (key) => {
+  const cached = productListCache.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt < Date.now()) {
+    productListCache.delete(key);
+    return null;
+  }
+  return cached.data;
+};
+
+const setProductListCache = (key, data) => {
+  productListCache.set(key, { data, expiresAt: Date.now() + PRODUCT_LIST_CACHE_TTL_MS });
+};
+
+const clearProductListCache = () => {
+  productListCache.clear();
+};
+
 const sanitizeShippingFee = (value) => Math.abs(Number(value) || 0);
 
 const isValidImageUrl = (url) => {
@@ -114,6 +135,8 @@ exports.createProduct = async (req, res) => {
       seller: req.user && req.user.role === 'seller' ? req.user._id : null
     });
 
+    clearProductListCache();
+
     res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -122,6 +145,14 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
+    const cacheKey = req.originalUrl;
+    const cachedProducts = getProductListCache(cacheKey);
+    if (cachedProducts) {
+      res.set("X-Cache", "HIT");
+      res.set("Cache-Control", "public, max-age=30");
+      return res.json(cachedProducts);
+    }
+
     const { limit, page, select, search, category, includeSeller } = req.query;
     const filter = {};
 
@@ -168,6 +199,8 @@ exports.getAllProducts = async (req, res) => {
     }
 
     const products = await query;
+    setProductListCache(cacheKey, products);
+    res.set("X-Cache", "MISS");
     res.set("Cache-Control", "public, max-age=30");
     res.json(products);
   } catch (error) {
@@ -281,6 +314,8 @@ exports.updateProduct = async (req, res) => {
       new: true,
     });
 
+    clearProductListCache();
+
     res.json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -301,6 +336,7 @@ exports.deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id);
+    clearProductListCache();
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

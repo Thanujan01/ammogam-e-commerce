@@ -1,6 +1,8 @@
 require("dotenv").config(); // Server restarted
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
+const mongoose = require("mongoose");
 const connectDB = require("./src/config/db");
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -21,12 +23,14 @@ const reviewRoutes = require("./src/routes/reviewRoutes");
 
 const app = express();
 app.use(cors());
+app.use(compression());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+const slowRequestThresholdMs = Number(process.env.SLOW_REQUEST_THRESHOLD_MS || 300);
+
 // Health check route
 app.get("/", (req, res) => {
-  const mongoose = require("mongoose");
   const dbStatus = mongoose.connection.readyState;
   const statusMap = {
     0: "Disconnected",
@@ -69,10 +73,22 @@ if (process.env.STORAGE_DRIVER === "local") {
 }
 
 // API Routes
+app.use("/api", (req, res, next) => {
+  const start = process.hrtime.bigint();
+  res.on("finish", () => {
+    const end = process.hrtime.bigint();
+    const durationMs = Number(end - start) / 1e6;
+    if (durationMs >= slowRequestThresholdMs) {
+      console.warn(
+        `[SLOW_API] ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs.toFixed(1)}ms`
+      );
+    }
+  });
+  next();
+});
+
 // Middleware to ensure DB is connected before processing API requests
 app.use("/api", async (req, res, next) => {
-  const mongoose = require("mongoose");
-  
   // If already connected, proceed
   if (mongoose.connection.readyState === 1) {
     return next();
