@@ -81,7 +81,7 @@ export default function AdminProducts() {
   const fetchData = async () => {
     try {
       const [productsRes, categoriesRes] = await Promise.all([
-        api.get('/products'),
+        api.get('/products?includeSeller=true&select=name,description,price,stock,category,image,subCategory,brand,discount,badge,seller,shippingFee,colorVariants'),
         api.get('/categories')
       ]);
 

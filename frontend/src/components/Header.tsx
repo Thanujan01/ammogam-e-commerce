@@ -201,7 +201,7 @@ export default function Header() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await api.get('/products');
+        const { data } = await api.get('/products?limit=200&select=name,description,brand,subCategory,category,image,colorVariants');
         setProducts(data);
       } catch (error) {
         console.error("Failed to fetch products", error);

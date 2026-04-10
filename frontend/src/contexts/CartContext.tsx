@@ -75,10 +75,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const syncPrices = async () => {
       if (items.length === 0) return;
       try {
-        const res = await api.get('/products');
-        const products = res.data;
+        const productIds = Array.from(new Set(items.map((item) => item.product._id).filter(Boolean)));
+        if (productIds.length === 0) return;
+
+        const res = await api.post('/products/batch', { ids: productIds });
+        const products = Array.isArray(res.data) ? res.data : [];
+        const productMap = new Map(products.map((p: any) => [p._id, p]));
+
         setItems(prev => prev.map(item => {
-          const fresh = products.find((p: any) => p._id === (item.product._id || (item.product as any).id));
+          const itemId = item.product._id || (item.product as any).id;
+          const fresh = productMap.get(itemId);
           if (!fresh) return item;
 
           const sanitizedFreshShippingFee = sanitizeShippingFee(fresh.shippingFee);

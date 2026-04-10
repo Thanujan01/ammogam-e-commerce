@@ -44,21 +44,18 @@ app.get("/", (req, res) => {
   });
 });
 
-// Simple request logger to help capture incoming requests during debugging
-app.use((req, res, next) => {
-  try {
-    console.log(`REQ ${req.method} ${req.originalUrl} - body: ${JSON.stringify(req.body)}`);
-  } catch (e) {
-    console.log(`REQ ${req.method} ${req.originalUrl} - body: <unserializable>`);
-  }
-  next();
-});
+const enableRequestLogs = process.env.DEBUG_REQUESTS === "true";
 
-// Request Logger
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+if (enableRequestLogs) {
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const ms = Date.now() - start;
+      console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`);
+    });
+    next();
+  });
+}
 
 // Connect to Database on startup
 console.log("🔄 Attempting to connect to MongoDB...");

@@ -122,7 +122,7 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const { limit, select, search, category } = req.query;
+    const { limit, page, select, search, category, includeSeller } = req.query;
     const filter = {};
 
     if (search) {
@@ -145,10 +145,22 @@ exports.getAllProducts = async (req, res) => {
       selectFields = select.split(',').join(' ');
     }
 
-    const query = Product.find(filter).populate("category").populate("seller", "name businessName email");
+    const query = Product.find(filter)
+      .populate("category", "name")
+      .sort({ createdAt: -1 })
+      .lean();
 
-    if (limit && parseInt(limit) > 0) {
-      query.limit(parseInt(limit));
+    if (includeSeller === "true") {
+      query.populate("seller", "name businessName email");
+    }
+
+    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = parseInt(page, 10);
+
+    if (!Number.isNaN(parsedLimit) && parsedLimit > 0) {
+      const safeLimit = Math.min(parsedLimit, 100);
+      const safePage = !Number.isNaN(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+      query.limit(safeLimit).skip((safePage - 1) * safeLimit);
     }
 
     if (selectFields) {
@@ -156,6 +168,7 @@ exports.getAllProducts = async (req, res) => {
     }
 
     const products = await query;
+    res.set("Cache-Control", "public, max-age=30");
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -164,7 +177,10 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("category").populate("seller", "name businessName");
+    const product = await Product.findById(req.params.id)
+      .populate("category", "name")
+      .populate("seller", "name businessName")
+      .lean();
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     // Calculate accurate stock from colorVariants
@@ -176,7 +192,7 @@ exports.getProduct = async (req, res) => {
     }
 
     // Return product with accurate stock and sold count
-    const productObj = product.toObject();
+    const productObj = { ...product };
     productObj.stock = accurateStock;
     productObj.sold = product.sold || 0;
     res.json(productObj);
@@ -294,7 +310,7 @@ exports.deleteProduct = async (req, res) => {
 // Get seller's own products
 exports.getSellerProducts = async (req, res) => {
   try {
-    const products = await Product.find({ seller: req.user._id }).populate("category");
+    const products = await Product.find({ seller: req.user._id }).populate("category", "name").lean();
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -307,13 +323,26 @@ exports.getSellerStats = async (req, res) => {
     const sellerId = req.user._id;
 
     // Get seller's products
-    const products = await Product.find({ seller: sellerId });
-    const productIds = products.map(p => p._id);
+    const products = await Product.find({ seller: sellerId }).select("_id name image stock createdAt").lean();
+    const productIds = products.map((p) => p._id);
+    if (productIds.length === 0) {
+      return res.json({
+        totalProducts: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        totalProductsSold: 0,
+        products: []
+      });
+    }
+    const productIdSet = new Set(productIds.map((id) => id.toString()));
 
     // Get orders containing seller's products
     const orders = await Order.find({
       'items.product': { $in: productIds }
-    }).populate('items.product');
+    })
+      .select("items")
+      .populate({ path: 'items.product', select: '_id' })
+      .lean();
 
     // Calculate stats
     let totalRevenue = 0;
@@ -322,7 +351,7 @@ exports.getSellerStats = async (req, res) => {
 
     orders.forEach(order => {
       order.items.forEach(item => {
-        if (item.product && productIds.some(id => id.toString() === item.product._id.toString())) {
+        if (item.product && productIdSet.has(item.product._id.toString())) {
           totalRevenue += (item.price * item.quantity) + (item.shippingFee || 0);
           totalProductsSold += item.quantity;
         }
@@ -348,30 +377,56 @@ exports.getSellerOrders = async (req, res) => {
     const sellerId = req.user._id;
 
     // Get seller's products
-    const products = await Product.find({ seller: sellerId });
-    const productIds = products.map(p => p._id);
+    const products = await Product.find({ seller: sellerId }).select("_id").lean();
+    const productIds = products.map((p) => p._id);
+    if (productIds.length === 0) {
+      return res.json([]);
+    }
+    const productIdSet = new Set(productIds.map((id) => id.toString()));
 
     // Get orders containing seller's products
     const orders = await Order.find({
       'items.product': { $in: productIds }
-    }).populate('user', 'name email phone').populate('items.product').sort({ createdAt: -1 });
+    })
+      .select("user items totalAmount shippingFee paymentStatus status createdAt")
+      .populate('user', 'name email phone')
+      .populate({ path: 'items.product', select: '_id name image seller' })
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Filter order items to only include seller's products
     const sellerOrders = orders.map(order => {
       const sellerItems = order.items.filter(item =>
-        productIds.some(id => id.toString() === item.product._id.toString())
+        item.product && productIdSet.has(item.product._id.toString())
       );
 
       const sellerTotal = sellerItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
       return {
-        ...order.toObject(),
+        ...order,
         items: sellerItems,
         sellerTotal
       };
-    });
+    }).filter((order) => order.items.length > 0);
 
     res.json(sellerOrders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getProductsBatch = async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.ids) ? req.body.ids.filter(Boolean) : [];
+    if (ids.length === 0) {
+      return res.json([]);
+    }
+
+    const products = await Product.find({ _id: { $in: ids } })
+      .select("_id price discount stock seller shippingFee")
+      .lean();
+
+    res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -12,7 +12,7 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 0;
-    const query = Category.find();
+    const query = Category.find().lean();
 
     if (limit > 0) {
       query.limit(limit);
@@ -24,6 +24,7 @@ exports.getCategories = async (req, res) => {
     }
 
     const list = await query;
+    res.set('Cache-Control', 'public, max-age=60');
     res.json(list);
   } catch (error) {
     res.status(500).json({ message: error.message });

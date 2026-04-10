@@ -1,15 +1,11 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const User = require("../models/User");
+const Category = require("../models/Category");
 
 // Get admin dashboard statistics
 exports.getAdminStats = async (req, res) => {
   try {
-    // Get all products
-    const allProducts = await Product.find().populate('seller');
-    const adminProducts = allProducts.filter(p => !p.seller);
-    const sellerProducts = allProducts.filter(p => p.seller);
-
     const { type, date } = req.query;
 
     let startDate, endDate;
@@ -56,11 +52,45 @@ exports.getAdminStats = async (req, res) => {
         ordersData = new Array(12).fill(0);
     }
 
-    // Get orders in range
-    const allOrders = await Order.find({
+    const [
+      allOrders,
+      totalProducts,
+      adminProducts,
+      sellerProducts,
+      totalCustomers,
+      totalSellers
+    ] = await Promise.all([
+      Order.find({
         createdAt: { $gte: startDate, $lte: endDate },
-        status: { $ne: 'cancelled' } // Only count valid sales
-    }).populate('items.product');
+        status: { $ne: 'cancelled' }
+      })
+        .select('items totalAmount status createdAt user')
+        .sort({ createdAt: -1 })
+        .lean(),
+      Product.countDocuments(),
+      Product.countDocuments({ $or: [{ seller: null }, { seller: { $exists: false } }] }),
+      Product.countDocuments({ seller: { $exists: true, $ne: null } }),
+      User.countDocuments({ role: 'customer' }),
+      User.countDocuments({ role: 'seller', isApproved: true })
+    ]);
+
+    const productIds = Array.from(new Set(
+      allOrders.flatMap((order) => order.items || []).map((item) => String(item.product || '')).filter(Boolean)
+    ));
+
+    const productDocs = productIds.length > 0
+      ? await Product.find({ _id: { $in: productIds } }).select('_id seller category name').lean()
+      : [];
+
+    const productMap = new Map(productDocs.map((p) => [String(p._id), p]));
+
+    const categoryIds = Array.from(new Set(
+      productDocs.map((p) => String(p.category || '')).filter(Boolean)
+    ));
+    const categoryDocs = categoryIds.length > 0
+      ? await Category.find({ _id: { $in: categoryIds } }).select('_id name').lean()
+      : [];
+    const categoryMapById = new Map(categoryDocs.map((c) => [String(c._id), c.name]));
 
 
     // 1. Calculate Aggregates for Chart
@@ -81,7 +111,8 @@ exports.getAdminStats = async (req, res) => {
             let orderRevenue = 0;
             order.items.forEach(item => {
                 const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
-                const isSellerProduct = item.product && item.product.seller;
+              const product = productMap.get(String(item.product || ''));
+              const isSellerProduct = Boolean(product && product.seller);
 
                 if (!isSellerProduct) {
                     orderRevenue += itemTotal;
@@ -110,7 +141,8 @@ exports.getAdminStats = async (req, res) => {
     allOrders.forEach(order => {
       let storeTotal = 0;
       order.items.forEach(item => {
-        const isSellerProduct = item.product && item.product.seller;
+        const product = productMap.get(String(item.product || ''));
+        const isSellerProduct = Boolean(product && product.seller);
         const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
 
         if (!isSellerProduct) {
@@ -132,16 +164,13 @@ exports.getAdminStats = async (req, res) => {
     // The previous implementation mixed them (totalSellers is global, totalOrders was filtered). 
     // Let's keep totals filtered to be consistent "Report for this period".
     // But totalProducts/Customers/Sellers are usually snapshots of NOW, not historical.
-    const totalCustomers = await User.countDocuments({ role: 'customer' });
-    const totalSellers = await User.countDocuments({ role: 'seller', isApproved: true });
-
-
     // Sales by Category
     const categoryMap = new Map();
     allOrders.forEach(order => {
       order.items.forEach(item => {
-        if (item.product && item.product.category) {
-          const categoryName = item.product.category.name || 'Uncategorized';
+        const product = productMap.get(String(item.product || ''));
+        if (product && product.category) {
+          const categoryName = categoryMapById.get(String(product.category)) || 'Uncategorized';
           const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
           categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + itemTotal);
         }
@@ -157,13 +186,14 @@ exports.getAdminStats = async (req, res) => {
     const productRevenueMap = new Map();
     allOrders.forEach(order => {
       order.items.forEach(item => {
-        if (item.product) {
-          const productId = item.product._id.toString();
+        const product = productMap.get(String(item.product || ''));
+        if (product) {
+          const productId = String(product._id);
           const itemTotal = (item.price * item.quantity) + (item.shippingFee || 0);
           
           if (!productRevenueMap.has(productId)) {
             productRevenueMap.set(productId, {
-              name: item.product.name,
+              name: product.name,
               revenue: 0,
               unitsSold: 0
             });
@@ -182,7 +212,7 @@ exports.getAdminStats = async (req, res) => {
 
     // Low Stock Products (stock < 20)
     const lowStockProducts = await Product.find({ stock: { $lt: 20 } })
-      .populate('category')
+      .populate('category', 'name')
       .sort({ stock: 1 })
       .limit(5)
       .lean();
@@ -201,9 +231,9 @@ exports.getAdminStats = async (req, res) => {
       sellerProductRevenue,
       adminCommissionFromSellers,
       sellerPayoutAmount: sellerProductRevenue * 0.95,
-      totalProducts: allProducts.length,
-      adminProducts: adminProducts.length,
-      sellerProducts: sellerProducts.length,
+      totalProducts,
+      adminProducts,
+      sellerProducts,
       totalOrders,
       pendingOrders,
       totalCustomers,

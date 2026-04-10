@@ -13,6 +13,7 @@ const sellerOrAdmin = (req, res, next) => {
 
 // Public routes
 router.get("/", productCtrl.getAllProducts);
+router.post("/batch", productCtrl.getProductsBatch);
 router.get("/:id", productCtrl.getProduct);
 
 // Seller routes

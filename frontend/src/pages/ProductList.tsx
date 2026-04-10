@@ -749,8 +749,8 @@ export default function ProductList() {
       setLoading(true);
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          api.get('/products'),
-          api.get('/categories')
+          api.get('/products?limit=100&select=name,description,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand,shippingFee'),
+          api.get('/categories?limit=100&select=name,icon,image,subCategories,mainSubcategories,color')
         ]);
 
         const dbCategories = categoriesRes.data;

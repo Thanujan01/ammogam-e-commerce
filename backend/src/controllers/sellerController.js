@@ -80,16 +80,19 @@ exports.registerSeller = async (req, res) => {
       return res.status(400).json({ message: "Business registration number is required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const [existingUser, existingRegistration] = await Promise.all([
+      User.findOne({ email }).select("_id").lean(),
+      User.findOne({
+        role: "seller",
+        taxId: { $regex: `^${escapeRegex(normalizedTaxId)}$`, $options: "i" }
+      }).select("_id").lean()
+    ]);
+
     if (existingUser) {
       console.log("BACKEND DEBUG: Conflict - Email already exists:", email);
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const existingRegistration = await User.findOne({
-      role: "seller",
-      taxId: { $regex: `^${escapeRegex(normalizedTaxId)}$`, $options: "i" }
-    });
     if (existingRegistration) {
       console.log("BACKEND DEBUG: Conflict - Registration number already exists:", normalizedTaxId);
       return res.status(400).json({ message: "Registration number already exists" });
@@ -134,7 +137,10 @@ exports.getPendingSellers = async (req, res) => {
     const pendingSellers = await User.find({
       role: "seller",
       isApproved: false
-    }).select('-password').sort({ createdAt: -1 });
+    })
+      .select("name email phone businessName businessAddress businessPhone taxId isApproved createdAt updatedAt")
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json(pendingSellers);
   } catch (error) {
@@ -214,7 +220,10 @@ exports.getAllSellers = async (req, res) => {
     const sellers = await User.find({
       role: "seller",
       isApproved: true
-    }).select('-password').sort({ createdAt: -1 });
+    })
+      .select("name email phone businessName businessAddress businessPhone taxId isApproved approvedAt createdAt updatedAt")
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json(sellers);
   } catch (error) {
@@ -225,7 +234,9 @@ exports.getAllSellers = async (req, res) => {
 // Get a specific seller's basic details (admin only)
 exports.getSellerById = async (req, res) => {
   try {
-    const seller = await User.findById(req.params.id).select("-password");
+    const seller = await User.findById(req.params.id)
+      .select("name email phone businessName businessAddress businessPhone taxId isApproved approvedAt approvedBy createdAt updatedAt")
+      .lean();
     if (!seller) return res.status(404).json({ message: "Seller not found" });
     res.json(seller);
   } catch (error) {
@@ -236,7 +247,9 @@ exports.getSellerById = async (req, res) => {
 // Get a specific seller's products (admin only)
 exports.getSellerProducts = async (req, res) => {
   try {
-    const products = await Product.find({ seller: req.params.id }).populate('category');
+    const products = await Product.find({ seller: req.params.id })
+      .populate('category', 'name')
+      .lean();
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -247,20 +260,30 @@ exports.getSellerProducts = async (req, res) => {
 exports.getSellerOrders = async (req, res) => {
   try {
     const sellerId = req.params.id;
-    const products = await Product.find({ seller: sellerId });
-    const productIds = products.map(p => p._id);
+    const products = await Product.find({ seller: sellerId }).select("_id").lean();
+    const productIds = products.map((p) => p._id);
+    if (productIds.length === 0) {
+      return res.json([]);
+    }
+    const productIdSet = new Set(productIds.map((id) => id.toString()));
 
     const orders = await Order.find({
       'items.product': { $in: productIds }
-    }).populate('user', 'name email').populate('items.product').sort({ createdAt: -1 });
+    })
+      .select("user items totalAmount shippingFee paymentStatus status createdAt")
+      .populate('user', 'name email')
+      .populate({ path: 'items.product', select: 'name image seller' })
+      .sort({ createdAt: -1 })
+      .lean();
 
     const filteredOrders = orders.map(order => {
-      const orderObj = order.toObject();
-      orderObj.items = orderObj.items.filter(item => 
-        item.product && item.product.seller && item.product.seller.toString() === sellerId
-      );
-      return orderObj;
-    });
+      const filteredItems = order.items.filter((item) => {
+        if (!item.product) return false;
+        const productId = item.product._id ? item.product._id.toString() : "";
+        return productIdSet.has(productId);
+      });
+      return { ...order, items: filteredItems };
+    }).filter((order) => order.items.length > 0);
 
     res.json(filteredOrders);
   } catch (error) {
