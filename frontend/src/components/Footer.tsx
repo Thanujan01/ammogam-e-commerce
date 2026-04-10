@@ -5,13 +5,6 @@ import {
 } from 'react-icons/fa';
 import { FaTiktok } from 'react-icons/fa6';
 
-// Assuming you have these images in your project:
-// visa-logo.png, mastercard-logo.png, amex-logo.png, discover-logo.png
-import visaLogo from '../assets/visa-logo.png';
-import mastercardLogo from '../assets/mastercard-logo.png';
-import amexLogo from '../assets/amex-logo.png';
-import discoverLogo from '../assets/discover-logo.png';
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -28,22 +21,10 @@ export default function Footer() {
   ];
 
   const paymentMethods = [
-    { 
-      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />, 
-      name: 'Visa' 
-    },
-    { 
-      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />, 
-      name: 'Mastercard' 
-    },
-    { 
-      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />, 
-      name: 'American Express' 
-    },
-    { 
-      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />, 
-      name: 'Discover' 
-    },
+    { icon: <span className="text-[10px] font-bold tracking-wide">VISA</span>, name: 'Visa' },
+    { icon: <span className="text-[10px] font-bold tracking-wide">MC</span>, name: 'Mastercard' },
+    { icon: <span className="text-[10px] font-bold tracking-wide">AMEX</span>, name: 'American Express' },
+    { icon: <span className="text-[10px] font-bold tracking-wide">DISC</span>, name: 'Discover' },
   ];
 
   return (

@@ -3,6 +3,7 @@ import axios from 'axios';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const api = axios.create({ baseURL: API_BASE });
+export const publicApi = axios.create({ baseURL: API_BASE });
 
 // Set token immediately if it exists in localStorage
 const storedToken = localStorage.getItem('ammogam_token');

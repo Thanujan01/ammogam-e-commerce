@@ -70,19 +70,19 @@ export default function ProductDetail() {
   // Payment methods data - matching footer style with image logos
   const paymentMethods = [
     {
-      icon: <img src={visaLogo} alt="Visa" className="h-6 w-auto object-contain" />,
+      icon: <img src={visaLogo} alt="Visa" width={50} height={30} loading="lazy" decoding="async" className="h-6 w-auto object-contain" />,
       name: 'Visa'
     },
     {
-      icon: <img src={mastercardLogo} alt="Mastercard" className="h-6 w-auto object-contain" />,
+      icon: <img src={mastercardLogo} alt="Mastercard" width={51} height={30} loading="lazy" decoding="async" className="h-6 w-auto object-contain" />,
       name: 'Mastercard'
     },
     {
-      icon: <img src={amexLogo} alt="American Express" className="h-6 w-auto object-contain" />,
+      icon: <img src={amexLogo} alt="American Express" width={51} height={30} loading="lazy" decoding="async" className="h-6 w-auto object-contain" />,
       name: 'American Express'
     },
     {
-      icon: <img src={discoverLogo} alt="Discover" className="h-6 w-auto object-contain" />,
+      icon: <img src={discoverLogo} alt="Discover" width={51} height={30} loading="lazy" decoding="async" className="h-6 w-auto object-contain" />,
       name: 'Discover'
     },
   ];

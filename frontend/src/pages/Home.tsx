@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api/api';
+import { api, publicApi } from '../api/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
@@ -51,7 +51,6 @@ export const addToRecentlyViewed = (product: any) => {
       detail: { productId: product.id }
     }));
 
-    console.log('Added to recently viewed:', product.name); // Debug log
     return true;
   } catch (error) {
     console.error('Error saving to recently viewed:', error);
@@ -128,7 +127,6 @@ export default function Home() {
   useEffect(() => {
     const loadRecentlyViewed = () => {
       const viewed = getRecentlyViewed();
-      console.log('Loading recently viewed:', viewed); // Debug log
       setRecentlyViewed(viewed);
     };
 
@@ -136,7 +134,6 @@ export default function Home() {
 
     // Listen for updates from ProductList page or ProductDetail page
     const handleRecentlyViewedUpdate = () => {
-      console.log('Recently viewed updated event received'); // Debug log
       loadRecentlyViewed();
     };
 
@@ -159,7 +156,6 @@ export default function Home() {
 
   // Function to add a product to recently viewed (Home page specific)
   const addToRecentlyViewedLocal = (product: any) => {
-    console.log('Adding to recently viewed from Home:', product.name); // Debug log
     const success = addToRecentlyViewed(product);
     if (success) {
       setRecentlyViewed(getRecentlyViewed());
@@ -215,9 +211,7 @@ export default function Home() {
         try {
           // Explicitly remove Authorization header for public data
           const res = await fetchWithRetry(() =>
-            api.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand', {
-              headers: { Authorization: '' }
-            })
+            publicApi.get('/products?limit=25&select=name,price,discount,rating,sold,stock,badge,category,subCategory,image,colorVariants,brand')
           );
 
           if (!isMounted) return;
@@ -267,9 +261,7 @@ export default function Home() {
         try {
           // Explicitly remove Authorization header for public data
           const res = await fetchWithRetry(() =>
-            api.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color', {
-              headers: { Authorization: '' }
-            })
+            publicApi.get('/categories?limit=20&select=name,icon,image,subCategories,mainSubcategories,color')
           );
 
           if (!isMounted) return;
@@ -386,7 +378,7 @@ export default function Home() {
       id: 1,
       title: "Ammogam",
       buttonText: "Shop Now",
-      image: "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800",
+      image: "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?auto=format&fit=crop&w=800&q=55",
       showText: true,
 
     },
@@ -396,7 +388,7 @@ export default function Home() {
       subtitle: "",
       description: "",
       buttonText: "",
-      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800",
+      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=55",
       bgGradient: "",
       showText: false
     },
@@ -406,7 +398,7 @@ export default function Home() {
       subtitle: "",
       description: "",
       buttonText: "",
-      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800",
+      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=800&q=55",
       bgGradient: "",
       showText: false
     }
@@ -660,6 +652,10 @@ export default function Home() {
                           <img
                             src={banner.image}
                             alt={banner.title || "Promotional Banner"}
+                            width={800}
+                            height={400}
+                            loading={banner.id === 1 ? "eager" : "lazy"}
+                            decoding="async"
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -736,10 +732,13 @@ export default function Home() {
                   <div className="w-full md:w-1/2 relative">
                     <div className="absolute inset-0 bg-gradient-to-l from-amber-700/30 to-transparent z-10"></div>
                     <img
-                      src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=800"
+                      src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?auto=format&fit=crop&w=800&q=55"
                       alt="Ammogam"
+                      width={800}
+                      height={600}
                       className="w-full h-full object-cover"
                       fetchPriority="high"
+                      decoding="async"
                     />
                   </div>
                 </div>
@@ -799,6 +798,10 @@ export default function Home() {
                         <img
                           src={product.image || '/placeholder.png'}
                           alt={product.name}
+                          width={329}
+                          height={329}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
@@ -944,6 +947,10 @@ export default function Home() {
                           <img
                             src={product.image || '/placeholder.png'}
                             alt={product.name}
+                            width={329}
+                            height={329}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
@@ -1114,6 +1121,10 @@ export default function Home() {
                           <img
                             src={item.image}
                             alt={item.name}
+                            width={240}
+                            height={160}
+                            loading="lazy"
+                            decoding="async"
                             className={`w-full h-24 sm:h-32 object-cover rounded-lg transition-transform duration-500 ${hoveredRecentlyViewed === item.id ? 'transform scale-110' : ''}`}
                           />
                           <div className="absolute bottom-2 right-2 flex flex-col gap-1">

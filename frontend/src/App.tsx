@@ -1,8 +1,8 @@
 import { Routes, Route, useLocation, Link } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
-import Header from './components/Header';
-import Footer from './components/Footer';
+const Header = lazy(() => import('./components/Header'));
+const Footer = lazy(() => import('./components/Footer'));
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtected from './components/AdminProtected';
@@ -62,11 +62,16 @@ function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isSellerRoute = location.pathname.startsWith('/seller');
+  const isPublicLayout = !isAdminRoute && !isSellerRoute;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Toaster position="top-right" reverseOrder={false} />
-      {(!isAdminRoute && !isSellerRoute) && <Header />}
+      {isPublicLayout && (
+        <Suspense fallback={null}>
+          <Header />
+        </Suspense>
+      )}
       <main className="flex-1">
         <Suspense fallback={<Loading />}>
           <Routes>
@@ -231,7 +236,11 @@ function App() {
           </Routes>
         </Suspense>
       </main>
-      {(!isAdminRoute && !isSellerRoute) && <Footer />}
+      {isPublicLayout && (
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      )}
     </div>
   );
 }

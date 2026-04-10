@@ -2,9 +2,54 @@ const fs = require("fs");
 const path = require("path");
 const initGCS = require("../config/storage");
 
+let sharp = null;
+try {
+  sharp = require("sharp");
+} catch (_) {
+  console.warn("sharp is not installed. Image optimization is disabled.");
+}
+
 const gcsBucket = initGCS();
 
+const optimizeImageIfPossible = async (file) => {
+  const isImage = file && typeof file.mimetype === "string" && file.mimetype.startsWith("image/");
+  const isUnsupported = file.mimetype === "image/gif" || file.mimetype === "image/svg+xml";
+
+  if (!sharp || !isImage || isUnsupported) {
+    return { uploadPath: file.path, cleanupPaths: [file.path] };
+  }
+
+  let optimizedExt = ".jpg";
+  if (file.mimetype === "image/png") optimizedExt = ".png";
+  if (file.mimetype === "image/webp") optimizedExt = ".webp";
+  const optimizedPath = `${file.path}-optimized${optimizedExt}`;
+
+  try {
+    let transformer = sharp(file.path).rotate().resize({
+      width: 1600,
+      height: 1600,
+      fit: "inside",
+      withoutEnlargement: true,
+    });
+
+    if (file.mimetype === "image/png") {
+      transformer = transformer.png({ compressionLevel: 9, palette: true });
+    } else if (file.mimetype === "image/webp") {
+      transformer = transformer.webp({ quality: 78 });
+    } else {
+      transformer = transformer.jpeg({ quality: 78, mozjpeg: true });
+    }
+
+    await transformer.toFile(optimizedPath);
+    return { uploadPath: optimizedPath, cleanupPaths: [file.path, optimizedPath] };
+  } catch (error) {
+    return { uploadPath: file.path, cleanupPaths: [file.path] };
+  }
+};
+
 exports.upload = async (file, destPath) => {
+  const { uploadPath, cleanupPaths } = await optimizeImageIfPossible(file);
+
   // GCS - PRIMARY STORAGE METHOD
   if (process.env.STORAGE_DRIVER === "gcs") {
     if (!gcsBucket) {
@@ -17,15 +62,21 @@ exports.upload = async (file, destPath) => {
       // Upload to GCS bucket
       // Note: With uniform bucket-level access enabled, files are accessible based on bucket IAM policies
       // Make sure your bucket has public read access configured via IAM
-      await gcsBucket.upload(file.path, { 
+      await gcsBucket.upload(uploadPath, {
         destination: destPath,
         metadata: {
           cacheControl: 'public, max-age=31536000', // Cache for 1 year
         }
       });
       
-      // Clean up temporary file
-      await fs.promises.unlink(file.path);
+      // Clean up temporary file(s)
+      await Promise.all(cleanupPaths.map(async (tempPath) => {
+        try {
+          await fs.promises.unlink(tempPath);
+        } catch (_) {
+          // ignore cleanup errors
+        }
+      }));
       
       const bucketName = process.env.GCS_BUCKET;
       return {
@@ -33,12 +84,13 @@ exports.upload = async (file, destPath) => {
       };
     } catch (error) {
       console.error("GCS Upload Error:", error.message);
-      // Clean up temp file even on error
-      try {
-        await fs.promises.unlink(file.path);
-      } catch (unlinkErr) {
-        // Ignore cleanup errors
-      }
+      await Promise.all(cleanupPaths.map(async (tempPath) => {
+        try {
+          await fs.promises.unlink(tempPath);
+        } catch (_) {
+          // ignore cleanup errors
+        }
+      }));
       throw new Error(`Failed to upload to Google Cloud Storage: ${error.message}`);
     }
   }
@@ -63,7 +115,16 @@ exports.upload = async (file, destPath) => {
   }
 
   const finalPath = path.join(uploadsDir, path.basename(destPath));
-  await fs.promises.rename(file.path, finalPath);
+  await fs.promises.rename(uploadPath, finalPath);
+
+  await Promise.all(cleanupPaths.map(async (tempPath) => {
+    if (tempPath === uploadPath) return;
+    try {
+      await fs.promises.unlink(tempPath);
+    } catch (_) {
+      // ignore cleanup errors
+    }
+  }));
 
   return { url: `/uploads/${path.basename(destPath)}` };
 };

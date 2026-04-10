@@ -14,7 +14,7 @@ import {
   FaCamera, FaPaw, FaBaby, FaGlobeAsia, FaCloudSun,FaInfoCircle,
   FaTools, FaPrint, FaImages, FaDog, FaBaby as FaBabyIcon, FaWallet
 } from 'react-icons/fa';
-import { api } from '../api/api';
+import { api, publicApi } from '../api/api';
 
 // Helper to render icon from string name
 const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -43,8 +43,6 @@ const CategoryIcon = ({ name, className }: { name: string; className?: string })
   return <IconComponent className={className} />;
 };
 
-import logoImage from '../assets/logo.png';
-
 export default function Header() {
   const auth = useContext(AuthContext)!;
   const cart = useContext(CartContext)!;
@@ -65,6 +63,8 @@ export default function Header() {
   const [searchSuggestions, setSearchSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
+  const [isProductsLoaded, setIsProductsLoaded] = useState(false);
+  const [isProductsLoading, setIsProductsLoading] = useState(false);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
@@ -163,7 +163,7 @@ export default function Header() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await api.get('/categories');
+        const { data } = await publicApi.get('/categories');
         const transformedCategories = data.map((cat: any) => ({
           ...cat,
           id: cat._id,
@@ -197,18 +197,25 @@ export default function Header() {
     fetchCategories();
   }, [searchParams]);
 
-  // Fetch products for search
+  // Fetch products for search only when user starts typing
   useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2 || isProductsLoaded || isProductsLoading) return;
+
     const fetchProducts = async () => {
       try {
-        const { data } = await api.get('/products?limit=200&select=name,description,brand,subCategory,category,image,colorVariants');
+        setIsProductsLoading(true);
+        const { data } = await publicApi.get('/products?limit=120&select=name,description,brand,subCategory,category,image,colorVariants');
         setProducts(data);
+        setIsProductsLoaded(true);
       } catch (error) {
         console.error("Failed to fetch products", error);
+      } finally {
+        setIsProductsLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [searchQuery, isProductsLoaded, isProductsLoading]);
 
   // Search suggestions logic
   useEffect(() => {
@@ -471,11 +478,9 @@ export default function Header() {
               </button>
 
               <Link to="/" className="flex items-center gap-3 w-164" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                <img
-                  src={logoImage}
-                  alt="AMMOGAM Logo"
-                  className="h-10 w-164 object-contain"
-                />
+                <div className="h-10 px-3 rounded-lg bg-gradient-to-r from-amber-700 to-orange-600 text-white text-sm font-bold tracking-wide flex items-center justify-center">
+                  AMMOGAM
+                </div>
               </Link>
             </div>
 
@@ -486,9 +491,11 @@ export default function Header() {
   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
 >
   <img
-    src={logoImage}
-    alt="AMMOGAM Logo"
-    className="h-14 w-auto object-contain"
+    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect width='56' height='56' rx='10' fill='%23b45309'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' fill='white' font-size='20' font-family='Arial' font-weight='700'%3EA%3C/text%3E%3C/svg%3E"
+    alt="AMMOGAM"
+    width={56}
+    height={56}
+    className="h-14 w-14 object-contain"
   />
   <span className="text-lg font-bold text-amber-500">
     AMMOGAM
