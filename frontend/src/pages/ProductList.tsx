@@ -15,7 +15,7 @@ import {
   FaStar, FaCartPlus, FaGem, FaFilter, FaHeart,
   FaCreditCard, FaClock, FaChevronRight,
   FaBox, FaLayerGroup, FaChevronDown, FaChevronUp,
-  FaAngleRight, FaAngleLeft,
+  FaAngleRight, FaAngleLeft, FaSearch,
 } from 'react-icons/fa';
 
 // Import the addToRecentlyViewed function from Home.tsx
@@ -189,20 +189,32 @@ const ProductGridSection = ({ filteredProducts, addToCart, openProductModal, tit
       </div>
 
       {/* Products Grid - Mobile: 2 columns, Desktop: responsive */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 mb-6 sm:mb-12">
-        {filteredProducts.map((product: any) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            addToCart={addToCart}
-            openProductModal={openProductModal}
-            toggleWishlist={toggleWishlist}
-            isFav={isFav}
-            categories={categories}
-            showCategoryBadge={showCategoryBadge}
-          />
-        ))}
-      </div>
+      {filteredProducts.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 mb-6 sm:mb-12">
+          {filteredProducts.map((product: any) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              addToCart={addToCart}
+              openProductModal={openProductModal}
+              toggleWishlist={toggleWishlist}
+              isFav={isFav}
+              categories={categories}
+              showCategoryBadge={showCategoryBadge}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-dashed border-gray-300 p-8 sm:p-12 text-center mb-8 sm:mb-12">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaSearch className="text-gray-400 text-2xl sm:text-3xl" />
+          </div>
+          <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No products found</h4>
+          <p className="text-gray-600 text-sm sm:text-base mb-6 max-w-md mx-auto">
+            We couldn't find any products matching your current filters or search query. Try adjusting your search term or clearing filters.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -601,8 +613,8 @@ const SubcategoryDropdown = ({ categories, selectedCategory, selectedSubcategory
 };
 
 // Active filters display - Mobile optimized
-const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters, categories }: any) => {
-  if (!selectedCategory && !selectedSubcategory) return null;
+const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters, categories, searchQuery }: any) => {
+  if (!selectedCategory && !selectedSubcategory && !searchQuery) return null;
 
   const categoryName = selectedCategory ? categories.find((cat: any) => cat.id === selectedCategory)?.name : null;
   const subcategoryName = selectedSubcategory;
@@ -628,6 +640,13 @@ const ActiveFilters = ({ selectedCategory, selectedSubcategory, onClearFilters, 
                 <span className="hidden sm:inline">Subcategory: </span>
                 <span>{subcategoryName}</span>
                 <button onClick={() => onClearFilters('subcategory')} className="text-[#e1630d] hover:text-[#c1550b] w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center hover:bg-orange-100 rounded-full text-xs">×</button>
+              </span>
+            )}
+            {searchQuery && (
+              <span className="px-2 py-1 sm:px-3 sm:py-1.5 bg-white border border-orange-200 text-orange-800 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 shadow-sm">
+                <span className="hidden sm:inline">Search: </span>
+                <span>"{searchQuery}"</span>
+                <button onClick={() => onClearFilters('search')} className="text-[#e1630d] hover:text-[#c1550b] w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center hover:bg-orange-100 rounded-full text-xs">×</button>
               </span>
             )}
           </div>
@@ -795,46 +814,53 @@ export default function ProductList() {
   }, [categoryParam, subcategoryParam]);
 
   useEffect(() => {
-    if (allProducts.length === 0 || categories.length === 0) return;
-
-    let productsToShow = [];
+    let productsToShow = [...allProducts];
     let relatedToShow = [];
 
+    // 1. Apply Search Filter if present
+    const searchParam = searchParams.get('search');
+    if (searchParam) {
+      const query = searchParam.toLowerCase().trim();
+      productsToShow = productsToShow.filter(p => 
+        p.name?.toLowerCase().includes(query) || 
+        p.description?.toLowerCase().includes(query) ||
+        p.brand?.toLowerCase().includes(query) ||
+        p.subCategory?.toLowerCase().includes(query) ||
+        p.categoryName?.toLowerCase().includes(query)
+      );
+    }
+
+    // 2. Apply Category/Subcategory Filtering
     if (selectedCategory) {
       const targetCat = categories.find(c => c.id === selectedCategory);
       if (targetCat) {
         if (selectedSubcategory) {
-          // When subcategory is selected: Show products from that subcategory
-          productsToShow = allProducts.filter(p =>
+          // Keep search results but filter by subcategory, or if no search results (because search didn't match anything), this will be empty
+          productsToShow = productsToShow.filter(p =>
             p.categoryId === selectedCategory &&
             p.subCategory === selectedSubcategory
           );
 
-          // Related Products: Show products from SAME category but DIFFERENT subcategories
           relatedToShow = allProducts.filter(p =>
             p.categoryId === selectedCategory &&
             p.subCategory !== selectedSubcategory
           );
         } else {
-          // When only category is selected (no subcategory): Show ALL products from that category
-          productsToShow = allProducts.filter(p => p.categoryId === selectedCategory);
-
-          // Related Products: Show products from OTHER categories
+          productsToShow = productsToShow.filter(p => p.categoryId === selectedCategory);
           relatedToShow = allProducts.filter(p => p.categoryId !== selectedCategory);
         }
       }
-    } else {
-      // No category selected: Show first 12 products as featured
+    } else if (!searchParam) {
+      // Default view: No category and no search - show only a subset
       productsToShow = allProducts.slice(0, 12);
 
-      // Related Products: Show random products from all categories
       const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
       relatedToShow = shuffled.slice(0, 12);
     }
 
     setFilteredProducts(productsToShow);
     setRelatedProducts(relatedToShow);
-  }, [selectedCategory, selectedSubcategory, allProducts, categories]);
+  }, [selectedCategory, selectedSubcategory, allProducts, categories, searchParams]);
 
   const handleCategorySelect = (categoryId: string | null) => {
     // ✅ FIX: Scroll to top when category changes
@@ -888,24 +914,31 @@ export default function ProductList() {
     setSearchParams(params);
   };
 
-  const handleClearFilters = (type: 'category' | 'subcategory' | 'all') => {
+  const handleClearFilters = (type: 'category' | 'subcategory' | 'search' | 'all') => {
     // ✅ FIX: Scroll to top when clearing filters
     window.scrollTo(0, 0);
 
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams);
 
-    if (type === 'all' || type === 'category') {
+    if (type === 'all') {
+      params.delete('category');
+      params.delete('subcategory');
+      params.delete('search');
       setSelectedCategory(null);
       setSelectedSubcategory(null);
-      setShowAllSubcategories(false);
-    } else if (type === 'subcategory') {
+    } else if (type === 'category') {
+      params.delete('category');
+      params.delete('subcategory');
+      setSelectedCategory(null);
       setSelectedSubcategory(null);
-      setShowAllSubcategories(false);
-      if (selectedCategory) {
-        params.set('category', selectedCategory);
-      }
+    } else if (type === 'subcategory') {
+      params.delete('subcategory');
+      setSelectedSubcategory(null);
+    } else if (type === 'search') {
+      params.delete('search');
     }
 
+    setShowAllSubcategories(false);
     setShowAllRelated(false);
     setShowAllProducts(false);
     setSearchParams(params);
@@ -1004,7 +1037,10 @@ export default function ProductList() {
 
   // Determine section title and description based on state
   const getSectionTitle = () => {
-    if (selectedSubcategory) {
+    const searchParam = searchParams.get('search');
+    if (searchParam) {
+      return `Search Results for "${searchParam}"`;
+    } else if (selectedSubcategory) {
       return `${selectedSubcategory} Products`;
     } else if (selectedCategory) {
       return `${currentCategory?.name} Products`;
@@ -1014,7 +1050,10 @@ export default function ProductList() {
   };
 
   const getSectionDescription = () => {
-    if (selectedSubcategory) {
+    const searchParam = searchParams.get('search');
+    if (searchParam) {
+      return `Found ${filteredProducts.length} results matching your search`;
+    } else if (selectedSubcategory) {
       return `Discover our handpicked ${selectedSubcategory} selection of ${filteredProducts.length} premium products`;
     } else if (selectedCategory) {
       return `Explore our curated ${currentCategory?.name} collection of ${filteredProducts.length} premium products`;
@@ -1085,6 +1124,7 @@ export default function ProductList() {
       <ActiveFilters
         selectedCategory={selectedCategory}
         selectedSubcategory={selectedSubcategory}
+        searchQuery={searchParams.get('search')}
         onClearFilters={handleClearFilters}
         categories={categories}
       />

@@ -12,11 +12,17 @@ exports.placeOrder = async (req, res) => {
       return res.status(400).json({ message: "No items in order" });
     }
 
+    const safeShippingFee = Math.abs(Number(shippingFee) || 0);
+    const sanitizedItems = items.map((item) => ({
+      ...item,
+      shippingFee: Math.abs(Number(item.shippingFee) || 0),
+    }));
+
     const order = await Order.create({
       user: req.user._id,
-      items,
+      items: sanitizedItems,
       totalAmount,
-      shippingFee: shippingFee || 0,
+      shippingFee: safeShippingFee,
       shippingAddress,
       paymentMethod,
     });

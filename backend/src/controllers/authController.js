@@ -140,9 +140,13 @@ exports.forgotPassword = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    const resetLink = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?email=${encodeURIComponent(user.email)}&otp=${otp}`;
+
     const message = `
       <h1>Password Reset Request</h1>
-      <p>Your OTP (One Time Password) to reset your password is:</p>
+      <p>Use the link below to reset your password:</p>
+      <p><a href="${resetLink}" target="_blank" rel="noopener noreferrer">Reset Password</a></p>
+      <p>Or enter this OTP manually on the reset screen:</p>
       <h2 style="color: #4F46E5; letter-spacing: 5px;">${otp}</h2>
       <p>This code expires in 10 minutes.</p>
     `;
@@ -150,11 +154,11 @@ exports.forgotPassword = async (req, res) => {
     try {
       await sendEmail({
         email: user.email,
-        subject: "Password Reset OTP",
+        subject: "Password Reset Link",
         html: message,
       });
 
-      res.status(200).json({ success: true, data: "OTP sent to email" });
+      res.status(200).json({ success: true, data: "Reset password link sent to email" });
     } catch (error) {
       console.log(error);
       user.resetPasswordToken = undefined;

@@ -89,7 +89,7 @@ export default function Checkout() {
   const selectedCartItems = cart.selectedCartItems as unknown as CartItem[];
   const subtotal = cart.selectedTotalAmount;
   const itemCount = cart.selectedItemsCount;
-  const shipping = cart.selectedShippingFee;
+  const shipping = Math.abs(Number(cart.selectedShippingFee) || 0);
   const total = subtotal + shipping;
 
   const [step, setStep] = useState(1);
@@ -452,7 +452,7 @@ export default function Checkout() {
           variationId: it.variationId || undefined,
           selectedSize: it.selectedSize || undefined,
           selectedWeight: it.selectedWeight || undefined,
-          shippingFee: it.product.shippingFee || 0,
+          shippingFee: Math.abs(Number(it.product.shippingFee) || 0),
           selectedImageIndex: it.selectedImageIndex || 0
         };
       });
@@ -1167,7 +1167,7 @@ export default function Checkout() {
                         return (
                           <div key={productId} className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
                             <span className="truncate max-w-[120px]">{item.product.name}</span>:
-                            <span>${(item.product.shippingFee || 0).toLocaleString()}</span>
+                            <span>${Math.abs(Number(item.product.shippingFee) || 0).toLocaleString()}</span>
                           </div>
                         );
                       })}

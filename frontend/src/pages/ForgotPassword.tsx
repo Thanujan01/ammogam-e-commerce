@@ -18,7 +18,7 @@ export default function ForgotPassword() {
 
         try {
             await api.post('/auth/forgot-password', { email });
-            setMessage('OTP sent to your email.');
+            setMessage('Reset password link sent to your email.');
             setTimeout(() => nav(`/reset-password?email=${encodeURIComponent(email)}`), 1500);
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Failed to send reset email.');

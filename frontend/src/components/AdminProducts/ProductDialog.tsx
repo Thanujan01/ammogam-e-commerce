@@ -9,6 +9,27 @@ export interface SizeOption {
   stock: number;
   price: number;
 }
+// Helper function to validate image URLs
+const isValidImageUrl = (url: string): { valid: boolean; error?: string } => {
+  if (!url || url.trim() === '') {
+    return { valid: false, error: 'URL cannot be empty' };
+  }
+  const trimmedUrl = url.trim();
+  try {
+    new URL(trimmedUrl);
+  } catch {
+    if (!trimmedUrl.includes('.') || trimmedUrl.split('.').pop()?.length === 0) {
+      return { valid: false, error: 'Invalid URL format' };
+    }
+  }
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.bmp', '.tiff', '.avif'];
+  const urlLower = trimmedUrl.toLowerCase();
+  const hasValidExtension = imageExtensions.some(ext => urlLower.endsWith(ext));
+  if (!hasValidExtension) {
+    return { valid: false, error: 'Invalid image URL: Must end with .jpg, .png, .gif, .webp, .svg, .ico, .bmp, .tiff, or .avif' };
+  }
+  return { valid: true };
+};
 
 export interface WeightOption {
   weight: string;
@@ -413,8 +434,12 @@ export default function ProductDialog({
               <input
                 type="number"
                 step="0.01"
+                min="0"
                 value={formData.price}
-                onChange={e => onChange('price', e.target.value)}
+                onChange={e => {
+                  const value = e.target.value;
+                  onChange('price', value);
+                }}
                 placeholder="0.00"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
               />
@@ -424,6 +449,7 @@ export default function ProductDialog({
               <input
                 type="number"
                 step="0.01"
+                min="0"
                 value={formData.shippingFee || ''}
                 onChange={e => onChange('shippingFee', e.target.value)}
                 placeholder="0.00"
@@ -654,6 +680,8 @@ export default function ProductDialog({
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Discount %</label>
                 <input
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.discount || ''}
                   onChange={e => onChange('discount', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary1 focus:border-primary1 outline-none transition-all"
@@ -926,7 +954,12 @@ export default function ProductDialog({
                                     e.preventDefault();
                                     const input = e.target as HTMLInputElement;
                                     const url = input.value.trim();
-                                    if (url && variant.images.length < 5) {
+                                      const validation = isValidImageUrl(url);
+                                      if (!validation.valid) {
+                                        showToast(validation.error || 'Invalid image URL', 'error');
+                                        return;
+                                      }
+                                      if (url && variant.images.length < 5) {
                                       const updatedImages = [...variant.images, url];
                                       handleColorVariantChange(index, 'images', updatedImages);
                                       input.value = '';
@@ -940,6 +973,11 @@ export default function ProductDialog({
                                   e.preventDefault();
                                   const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
                                   const url = input.value.trim();
+                                    const validation = isValidImageUrl(url);
+                                    if (!validation.valid) {
+                                      showToast(validation.error || 'Invalid image URL', 'error');
+                                      return;
+                                    }
                                   if (url && variant.images.length < 5) {
                                     const updatedImages = [...variant.images, url];
                                     handleColorVariantChange(index, 'images', updatedImages);

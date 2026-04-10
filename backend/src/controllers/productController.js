@@ -1,10 +1,77 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 
+const sanitizeShippingFee = (value) => Math.abs(Number(value) || 0);
+
+const isValidImageUrl = (url) => {
+  if (!url || typeof url !== "string") {
+    return { valid: false, error: "Image URL is required" };
+  }
+
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl) {
+    return { valid: false, error: "Image URL is required" };
+  }
+
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".ico", ".bmp", ".tiff", ".avif"];
+  const urlLower = trimmedUrl.toLowerCase();
+  const hasValidExtension = imageExtensions.some((ext) => urlLower.endsWith(ext));
+
+  if (!hasValidExtension) {
+    return {
+      valid: false,
+      error: "Invalid image URL format. Must end with a valid image extension",
+    };
+  }
+
+  return { valid: true };
+};
+
+const hasAtLeastOneImage = (colorVariants = [], fallbackImage = "") => {
+  const variantsHaveImage = Array.isArray(colorVariants) && colorVariants.some(
+    (variant) => Array.isArray(variant.images) && variant.images.some((img) => String(img || "").trim() !== "")
+  );
+  const hasFallbackImage = typeof fallbackImage === "string" && fallbackImage.trim() !== "";
+  return variantsHaveImage || hasFallbackImage;
+};
+
 exports.createProduct = async (req, res) => {
   try {
     const { name, price, description, category, mainSubcategory, subCategory } = req.body;
     const colorVariants = req.body.colorVariants || [];
+
+    // Validate price
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({ message: "Product price must be a non-negative number" });
+    }
+
+    // Validate shipping fee
+    const parsedShippingFee = parseFloat(req.body.shippingFee || 0);
+    if (isNaN(parsedShippingFee) || parsedShippingFee < 0) {
+      return res.status(400).json({ message: "Shipping fee must be a non-negative number" });
+    }
+
+    // Validate discount
+    const parsedDiscount = parseFloat(req.body.discount || 0);
+    if (isNaN(parsedDiscount) || parsedDiscount < 0 || parsedDiscount > 100) {
+      return res.status(400).json({ message: "Discount must be between 0 and 100" });
+    }
+
+    if (!hasAtLeastOneImage(colorVariants, req.body.image || "")) {
+      return res.status(400).json({ message: "Please add at least one product image" });
+    }
+
+    for (let i = 0; i < colorVariants.length; i++) {
+      if (Array.isArray(colorVariants[i].images) && colorVariants[i].images.length > 0) {
+        for (let j = 0; j < colorVariants[i].images.length; j++) {
+          const imageValidation = isValidImageUrl(colorVariants[i].images[j]);
+          if (!imageValidation.valid) {
+            return res.status(400).json({ message: `Variant ${i + 1}, Image ${j + 1}: ${imageValidation.error}` });
+          }
+        }
+      }
+    }
 
     // Calculate total stock from variants
     const totalStock = colorVariants.reduce((sum, variant) => {
@@ -25,20 +92,20 @@ exports.createProduct = async (req, res) => {
 
     const product = await Product.create({
       name,
-      price,
+      price: parsedPrice,
       stock: totalStock,
       description,
       category,
       mainSubcategory,
       subCategory,
       image: defaultImage,
-      discount: req.body.discount || 0,
+      discount: parsedDiscount,
       badge: req.body.badge || '',
       brand: req.body.brand || '',
       features: req.body.features || [],
       warranty: req.body.warranty || '',
       returnPolicy: req.body.returnPolicy || '',
-      shippingFee: req.body.shippingFee || 0,
+      shippingFee: parsedShippingFee,
       bundleDeals: req.body.bundleDeals || '',
       isCertified: req.body.isCertified || false,
       isChoice: req.body.isChoice || false,
@@ -55,18 +122,33 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 0;
+    const { limit, select, search, category } = req.query;
+    const filter = {};
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
+        { subCategory: { $regex: search, $options: "i" } },
+        { mainSubcategory: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (category) {
+      filter.category = category;
+    }
 
     // Check if select field is provided
     let selectFields = "";
-    if (req.query.select) {
-      selectFields = req.query.select.split(',').join(' ');
+    if (select) {
+      selectFields = select.split(',').join(' ');
     }
 
-    const query = Product.find().populate("category").populate("seller", "name businessName email");
+    const query = Product.find(filter).populate("category").populate("seller", "name businessName email");
 
-    if (limit > 0) {
-      query.limit(limit);
+    if (limit && parseInt(limit) > 0) {
+      query.limit(parseInt(limit));
     }
 
     if (selectFields) {
@@ -118,8 +200,51 @@ exports.updateProduct = async (req, res) => {
 
     const updateData = { ...req.body };
 
+    // Validate price if provided in update
+    if (Object.prototype.hasOwnProperty.call(updateData, 'price')) {
+      const parsedPrice = parseFloat(updateData.price);
+      if (isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({ message: "Product price must be a non-negative number" });
+      }
+      updateData.price = parsedPrice;
+    }
+
+    // Validate shipping fee if provided in update
+    if (Object.prototype.hasOwnProperty.call(updateData, 'shippingFee')) {
+      const parsedShippingFee = parseFloat(updateData.shippingFee || 0);
+      if (isNaN(parsedShippingFee) || parsedShippingFee < 0) {
+        return res.status(400).json({ message: "Shipping fee must be a non-negative number" });
+      }
+      updateData.shippingFee = parsedShippingFee;
+    }
+
+    // Validate discount if provided in update
+    if (Object.prototype.hasOwnProperty.call(updateData, 'discount')) {
+      const parsedDiscount = parseFloat(updateData.discount || 0);
+      if (isNaN(parsedDiscount) || parsedDiscount < 0 || parsedDiscount > 100) {
+        return res.status(400).json({ message: "Discount must be between 0 and 100" });
+      }
+      updateData.discount = parsedDiscount;
+    }
+
     // If colorVariants are provided, recalculate stock and image
     if (updateData.colorVariants) {
+        if (!hasAtLeastOneImage(updateData.colorVariants, updateData.image || "")) {
+          return res.status(400).json({ message: "Please add at least one product image" });
+        }
+
+        // Validate images in colorVariants
+        for (let i = 0; i < updateData.colorVariants.length; i++) {
+          if (Array.isArray(updateData.colorVariants[i].images) && updateData.colorVariants[i].images.length > 0) {
+            for (let j = 0; j < updateData.colorVariants[i].images.length; j++) {
+              const imageValidation = isValidImageUrl(updateData.colorVariants[i].images[j]);
+              if (!imageValidation.valid) {
+                return res.status(400).json({ message: `Variant ${i + 1}, Image ${j + 1}: ${imageValidation.error}` });
+              }
+            }
+          }
+        }
+
       const colorVariants = updateData.colorVariants;
       updateData.stock = colorVariants.reduce((sum, variant) => {
         if (variant.variantType === 'size' && variant.sizes) {

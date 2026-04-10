@@ -137,7 +137,7 @@ export default function CartPage() {
   // Use selected totals from CartContext
   const subtotal = cart.selectedTotalAmount;
   const itemCount = cart.selectedItemsCount;
-  const shipping = cart.selectedShippingFee;
+  const shipping = Math.abs(Number(cart.selectedShippingFee) || 0);
   const total = subtotal + shipping;
 
   // Group items by seller

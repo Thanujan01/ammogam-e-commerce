@@ -23,7 +23,7 @@ const ProductSchema = new mongoose.Schema(
     features: [String], // e.g., ["High quality material", "Durable and long lasting", "Warranty included"]
     warranty: String, // e.g., "1 year warranty"
     returnPolicy: String, // e.g., "30-day return policy"
-    shippingFee: { type: Number, default: 0 },
+    shippingFee: { type: Number, default: 0, min: 0 },
     bundleDeals: String, // Description of bundle deals available
     isCertified: { type: Boolean, default: false },
     isChoice: { type: Boolean, default: false },

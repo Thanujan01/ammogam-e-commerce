@@ -148,6 +148,33 @@ export default function AdminProducts() {
       return;
     }
 
+    const price = parseFloat(formData.price);
+    if (isNaN(price) || price < 0) {
+      showToast('Product price must be a non-negative number.', 'error');
+      return;
+    }
+
+    const shippingFee = parseFloat(formData.shippingFee || '0');
+    if (isNaN(shippingFee) || shippingFee < 0) {
+      showToast('Shipping fee must be a non-negative number.', 'error');
+      return;
+    }
+
+    const discount = parseFloat(formData.discount || '0');
+    if (isNaN(discount) || discount < 0 || discount > 100) {
+      showToast('Discount must be between 0 and 100.', 'error');
+      return;
+    }
+
+    const hasAtLeastOneImage = (formData.colorVariants || []).some(
+      (variant) => Array.isArray(variant.images) && variant.images.some((img) => String(img || '').trim() !== '')
+    );
+    const hasMainImage = String(formData.image || '').trim() !== '';
+    if (!hasAtLeastOneImage && !hasMainImage) {
+      showToast('Please add at least one product image.', 'error');
+      return;
+    }
+
     try {
       const payload = {
         ...formData,

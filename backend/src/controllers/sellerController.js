@@ -49,6 +49,8 @@ const generateRandomPassword = (length = 10) => {
     .slice(0, length); // return required number of characters
 };
 
+const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // Seller registration
 exports.registerSeller = async (req, res) => {
   console.log("-----------------------------------------");
@@ -66,6 +68,7 @@ exports.registerSeller = async (req, res) => {
       businessPhone,
       taxId
     } = req.body;
+    const normalizedTaxId = (taxId || "").trim().toUpperCase();
 
     // Basic validation - Password NO LONGER REQUIRED during registration
     if (!name || !email || !phone) {
@@ -73,10 +76,23 @@ exports.registerSeller = async (req, res) => {
       return res.status(400).json({ message: "Name, email, and phone are required" });
     }
 
+    if (!normalizedTaxId) {
+      return res.status(400).json({ message: "Business registration number is required" });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("BACKEND DEBUG: Conflict - Email already exists:", email);
       return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const existingRegistration = await User.findOne({
+      role: "seller",
+      taxId: { $regex: `^${escapeRegex(normalizedTaxId)}$`, $options: "i" }
+    });
+    if (existingRegistration) {
+      console.log("BACKEND DEBUG: Conflict - Registration number already exists:", normalizedTaxId);
+      return res.status(400).json({ message: "Registration number already exists" });
     }
 
     // Create seller instance with no password (will be generated on approval)
@@ -91,7 +107,7 @@ exports.registerSeller = async (req, res) => {
       businessName,
       businessAddress,
       businessPhone,
-      taxId
+      taxId: normalizedTaxId
     });
 
     await seller.save();

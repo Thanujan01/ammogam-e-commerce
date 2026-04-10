@@ -27,11 +27,22 @@ type CartContextType = {
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const sanitizeShippingFee = (value: unknown) => Math.abs(Number(value) || 0);
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<ICartItem[]>(() => {
     try {
       const raw = localStorage.getItem('ammogam_cart');
-      return raw ? JSON.parse(raw) : [];
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((item: any) => ({
+        ...item,
+        product: {
+          ...item.product,
+          shippingFee: sanitizeShippingFee(item?.product?.shippingFee)
+        }
+      }));
     } catch (error) {
       console.error("Error parsing cart from localStorage:", error);
       return [];
@@ -68,8 +79,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const products = res.data;
         setItems(prev => prev.map(item => {
           const fresh = products.find((p: any) => p._id === (item.product._id || (item.product as any).id));
-          if (fresh && fresh.price !== undefined && fresh.price !== item.product.price) {
-            console.log(`Syncing price for ${item.product.name}: ${item.product.price} -> ${fresh.price}`);
+          if (!fresh) return item;
+
+          const sanitizedFreshShippingFee = sanitizeShippingFee(fresh.shippingFee);
+          const sanitizedCurrentShippingFee = sanitizeShippingFee(item.product.shippingFee);
+          const hasPriceChanged = fresh.price !== undefined && fresh.price !== item.product.price;
+          const hasShippingChanged = sanitizedFreshShippingFee !== sanitizedCurrentShippingFee;
+          const isMissingSeller = fresh.seller && !item.product.seller;
+
+          if (hasPriceChanged || hasShippingChanged || isMissingSeller) {
+            if (hasPriceChanged) {
+              console.log(`Syncing price for ${item.product.name}: ${item.product.price} -> ${fresh.price}`);
+            }
+
             return {
               ...item,
               product: {
@@ -77,19 +99,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 price: fresh.price,
                 discount: fresh.discount,
                 stock: fresh.stock,
-                seller: fresh.seller
+                seller: fresh.seller || item.product.seller,
+                shippingFee: sanitizedFreshShippingFee
               }
             };
           }
-          if (fresh && fresh.seller && !item.product.seller) {
-            return {
-              ...item,
-              product: {
-                ...item.product,
-                seller: fresh.seller
-              }
-            };
-          }
+
           return item;
         }));
       } catch (err) {
@@ -119,7 +134,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const selectedShippingFee = selectedCartItems.reduce((acc, it, idx) => {
     const isFirstOccurrence = selectedCartItems.findIndex(i => i.product._id === it.product._id) === idx;
     if (!isFirstOccurrence) return acc;
-    return acc + (it.product.shippingFee || 0);
+    return acc + sanitizeShippingFee(it.product.shippingFee);
   }, 0);
 
   const selectedItemsCount = selectedCartItems.reduce((s, it) => s + it.quantity, 0);
@@ -165,7 +180,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return [
         ...prev,
         {
-          product: { ...product, _id: pid, price: Number(product.price) || 0 },
+          product: {
+            ...product,
+            _id: pid,
+            price: Number(product.price) || 0,
+            shippingFee: sanitizeShippingFee(product.shippingFee)
+          },
           quantity: qty,
           variationId,
           selectedColor: color,
@@ -258,7 +278,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const shippingFee = items.reduce((acc, it, idx) => {
     const isFirstOccurrence = items.findIndex(i => i.product._id === it.product._id) === idx;
     if (!isFirstOccurrence) return acc;
-    return acc + (it.product.shippingFee || 0);
+    return acc + sanitizeShippingFee(it.product.shippingFee);
   }, 0);
 
   return (
